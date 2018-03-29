@@ -1,1 +1,966 @@
-<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="不断提高自己认知，不断的为自己想要的努力"><title>fuchenxuan’ blog | 不断提高自己认知，不断的为自己想要的努力</title><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/4.2.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/grids-responsive-min.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css"><script type="text/javascript" src="/weixin.js"></script><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">fuchenxuan’ blog</h1><a id="logo" href="/.">fuchenxuan’ blog</a><p class="description">不断提高自己认知，不断的为自己想要的努力</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h2 class="post-title"><a href="/2016/06/07/优化Gradle 依赖使用方式/">优化Gradle 依赖使用方式</a></h2><div class="post-meta">2016-06-07</div><div class="post-content"><h3 id="优化Gradle-依赖关系"><a href="#优化Gradle-依赖关系" class="headerlink" title="优化Gradle 依赖关系"></a>优化Gradle 依赖关系</h3><p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p></div><p class="readmore"><a href="/2016/06/07/优化Gradle 依赖使用方式/">阅读更多</a></p></div><div class="post"><h2 class="post-title"><a href="/2016/06/07/APK 瘦身，减少APK的大小/">APK 瘦身，减少APK体积的大小</a></h2><div class="post-meta">2016-06-07</div><div class="post-content"><p>让我们的apk文件尽可能更小，移除那些未使用的代码和资源文件。本章节介绍了如何做到让APK更小，性能更好，下载转化率会更高，以及如何指定在构建APK过程中保留或移除项目中的代码和资源，在我们还没有分析APK大小之前，项目中存在一些资源放置处理不当，没有统一的规范，依赖管理不合理，资源重叠，dex方法数过多、文件过大等问题，导致整个APK文件也比较大，对于下载转化率必然有一定的影响。</p></div><p class="readmore"><a href="/2016/06/07/APK 瘦身，减少APK的大小/">阅读更多</a></p></div><div class="post"><h2 class="post-title"><a href="/2016/04/09/2016-04-09-Android 之美 Android 进阶（一）/">Android 之美 Android 进阶（一）</a></h2><div class="post-meta">2016-04-09</div><div class="post-content"><blockquote></div><p class="readmore"><a href="/2016/04/09/2016-04-09-Android 之美 Android 进阶（一）/">阅读更多</a></p></div><div class="post"><h2 class="post-title"><a href="/2015/09/11/2015-09-11-Linux安装Android Studio/">Linux下安装Android Studio</a></h2><div class="post-meta">2015-09-11</div><div class="post-content"><pre><code>实在是不喜欢使用Windows了，时间长了就变得卡顿，还是喜欢Linux的文件系统不会像Windows的文件系统一样产生碎片化严重、</div><p class="readmore"><a href="/2015/09/11/2015-09-11-Linux安装Android Studio/">阅读更多</a></p></div><div class="post"><h2 class="post-title"><a href="/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/">给我们的apk应用瘦身计划</a></h2><div class="post-meta">2015-09-11</div><div class="post-content"><p>现在apk越来越大，原因有如下几个：<br>1.多dpi支持([l|m|tv|h|x|xx|xxx]dpi)<br>2.Android开发工具和生态系统的发展<br>3.为了提高用户体验的高分辨率ui设计<br>4.无用代码,重复类库的编译<br>随着项目的开发，项目体积不断增长，应用体积也变大了许多,会让很多用户会放弃安装，为了给apk瘦身,翻阅了大片文章,总结一下自己在开发中的经验</p></div><p class="readmore"><a href="/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/">阅读更多</a></p></div><div class="post"><h2 class="post-title"><a href="/2015/08/12/2015-08-11-用Android Studio Gradle 构建、打包、发布项目/">用Android Studio Gradle 构建、打包、发布项目</a></h2><div class="post-meta">2015-08-12</div><div class="post-content"><pre><code>Gradle其他好处就不多说，在android应用发布的时候，如果要统计多个渠道，gradle 批量打包的好处就显示出来了,</div><p class="readmore"><a href="/2015/08/12/2015-08-11-用Android Studio Gradle 构建、打包、发布项目/">阅读更多</a></p></div><div class="post"><h2 class="post-title"><a href="/2015/07/13/2015-07-13-深入理解Handler原理/">深入理解Handler原理）</a></h2><div class="post-meta">2015-07-13</div><div class="post-content"><p>Handler在Android开发中非常重要，最常见的使用场景就是在子线程需要更新UI，用Handler来投递消息到主线程执行UI更新操作。因为 Android系统的View是非线程安全的，所以需要在主线程更新UI。总的来说Handler就是用来做线程间通信，在不同线程之间传递消息。<br>注：这篇文章所讲到的Handler是在主线程创建的，主线程在开始的时候已经创建了默认的消息循环。后面的文章会讲如何创建自己的消息循环。<br>从图中可以看出，四种颜色分别代表了四个对象，并且大致描述了几个对象之间的关系，以及消息的流转过程，首先Handler通过sendMessage将消息投递给MessageQueue，Looper通过消息循环（loop）不断的从MessageQueue中取出消息，然后消息被Handler的dispatchMessage分发到handleMessage方法消费掉。<br>消息循环中涉及的重要对象</p></div><p class="readmore"><a href="/2015/07/13/2015-07-13-深入理解Handler原理/">阅读更多</a></p></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="fushenghua.github.io"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础技能/">基础技能</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/性能优化/">性能优化</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/android/" style="font-size: 15px;">android</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/优化/" style="font-size: 15px;">优化</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/2016/06/07/优化Gradle 依赖使用方式/">优化Gradle 依赖使用方式</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/06/07/APK 瘦身，减少APK的大小/">APK 瘦身，减少APK体积的大小</a></li><li class="post-list-item"><a class="post-list-link" href="/2016/04/09/2016-04-09-Android 之美 Android 进阶（一）/">Android 之美 Android 进阶（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/09/11/2015-09-11-Linux安装Android Studio/">Linux下安装Android Studio</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/">给我们的apk应用瘦身计划</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/08/12/2015-08-11-用Android Studio Gradle 构建、打包、发布项目/">用Android Studio Gradle 构建、打包、发布项目</a></li><li class="post-list-item"><a class="post-list-link" href="/2015/07/13/2015-07-13-深入理解Handler原理/">深入理解Handler原理）</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">© <a href="/." rel="nofollow">fuchenxuan’ blog</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/weixin.js"></script><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css?v=0.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>fuchenxuan’ blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="不断提高自己认知，不断的为自己想要的努力">
+<meta property="og:type" content="website">
+<meta property="og:title" content="fuchenxuan’ blog">
+<meta property="og:url" content="fushenghua.github.io/index.html">
+<meta property="og:site_name" content="fuchenxuan’ blog">
+<meta property="og:description" content="不断提高自己认知，不断的为自己想要的努力">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="fuchenxuan’ blog">
+<meta name="twitter:description" content="不断提高自己认知，不断的为自己想要的努力">
+  
+    <link rel="alternate" href="/atom.xml" title="fuchenxuan’ blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">fuchenxuan’ blog</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">不断提高自己认知，不断的为自己想要的努力</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="fushenghua.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-APK 瘦身，减少APK的大小" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/07/APK 瘦身，减少APK的大小/" class="article-date">
+  <time datetime="2016-06-07T00:55:29.000Z" itemprop="datePublished">2016-06-07</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/性能优化/">性能优化</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/07/APK 瘦身，减少APK的大小/">APK 瘦身，减少APK体积的大小</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>让我们的apk文件尽可能更小，移除那些未使用的代码和资源文件。本章节介绍了如何做到让APK更小，性能更好，下载转化率会更高，以及如何指定在构建APK过程中保留或移除项目中的代码和资源，在我们还没有分析APK大小之前，项目中存在一些资源放置处理不当，没有统一的规范，依赖管理不合理，资源重叠，dex方法数过多、文件过大等问题，导致整个APK文件也比较大，对于下载转化率必然有一定的影响。</p>
+<p>[TOC]</p>
+<h1 id="分析APK的大小"><a href="#分析APK的大小" class="headerlink" title="分析APK的大小"></a>分析APK的大小</h1><p>古人云：工欲善其事，必先利其器，我们得先有利器，下面就是我们常用的分析APK大小工具的利器做一些简单的介绍和使用，帮助我们分析造成APK体积较大的元凶，以便于我们从那些方面入手优化。</p>
+<h3 id="使用Android-Studio-2-2"><a href="#使用Android-Studio-2-2" class="headerlink" title="使用Android Studio 2.2"></a>使用Android Studio 2.2</h3><p>Android Studio 2.2 新功能直接能分析APK的大小，双击打开就能看到那些占用APK比例大，方法数等。</p>
+<p><img src="http://img.blog.csdn.net/20160821125248173" alt="这里写图片描述"></p>
+<ul>
+<li>分析任何的APK</li>
+<li>查看APK下载包的大小，解压后的实际大小</li>
+<li>反编译资源文件，还原layout中的资源id，代码</li>
+<li>分析dex，显示每部分的方法数，直接查看那些library体积比较大</li>
+</ul>
+<p>使用方法：Build -&gt; Analyz APK</p>
+<p>有了<code>Analyz APK</code>这个利器，以下工具也可以基本不用了</p>
+<h3 id="NimbleDroid"><a href="#NimbleDroid" class="headerlink" title="NimbleDroid"></a>NimbleDroid</h3><p><a href="https://nimbledroid.com/" target="_blank" rel="external">NimbleDroid</a> 是美国哥伦比亚大学的博士创业团队研发出来的自动化分析Android app性能指标的系统，分析的方式有静态和动态两种方式，其中静态分析可以分析出APK安装包中大文件排行榜，各种知名SDK的大小以及占代码整体的比例，各种类型文件的大小以及占排行，各种知名SDK的方法数以及占所有dex中方法数的比例,针对缓慢的方法，缓慢的第三方SDK和内存泄漏。<br>测量生成的速度、网络、内存和磁盘使用率。总之有非常多分析App性能的功能，如果要做性能优化，也可以尝试使用<a href="https://nimbledroid.com/" target="_blank" rel="external">NimbleDroid</a>。</p>
+<p>查看详细的方法耗时</p>
+<p><img src="https://nimbledroid.com/assets/home/img-2nd-section-a313c4d4a955152934fbc2999bbbb266.png" alt=""></p>
+<p>具体使用方法请看官网：<br><a href="https://nimbledroid.com/" target="_blank" rel="external">https://nimbledroid.com/</a></p>
+<p>不过需要注意的是<a href=""><strong>不要上传任何未发布的产品</strong></a>。</p>
+<h3 id="ClassShark"><a href="#ClassShark" class="headerlink" title="ClassShark"></a>ClassShark</h3><p>ClassShark 是一款查看Android执行文件（apk）的浏览工具，目前有两个android App（Apk）和桌面（jar）的版本。<br>使用这款工具，可以很方便的打开APK/Class/Jar/res<br>等 文件和分析里面的内容。</p>
+<p><img src="https://github.com/borisf/classyshark-user-guide/raw/master/images/5%20ClassesDexData.png" alt=""></p>
+<p>具体源码与使用方法详细在github中：<br><a href="https://github.com/google/android-classyshark" target="_blank" rel="external">https://github.com/google/android-classyshark</a></p>
+<p>通过以上任一工具分析我们知道我们项目中主要是以下文件占用APK大小：</p>
+<ul>
+<li><p><strong>classes.dex</strong><br>   classes.dex是java源码编译后生成的java字节码文件，</p>
+</li>
+<li><p><strong>res</strong><br>  主要是存放我们的图片资源</p>
+</li>
+<li><p><strong>resources.arsc</strong><br>  编译后的二进制资源文件，非常多无效资源文件(语言)</p>
+</li>
+<li><p><strong>assets</strong><br>  主要存放了我们的缓存数据文件，已做最优化压缩，我们考虑能否云端存放。</p>
+</li>
+<li><p><strong>lib</strong></p>
+<pre><code>主要是存放我们的so库，目前我们已经优化了
+</code></pre></li>
+</ul>
+<p>既然知道了那些数据导致我们APK体积大，那么我们就着手瘦身了。</p>
+<h1 id="对APK进行瘦身"><a href="#对APK进行瘦身" class="headerlink" title="对APK进行瘦身"></a>对APK进行瘦身</h1><h2 id="对资源进行极限压缩"><a href="#对资源进行极限压缩" class="headerlink" title="对资源进行极限压缩"></a>对资源进行极限压缩</h2><p>对资源进行极限压缩，主要是对如：res里面用到的图片资源文件和assets文件夹下的一些html，db等一些缓存预留在APK的数据文件</p>
+<ul>
+<li>assets资源压缩，使用7zip或者lzma压缩方式最高，把文件打包压缩</li>
+<li>res 图片资源的压缩，使用tinypng优化Android的资源图片，通常我们可以在保证图片不失真的情况下，多压缩几次。目前tinypng已经支持png和jpg图片、.9图的压缩  </li>
+<li>将非alpha的图转换成jpg形式</li>
+</ul>
+<p>通过以上方法我们图片降低了79%的大小。</p>
+<h3 id="使用WEBP，SVG图片资源格式"><a href="#使用WEBP，SVG图片资源格式" class="headerlink" title="使用WEBP，SVG图片资源格式"></a>使用WEBP，SVG图片资源格式</h3><ul>
+<li>WebP是谷歌研发出来的一种图片数据格式，它是一种支持有损压缩和无损压缩的图片文件格式，如果应用支持到Android 4.0+，那么我们可以使用WebP格式代替PNG，我们的资源大小能降低50%多。或者有些资源可以使用SVG图片资源更小。<br>以下是他们的对比图：</li>
+</ul>
+<p><img src="http://img.blog.csdn.net/20160821131133417" alt="这里写图片描述"></p>
+<p>  这里提供方便转换的WEBP资源的工具：</p>
+<ul>
+<li><a href="https://isparta.github.io/" target="_blank" rel="external">https://isparta.github.io/</a></li>
+<li><a href="https://imageoptim.com/mac" target="_blank" rel="external">https://imageoptim.com/mac</a></li>
+</ul>
+<ul>
+<li>使用VectorDrawable和SVG图片来替换原有图片<br>  使用SVG不用考虑屏幕适配问题，体积非常小。</li>
+</ul>
+<h3 id="利用AndResGuard资源压缩打包工具"><a href="#利用AndResGuard资源压缩打包工具" class="headerlink" title="利用AndResGuard资源压缩打包工具"></a>利用AndResGuard资源压缩打包工具</h3><p>微信中的资源混淆工具主要为了混淆资源ID长度(例如将res/drawable/icon.png,png变成混淆为r/s/a.png)，同时利用7z深度压缩、对png的存储方式做了改变占用内存更小，大大减少了安装包体积</p>
+<p>具体源码与使用方法详细在github中：</p>
+<p><a href="https://github.com/shwenzhang/AndResGuard" target="_blank" rel="external">https://github.com/shwenzhang/AndResGuard</a></p>
+<h2 id="清除你的代码和资源"><a href="#清除你的代码和资源" class="headerlink" title="清除你的代码和资源"></a>清除你的代码和资源</h2><p>通过上面的图片资源极限压缩能对APK减小不少，但这往往这些还是不够的，项目里还有很多未使用的资源文件，重复的资源等，这里主要参考Google官方文档<a href="https://developer.android.com/studio/build/shrink-code.html#shrink-code" target="_blank" rel="external">https://developer.android.com/studio/build/shrink-code.html#shrink-code</a> 部分，利用Android Plugin开启gradle 的<code>Code shrinking</code>和<code>ProGuard</code>结合使用。</p>
+<ul>
+<li><p><code>ProGuard</code>能够检测和删除未使用的类，字段，方法，和从你的打包应用程序的属性，包括那些包含代码库，<a href="https://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/introduction.html" target="_blank" rel="external">ProGuard</a>是一个混淆优化字节码的工具,能够删除一些未使用的代码，混淆使用的类，字段，方法和短名称，经过混淆处理也能够使APK源代码得到保护</p>
+</li>
+<li><p><code>Code shrinking</code>是一个Android Plugin for Gradle，从您的打包的应用程序中删除未使用的资源，包括代码库中的未使用的资源。它工作在与代码缩小，这样，一旦未使用的代码已被删除，任何资源不再引用可以安全地删除。</p>
+</li>
+</ul>
+<p>该功能需要依赖于：</p>
+<ul>
+<li>SDK Tools 25.0.10 或更高</li>
+<li>Android Plugin for Gradle 2.0.0 或更高</li>
+</ul>
+<h3 id="清除无用代码"><a href="#清除无用代码" class="headerlink" title="清除无用代码"></a>清除无用代码</h3><p>code shrinking需要结合ProGuard使用，添加<code>minifyEnabled</code> <code>true</code>在你的<code>build.gradle</code>文件中。</p>
+<blockquote>
+<p>需要注意code shrinking会减慢Gradle 编译，应避免使用它在您的调试版本中使用它。Android Studio禁用ProGuard使用 <a href="https://developer.android.com/tools/building/building-studio.html#instant-run" target="_blank" rel="external">Instant Run</a>.。<br>例如，以下从<code>build.gradle</code>文件片段，使<code>code shrinking</code>为发布版本</p>
+</blockquote>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="section">android</span> &#123;</div><div class="line">    <span class="section">buildTypes</span> &#123;</div><div class="line">        <span class="section">release</span> &#123;</div><div class="line">            <span class="attribute">minifyEnabled</span> <span class="literal">true</span></div><div class="line">            proguardFiles getDefaultProguardFile(‘proguard-android.txt<span class="string">'),</span></div><div class="line">                    'proguard-rules.pro<span class="string">'</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中<code>getDefaultProguardFile(‘proguard-android.txt&#39;)</code>默认ProGuard设置来自于Android SDK <code>tools/proguard/</code>中的文件夹</p>
+<blockquote>
+<p>更多的减少代码可以尝试使用相同位置的<code>proguard-android-optimize.txt</code>文件（这样能让我们的APK又减少了0.5M以上）proguard-rules.pro是你自定义的proguard规则。</p>
+</blockquote>
+<p>那么我们怎么知道每一次build，删除了和未删除那些资源和代码呢，ProGuard会输出以下文件在<code>/build/outputs/mapping/release/</code>:</p>
+<ul>
+<li><strong>dump.txt</strong><br>描述.apk文件中所有类文件间的内部结构</li>
+<li><strong>mapping.txt</strong><br>列出了原始的类，方法和字段名与混淆后代码间的映射。这个文件很重要，当你从release版本中收到一个bug报告时，可以用它来翻译被混淆的代码。</li>
+<li><strong>seeds.txt</strong><br>列出了未被混淆的类和成员</li>
+<li><strong>usage.txt</strong><br>列出了从.apk中删除的代码</li>
+<li><strong>resources.txt</strong><br>列出resource被保留的资源</li>
+</ul>
+<h3 id="自定义混淆规则"><a href="#自定义混淆规则" class="headerlink" title="自定义混淆规则"></a>自定义混淆规则</h3><p>在某些情况下，默认的混淆器配置文件<code>proguard-android.txt</code>文件是会移除所有只有未使用的代码，但也有可能会误删除了你需要的代码，所以要注意以下几种情况：</p>
+<ul>
+<li>在<code>AndroidManifest.xml</code>配置的文件类</li>
+<li>使用了JNI 的接口方法</li>
+<li>运行时反射调用方法(不过现在ProGuard已经可以处理这种了)</li>
+</ul>
+<p>添加-keep来忽略一下防止被混淆的代码到proguard-rules.pro文件中，比如：</p>
+<p><code>-keep public class MyClass</code></p>
+<p>另外也可以使用<a href="https://developer.android.com/reference/android/support/annotation/Keep.html" target="_blank" rel="external">@Keep </a>注解在你的需要忽略的代码中，需要<a href="https://developer.android.com/tools/support-library/features.html#annotations" target="_blank" rel="external">Annotations Support Library</a>的支持</p>
+<p>有关自定义proguard-rules.pro文件的更多信息，可以参考<a href="http://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/introduction.html" target="_blank" rel="external">ProGuard Manual.</a>这里<a href="http://stuff.mit.edu/afs/sipb/project/android/sdk/android-sdk-linux/tools/proguard/docs/index.html#manual/troubleshooting.html" target="_blank" rel="external">Troubleshooting</a>列出了一些常见的问题。</p>
+<h3 id="清除无用的资源文件"><a href="#清除无用的资源文件" class="headerlink" title="清除无用的资源文件"></a>清除无用的资源文件</h3><p><code>Resource shrinking</code> 需要和<code>Code shrinking</code> 一起使用。在代码中删除所有未使用的代码后，<code>Resource shrinking</code>才可以知道哪些资源APK程序仍然使用，你必须先删除未使用的代码，Resource才会成为无用的，从而被清除掉。</p>
+<p>添加<code>shrinkResources</code> <code>true</code>属性在你的 build.gradle文件中，相应代码块如下：</p>
+<figure class="highlight sml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">android &#123;</div><div class="line">    ...</div><div class="line">    buildTypes &#123;</div><div class="line">        release &#123;</div><div class="line">            shrinkResources <span class="literal">true</span></div><div class="line">            minifyEnabled <span class="literal">true</span></div><div class="line">            proguardFiles getDefaultProguardFile(<span class="symbol">'proguard</span>-android.txt'),</div><div class="line">                    <span class="symbol">'proguard</span>-rules.pro'</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p><code>resource shrinker</code> 目前还不支持移除定义在values/目录下的资源文件(strings,dimensions,styles,colors),因为Android Asset Packaging Tool（AAPT）不允许Gradle Plugin指定预定义的版本资源<a href="https://code.google.com/p/android/issues/detail?id=70869" target="_blank" rel="external">[issue 70869]</a></p>
+</blockquote>
+<h3 id="指定要忽略的资源文件"><a href="#指定要忽略的资源文件" class="headerlink" title="指定要忽略的资源文件"></a>指定要忽略的资源文件</h3><p>如果我们希望保留或丢弃特定的资源，需要在项目中创建一个XML文件，并使用<code>resources</code>标签，并指定每个资源保存在工具中<code>tools:keep</code>和每个资源在工具中丢弃 <code>tools:discard</code>。两个属性都可以使用逗号(,)分隔符声明资源名称列表。也可以使用* 作为匹配符，匹配名称。</p>
+<p>相应代码块如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="php"><span class="meta">&lt;?</span>xml version=<span class="string">"1.0"</span> encoding=<span class="string">"utf-8"</span><span class="meta">?&gt;</span></span></div><div class="line"><span class="tag">&lt;<span class="name">resources</span> <span class="attr">xmlns:tools</span>=<span class="string">"http://schemas.android.com/tools"</span></span></div><div class="line">    <span class="attr">tools:keep</span>=<span class="string">"@layout/l_used*_c,@layout/l_used_a,@layout/l_used_b*"</span></div><div class="line">    <span class="attr">tools:discard</span>=<span class="string">"@layout/unused2"</span> /&gt;</div></pre></td></tr></table></figure>
+<p>需要在项目resources目录保存res/raw/keep.xml文件，build的时候该文件不会被打包到APK里面。</p>
+<h3 id="启用严格的检测"><a href="#启用严格的检测" class="headerlink" title="启用严格的检测"></a>启用严格的检测</h3><p>通常情况下，<code>resource shrinker</code>可以准确地确定资源使用。如果你使用<code>Resources.getIdentifier()</code>动态获取指定资源的Id，在默认情况下，这样资源具有匹配名称的格式为潜在的使用，无法去除。</p>
+<p>例如，下面的代码将导致所有img_前缀的资源都无法去除。</p>
+<figure class="highlight ebnf"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="attribute">String name</span> = String.format(<span class="string">"img_%1d"</span>, angle + 1);</div><div class="line"><span class="attribute">res</span> = getResources().getIdentifier(name, <span class="string">"drawable"</span>, getPackageName());</div></pre></td></tr></table></figure>
+<p><code>resource shrinker</code> 也通过搜索代码中是否包含资源名来判断是否在build的时候删除。</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="php"><span class="meta">&lt;?</span>xml version=<span class="string">"1.0"</span> encoding=<span class="string">"utf-8"</span><span class="meta">?&gt;</span></span></div><div class="line"><span class="tag">&lt;<span class="name">resources</span> <span class="attr">xmlns:tools</span>=<span class="string">"http://schemas.android.com/tools"</span></span></div><div class="line">    <span class="attr">tools:shrinkMode</span>=<span class="string">"strict"</span> /&gt;</div></pre></td></tr></table></figure>
+<p>在 resource 文件中指定 shrinkMode，你可以指定 Gradle 在处理该资源文件时候的方式，默认的值为 safe，你也可以将它指定为 strict（只会保留有明确引用的资源，以及处理被 <code>tools:keep</code> 和 <code>tools:discard</code> 标注的资源）</p>
+<p>在后面<strong>查看资源回收</strong>情况，我们会讲到，会遇到有些xml 无法被清除的问题，使用shrinkMode可以解决这个问题。</p>
+<h3 id="清除未使用的替代资源"><a href="#清除未使用的替代资源" class="headerlink" title="清除未使用的替代资源"></a>清除未使用的替代资源</h3><p>Gradle <code>resource shrinker</code> 只删除你在代码中未使用资源，这意味着它不会删除不同的设备配置的可替代资源。如果有必要，你可以使用<code>Android Gradle plugin</code> 的<code>resconfigs</code>属性删除替代资源文件。</p>
+<p>例如：我们项目中适配10种国家语言，而项目依赖了v7、v4等其他support包里面包含20种国家语言，那么我们可以通过resconfigs 删除剩余的可替代资源文件，这对于我们APK大小可减少了不少，</p>
+<p>以下代码说明了如何限制你的语言资源，只是英语和法语：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="class">android </span>&#123;</div><div class="line">    <span class="class">defaultConfig </span>&#123;</div><div class="line">        ...</div><div class="line">        resConfigs <span class="string">"en"</span>, <span class="string">"fr"</span></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>像上面那样通过<code>resconfig</code>属性指定的语言。未指定的语言的任何资源都被删除。</p>
+<p>同样的图片资源我们也可以这么做，例如：我们提供一套xxhdpi的图片资源，其他的都过滤清除掉，这样大量清除了support，其他第三方library的资源文件，关于这个待会我们在后面会说。</p>
+<h3 id="合并重复的资源"><a href="#合并重复的资源" class="headerlink" title="合并重复的资源"></a>合并重复的资源</h3><p>默认情况下，Gradle也将同名的资源，比如相同的名字，可能是在不同的资源文件夹下，这样子不能通过shrinkResources属性来去除。</p>
+<p>只有当两个或多个文件共享相同的资源名称、类型和限定符时才发生资源合并，关于资源的合并优先级如下：</p>
+<p>Gradle 主要从以下位置合并资源：</p>
+<ul>
+<li>src/main/res/ 主要资源</li>
+<li>Gradle 使用variant(build type 和 build flavors) </li>
+<li>Library的依赖使用</li>
+</ul>
+<p>Gradle合并重复资源优先顺序为：</p>
+<p>Dependencies → Main → Build flavor → Build type</p>
+<p>例如：如果一个重复的资源在你的mian res中和一个Build flavor指定 ，Gradle 会优先选择Build flavor</p>
+<h3 id="查看资源回收"><a href="#查看资源回收" class="headerlink" title="查看资源回收"></a>查看资源回收</h3><p>当你Gradle <code>resource shrinker</code>，Gradle Console 输出日志，移除APK资源的信息。例如:</p>
+<figure class="highlight asciidoc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="meta">:android:shrinkDebugResources</span></div><div class="line">Removed unused resources: Binary resource data reduced from 2570KB to 1711KB: Removed 33%</div><div class="line"><span class="meta">:android:validateDebugSigning</span></div></pre></td></tr></table></figure>
+<p>APK构建完成后会Gradle会生成一个resource.txt 在 <module-name>/build/outputs/mapping/release/ 中，这个文件包括详细信息，如资源参考其他资源和使用或删除资源的详细信息等。</module-name></p>
+<p>例如：找出为什么<code>@drawable/ic_plus_anim_016</code>，仍然包含在你的APK中，在resource.txt 搜索该文件名，你可能会发现它是被另一个资源引用，如下：</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">16<span class="selector-pseudo">:25</span><span class="selector-pseudo">:48.005</span> <span class="selector-attr">[QUIET]</span> <span class="selector-attr">[system.out]</span> @<span class="keyword">drawable</span>/<span class="keyword">add_schedule_fab_icon_anim</span> : reachable=true</div><div class="line"><span class="number">16</span>:<span class="number">25</span>:<span class="number">48.009</span> [QUIET] [system.out]     @drawable/ic_plus_anim_016</div></pre></td></tr></table></figure>
+<p>现在需要知道为什么<code>@drawable/add_schedule_fab_icon_anim</code> 仍然在使用，搜索我们可以知道应该有代码引用着<code>add_schedule_fab_icon_anim</code>。</p>
+<p>如果你不使用严格的检查（就是上面讲的<code>shrinkMode</code>），同样的我们如果我们在drawable中使用了字符串’#FFFFFF‘ 这样的使用<code>resource shrinker</code>也不能将他移除在APK中，通常我们可以在Gradle Console中看到以下信息：</p>
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="number">10</span>:<span class="number">32</span>:<span class="number">50.590</span> [QUIET] [<span class="keyword">system</span>.out] Marking drawable:ic_plus_anim_016:<span class="number">2130837506</span></div><div class="line">    used because <span class="keyword">it</span> <span class="built_in">format</span>-<span class="keyword">string</span> matches <span class="keyword">string</span> pool <span class="built_in">constant</span> ic_plus_anim_%<span class="number">1</span>$d.</div></pre></td></tr></table></figure>
+<p>那么这种情况我们如何解决呢，可以通过以下方法来清理：</p>
+<ul>
+<li>使用tools:discard，在 tools:shrinkMode=”strict” 的时候生效，指定某资源文件需要删除。在你确定该资源文件无效的时候使用。</li>
+<li><p>利用Lint找出未使用的资源并清理掉</p>
+<blockquote>
+<p>在Android Studio中打开“Analyze” 然后选择”Inspect Code…”，范围选择整个项目，然后点击”OK”</p>
+</blockquote>
+</li>
+</ul>
+<p>到这里APK的大小又小了不少。</p>
+<h2 id="使用APK-Splits构建APK"><a href="#使用APK-Splits构建APK" class="headerlink" title="使用APK Splits构建APK"></a>使用APK Splits构建APK</h2><p>虽然我们上面很好的使用了<code>resource shrinker</code>可以回收一些未使用的资源(v7、v4、google Service 等Libarry资源)，但有些资源仍然未被清除。</p>
+<p>例如：那些未使用的多套替代资源，或者是library内部隐患着引用着的资源而我们却没有使用到。或者是我们要根据用户的手机去提供不同版本的APK，如分辨率(xxhdpi,mhdpi等)，so库等。那么我们可以使用<code>APK Splits</code>大大的减少一些无用的资源，这里我们主要参考了<a href="http://tools.android.com/tech-docs/new-build-system/user-guide/apk-splits" target="_blank" rel="external">http://tools.android.com/tech-docs/new-build-system/user-guide/apk-splits</a> 文档。</p>
+<p><code>APK Splits</code>比起使用 flavors，能让应用程序更有效地构建一些形式的多个apk。</p>
+<p>多 apk 只支持以下类型：</p>
+<ul>
+<li>屏幕密度</li>
+<li>ABI</li>
+</ul>
+<p>使用新的<code>APK Splits</code>，构建同一个应用程序的hdpi版本和mdpi版本，能够共享很多的任务 （如 javac，dx，proguard）。此外，它会被认为是一个单一的variant，并且同一个测试程序将会被用来测试每​​个多APK。</p>
+<h3 id="按屏幕密度拆分"><a href="#按屏幕密度拆分" class="headerlink" title="按屏幕密度拆分"></a>按屏幕密度拆分</h3><figure class="highlight puppet"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">android</span> &#123;</div><div class="line">  ...</div><div class="line">  splits &#123;</div><div class="line">    density &#123;</div><div class="line">      <span class="literal">enable</span> <span class="keyword">true</span></div><div class="line">      <span class="literal">exclude</span> <span class="string">"ldpi"</span>, <span class="string">"tvdpi"</span>, <span class="string">"xxxhdpi"</span></div><div class="line">      compatibleScreens <span class="string">'small'</span>, <span class="string">'normal'</span>, <span class="string">'large'</span>, <span class="string">'xlarge'</span></div><div class="line">    &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>enable： 启用屏幕密度拆分机制</li>
+<li>exclude： 默认情况下所有屏幕密度都包括在内，你可以移除一些密度。</li>
+<li>include： 表示要包括哪些屏幕密度</li>
+<li>reset()： 重置屏幕密度列表为只包含一个空字符串 （这能够实现，在与include一起使用时可以表示使用哪一个屏幕密度，而不是要忽略哪一些屏幕密度）</li>
+<li>compatibleScreens：表示兼容屏幕的列表。这将会注入到manifest中匹配的 <compatible-screens> <screen> 节点。这个设置是可选的。</screen></compatible-screens></li>
+</ul>
+<p>构建完成后可以在out/apk/目录下看到多个版本的APK</p>
+<h3 id="按-ABI-拆分"><a href="#按-ABI-拆分" class="headerlink" title="按 ABI 拆分"></a>按 ABI 拆分</h3><figure class="highlight puppet"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">android</span> &#123;</div><div class="line">  ...</div><div class="line">  splits &#123;</div><div class="line">    abi &#123;</div><div class="line">      <span class="literal">enable</span> <span class="keyword">true</span></div><div class="line">      reset()</div><div class="line">      <span class="literal">include</span> <span class="string">'x86'</span>, <span class="string">'armeabi-v7a'</span>, <span class="string">'mips'</span></div><div class="line">      universalApk <span class="keyword">true</span></div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li>enable： 启用ABI拆分机制</li>
+<li>exclude： 默认情况下所有ABI都包括在内，你可以移除一些ABI。</li>
+<li>include：指明要包含哪些ABI</li>
+<li>reset()：重置ABI列表为只包含一个空字符串（这可以实现，在与include一起使用来可以表示要使用哪一个ABI，而不是要忽略哪一些ABI）</li>
+<li>universalApk：指示是否打包一个通用版本（包含所有的ABI）。默认值为 false。</li>
+</ul>
+<p>例如：我们项目主要提供xxhdpi的图片资源，而项目中引用到了很多第三方库(v7、v4、google Service 等Libarry资源)我们无法使用到，那么我们可以通过这种方法来去除那些资源。这样我们的APK又减小了非常多。</p>
+<h3 id="使用多版本的APK"><a href="#使用多版本的APK" class="headerlink" title="使用多版本的APK"></a>使用多版本的APK</h3><p><code>Multiple APK Support</code>是一个在Google Play，可以发布不同的应用程序，分别针对不同的设备配置特征。每个APK是一个完整的、独立的应用程序版本，但他们分享在Google Play相同的应用程序清单，必须共享相同的包名和与签名。Google Play 会自动给你匹配相应的APK，这样我们的APK 就可以是分不同版本构建需要资源文件，从而减小APK的大小。</p>
+<p>通过发布有多个APK，我们可以：</p>
+<ul>
+<li>支持不同OpenGL的APK</li>
+<li>支持不同的屏幕尺寸和密度的APK</li>
+<li>支持不同的设备功能的APK</li>
+<li>支持不同的平台版本的APK</li>
+<li><p>支持不同的CPU架构，每个apk（如ARM、x86，MIPS等)的APK</p>
+<p>更多相关信息请参考<a href="https://developer.android.com/google/play/publishing/multiple-apks.html#Concepts" target="_blank" rel="external">https://developer.android.com/google/play/publishing/multiple-apks.html#Concepts</a></p>
+</li>
+</ul>
+<p>目前我们基于这个方案做了不同屏幕的APK。</p>
+<h2 id="资源动态加载"><a href="#资源动态加载" class="headerlink" title="资源动态加载"></a>资源动态加载</h2><p>我们可以在项目中使用资源动态加载形式，例如：表情，语言，离线库等资源动态加载，减小APK的大小。</p>
+<h2 id="依赖库优化"><a href="#依赖库优化" class="headerlink" title="依赖库优化"></a>依赖库优化</h2><ul>
+<li>如果应用支持的最低版本是API14，那就不要使用android support库，或者分开使用android support库，用哪个引入哪个库(android-support-ui/android-support-core 等)虽然现在支持还不太好，Google servie 也是如此。</li>
+<li>使用更轻量级的库代替，或者优化library的大小，不然自己写更好。</li>
+<li>删除armable-v7包下的so、删除x86包下的so，基本上armable的so也是兼容armable-v7的，armable-v7a的库会对图形渲染方面有很大的改进，不过最好的是根据上面我们说的提供多版本APK，对不同的平台精简，再或者动态的加载so。</li>
+<li>使用H5编写界面，图片云端获取</li>
+<li>资源缓存库不放在assets下，云端获取更新。</li>
+</ul>
+<h2 id="支持插件化"><a href="#支持插件化" class="headerlink" title="支持插件化"></a>支持插件化</h2><p>未来对于一些独立业务模块，可以做成插件化动态加载，用户需要使用时，只需下载少部分插件。</p>
+<h2 id="使用ReDex优化"><a href="#使用ReDex优化" class="headerlink" title="使用ReDex优化"></a>使用ReDex优化</h2><p>ReDex是Facebook开源一个减小安卓app大小以提高性能的工具，内嵌以及清除僵尸代码这样的优化来减小字节码，主要是对Dex进行了优化，能让APK 运行更快，不过需要多测试是否会崩溃。</p>
+<p>教程很简单具体更详细的内容请参考：<br><a href="https://code.facebook.com/posts/998080480282805/open-sourcing-redex-making-android-apps-smaller-and-faster/" target="_blank" rel="external">https://code.facebook.com/posts/998080480282805/open-sourcing-redex-making-android-apps-smaller-and-faster/</a></p>
+<p>github地址：<br><a href="https://github.com/facebook/redex.git" target="_blank" rel="external">https://github.com/facebook/redex.git</a></p>
+<p>关于APK瘦身我们就总结到这了，应该还有很多更好的方案，若有错漏，欢迎补充。</p>
+<blockquote>
+<ul>
+<li>author：傅声华(Silver)</li>
+<li>phone：18911630016</li>
+<li>e-mail:silverfu@tcl.com</li>
+</ul>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="fushenghua.github.io/2016/06/07/APK 瘦身，减少APK的大小/" data-id="cjfc65etu00078cmwa6wjbtfr" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-优化Gradle 依赖使用方式" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/06/07/优化Gradle 依赖使用方式/" class="article-date">
+  <time datetime="2016-06-07T00:55:29.000Z" itemprop="datePublished">2016-06-07</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/基础技能/">基础技能</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/06/07/优化Gradle 依赖使用方式/">优化Gradle 依赖使用方式</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="优化Gradle-依赖关系"><a href="#优化Gradle-依赖关系" class="headerlink" title="优化Gradle 依赖关系"></a>优化Gradle 依赖关系</h3><p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p>
+<blockquote>
+<p><a href="http://stash.lab.tclclouds.com/projects/CLEAN/repos/cleaner_module/commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318" target="_blank" rel="external">commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318</a></p>
+</blockquote>
+<p>现在仍有些问题,比如 <strong>SpaceBase</strong> 依赖了 <strong>VirusEngine</strong> 等问题。</p>
+<h3 id="全新的依赖方式"><a href="#全新的依赖方式" class="headerlink" title="全新的依赖方式"></a>全新的依赖方式</h3><h4 id="需要那个开那个"><a href="#需要那个开那个" class="headerlink" title="需要那个开那个"></a>需要那个开那个</h4><p>修改项目中 <code>module.properties</code> 的配置, <code>true</code> 代表以<code>Project</code> 方式引入,反之则是<code>aar</code>方式,<strong>该配置已被忽略,只对当前工程配置有效。</strong></p>
+<p>如果你确实想提交修改,请使用 <code>git add -f module.properties</code> 命令强制添加。</p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="params">...</span></div><div class="line">isBoostengineDebug=<span class="literal">false</span></div><div class="line">isAppmgrDebug=<span class="literal">false</span></div><div class="line">isCpuDebug=<span class="literal">false</span></div><div class="line">isNotifyboxDebug=<span class="literal">false</span></div><div class="line">isHardwareDebug=<span class="literal">false</span></div><div class="line">isAntivirusDebug=<span class="literal">false</span></div><div class="line">isJunkDebug=<span class="literal">false</span></div><div class="line">isAllDebug=<span class="literal">false</span><span class="comment">// 全部 Debug，即编译Project模式</span></div></pre></td></tr></table></figure>
+<h4 id="添加新的模块依赖"><a href="#添加新的模块依赖" class="headerlink" title="添加新的模块依赖"></a>添加新的模块依赖</h4><p>如果你需要添加新的模块依赖,请按照以下方法,在 <code>module.gradle</code> 脚本中新增 <code>compile_*</code> 方法,如下:</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">def</span> compile_junk(<span class="keyword">Project</span> projectModule)&#123;</div><div class="line">    projectModule.<span class="keyword">dependencies</span>&#123;</div><div class="line">        <span class="keyword">if</span> (isAllDebug.toBoolean() || isJunkDebug.toBoolean()) &#123;</div><div class="line">            <span class="keyword">compile</span> <span class="keyword">project</span>(<span class="string">':junk'</span>)</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">compile</span>(name: <span class="string">'junk'</span>, ext: <span class="string">'aar'</span>)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后通过闭包形式传递出去,在 <code>module.gradle</code> 脚本中有<code>ext</code> 扩展属性 ，添加如下：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class">ext </span>&#123;</div><div class="line">  compile_junk = this.<span class="variable">&amp;compile_junk</span>  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最终通过以下方式使用</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compile_junk(<span class="name">getProject</span>())</div></pre></td></tr></table></figure>
+<h3 id="模块公用的Libs库"><a href="#模块公用的Libs库" class="headerlink" title="模块公用的Libs库"></a>模块公用的Libs库</h3><p>在工程目录的顶级 <code>libs</code> 文件夹中存放着各个模块的 <code>aar</code> ,如果需要更新,可以通过脚本进行<br>全量更新,或者各模块部分更新。</p>
+<h3 id="更新AAR"><a href="#更新AAR" class="headerlink" title="更新AAR"></a>更新AAR</h3><p>在<code>cleaner</code> 工程目录下，在你每次<strong>运行</strong>程序时 <code>update-aar.gradle</code>会自动更新<strong>已开启</strong>模块(如<code>isJunkDebug=true</code>)的<code>aar</code> 到 公用<code>libs</code>库中，你所需要做的就是 <code>commit</code>，这样能保证各位小伙伴使用的都是较新的<code>aar</code>。</p>
+<p>同样的你也可以手动触发<code>Task</code>来更新<code>aar</code>，相应<code>Task</code> 如下：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">task</span> updateAAR &lt;&lt; &#123;</div><div class="line">    eachLibsAAR()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="版本发布"><a href="#版本发布" class="headerlink" title="版本发布"></a>版本发布</h3><p>如果需要全部通过 <code>Project</code> 形式构建<strong>版本发布</strong>,只需添加动态参数 <code>isAllDebug=true</code> ，比如：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAllDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
+<p>同样的可以添加更多的模块参数,来表示某些模块通过 <code>Project</code> 形式构建，比如：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAppmgrDebug=<span class="literal">true</span> -PisJunkDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
+<blockquote>
+<p>注意: 默认都是以引入<code>aar</code> 形式构建(除<strong>SpaceBase</strong>),所以如果不添加参数,需要及时更新<code>aar</code></p>
+</blockquote>
+<h3 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h3><h4 id="2017-4-21-优化Gradle编译速度，最快3s。"><a href="#2017-4-21-优化Gradle编译速度，最快3s。" class="headerlink" title="2017/4/21 优化Gradle编译速度，最快3s。"></a>2017/4/21 优化Gradle编译速度，最快3s。</h4><blockquote>
+<p>1、修改<strong><code>isAllDebug</code></strong> 作用域，由原存放在<code>module.properties</code> 修改存放在<code>gradle.properties</code>中。<br>2、可选模块<strong>include</strong>，只有在<code>module.properties</code>配置文件中开关为<strong>true</strong> 的模块，才会被Android Studio 所<strong>include</strong>。<br>3、新增<code>task</code> 耗时监听，方便查看耗时<code>task</code>，在<em>Gradle Console</em> 中输出。<br>4、区分测试开发输出，新增<strong><code>dev</code></strong> <code>productFlavors</code>,同时关闭一些不用的<code>productFlavors</code>，其中<strong><code>dev</code></strong> 用于测试Jenkins 输出apk <code>flavors</code>，<strong><code>buildVersion</code></strong> 用于研发本地输出apk，<strong>minSdkVersion=21</strong>，关闭<strong>fabric</strong> 在<strong><code>buildVersion</code></strong> 中上报初始化，同时也优化了其他模块的依赖。<br>5、本地默认只有<strong><code>buildVersion</code></strong><code>flavors</code>，只有在<code>isAllDebug=true</code>的情况，才会开启其他的<code>flavors</code>。以便获得更好的编译体验。<strong>还有修改完gradle配置文件后记得点build sync<img src="/images/toolbar-sync-gradle.png" alt="Alt text">进行同步一下。</strong></p>
+</blockquote>
+<h4 id="2017-5-27-添加自动合并多语言task"><a href="#2017-5-27-添加自动合并多语言task" class="headerlink" title="2017/5/27  添加自动合并多语言task"></a>2017/5/27  添加自动合并多语言task</h4><blockquote>
+<p>1 、使用<code>Python</code>脚本自动化合入多语言的<code>task</code>，所以在使用前需要有<code>Python</code>环境，相应代码块如下：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">task mergeLanguage(<span class="built_in">type</span>: Exec) &#123;</div><div class="line">    workingDir <span class="string">'./'</span></div><div class="line">    <span class="built_in">command</span>Line <span class="string">"python"</span>, <span class="string">"merge_strs.py"</span>,</div><div class="line"><span class="string">"/home/silver/ssd/AndroidStudioProjects/cleaner_module/spaceplus_android/junk/src/main/res/"</span>,</div><div class="line">            <span class="string">"/home/silver/桌面/清理缓存0502-多语言/"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中第一个参数是需要添入多语言模块文件目录，第二个参数是存放多语言文件目录。修改参数 执行<strong><code>mergeLanguage</code></strong> <code>task</code>即可合并多语言。<br><img src="/images/2017-05-27 19:26:37屏幕截图.png" alt="Alt text"></p>
+<h4 id="2017-5-31-Auto-Update-Librarys-AAR"><a href="#2017-5-31-Auto-Update-Librarys-AAR" class="headerlink" title="2017/5/31  Auto Update Librarys AAR"></a>2017/5/31  Auto Update Librarys AAR</h4><blockquote>
+<p>1 、<strong><code>quartz-robot</code></strong>会在<strong>每周一至周五(8,12,16,20h)</strong>准时自动更新<code>aar</code>到git repos。</p>
+</blockquote>
+<h4 id="2017-5-1-更新说明"><a href="#2017-5-1-更新说明" class="headerlink" title="2017/5/1  更新说明"></a>2017/5/1  更新说明</h4><p>以上是模块化后解决过渡时期编译速度慢,方便开发调试等各种便利的方案,各位研发大拿体验<br>下,感受如丝般顺滑,如有问题及时沟通。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="fushenghua.github.io/2016/06/07/优化Gradle 依赖使用方式/" data-id="cjfc65euc000l8cmwstvmgy8m" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2016-04-09-Android 之美 Android 进阶（一）" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/04/09/2016-04-09-Android 之美 Android 进阶（一）/" class="article-date">
+  <time datetime="2016-04-09T03:23:32.000Z" itemprop="datePublished">2016-04-09</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/android/">android</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/04/09/2016-04-09-Android 之美 Android 进阶（一）/">Android 之美 Android 进阶（一）</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <blockquote>
+<p>在前几篇文章中都是讲的基础，大家应该会觉得非常熟悉，但往往我们可能对于基础某些细节认识不够彻底或贯穿不全，我一直认为基础都是比较难的，那么本章节终于到进阶啦，主要讲的是View 的相关知识，在前面<a href="http://blog.csdn.net/vfush/article/details/51534916" target="_blank" rel="external">《Android 面试题总结之Android 基础 (六)》
+</a>中已经对View有了一定的了解，由于内容较多且也是<strong>面试必考题</strong>，所以将分两篇继续深入的理解View。</p>
+<p>在阅读过程中有任何问题，请及时联系。如需转载请注明 <a href="http://blog.csdn.net/vfush" target="_blank" rel="external">fuchenxuan de Blog</a><br>  本章系<a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external">《Android 之美 从0到1 – 高手之路》</a>Android进阶（一）自定义View的过程</p>
+</blockquote>
+<p>[TOC]</p>
+<h1 id="掌握"><a href="#掌握" class="headerlink" title="掌握"></a>掌握</h1><ol>
+<li>什么是View?</li>
+<li>View 坐标的基本概念</li>
+<li>View的生命周期</li>
+<li>如何自定义View</li>
+</ol>
+<h1 id="什么是View"><a href="#什么是View" class="headerlink" title="什么是View?"></a>什么是View?</h1><p>android.app.View 就是手机的UI，View 负责绘制UI，处理事件(evnet),Android 利用 View 打造出所 Widgets，利用 Widget 可打造出互动式的使用者介面，每个View 负责一定区域的绘制。</p>
+<p>一张图理解常用控件层级关系</p>
+<p><img src="http://img.blog.csdn.net/20160608135802023" alt="这里写图片描述"></p>
+<h1 id="View-坐标的基本概念"><a href="#View-坐标的基本概念" class="headerlink" title="View 坐标的基本概念"></a>View 坐标的基本概念</h1><p>View的宽高是有top、left、right、bottom参数决定的 而X，Y和translationX，和translationY则负责View位置的改变。</p>
+<blockquote>
+<p>从Android3.0开始，加入了translation的概念，即相对于父容器的偏移量以及X,Y坐标的概念，X,Y代表左上顶点的横纵坐标。当View在发生平移时，getX，getY，setX，setY<br>get/setTranslationX/Y来获得当前左上点的坐标。</p>
+</blockquote>
+<p>X=left+translationX Y同理。<br>注意：在View发生改变的过程中，top，left等值代表原始位置，是不会改变的。改变的只有X,Y，translationX/Y。  </p>
+<p>一张图理解View的坐标概念<br><img src="http://img.blog.csdn.net/20160608162836872" alt="这里写图片描述"></p>
+<h1 id="View的生命周期"><a href="#View的生命周期" class="headerlink" title="View的生命周期"></a>View的生命周期</h1><table>
+<thead>
+<tr>
+<th>Category</th>
+<th style="text-align:center">Methods</th>
+<th style="text-align:right">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Creation</td>
+<td style="text-align:center">Constructors</td>
+<td style="text-align:right">几个View的构造函数</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onFinishInflate(" target="_blank" rel="external">onFinishInflate()</a>)</td>
+<td style="text-align:right">当系统解析完View之后调用onFinishInflate方法</td>
+</tr>
+<tr>
+<td>Layout</td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onMeasure(int,%20int" target="_blank" rel="external">onMeasure(int, int)</a>)</td>
+<td style="text-align:right">确定所有子View的大小</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onLayout(boolean,%20int,%20int,%20int,%20int" target="_blank" rel="external">onLayout(boolean, int, int, int, int)</a>)</td>
+<td style="text-align:right">当ViewGroup分配所有的子View的大小和位置时触发</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onSizeChanged(int,%20int,%20int,%20int" target="_blank" rel="external">onSizeChanged(int, int, int, int)</a>)</td>
+<td style="text-align:right">当view的大小发生变化时触发</td>
+</tr>
+<tr>
+<td>Drawing</td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onDraw(android.graphics.Canvas" target="_blank" rel="external">onDraw(android.graphics.Canvas)</a>)</td>
+<td style="text-align:right">view渲染内容的细节</td>
+</tr>
+<tr>
+<td>Event processing</td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onKeyDown(int,%20android.view.KeyEvent" target="_blank" rel="external">onKeyDown(int, KeyEvent)</a>)</td>
+<td style="text-align:right">有按键按下后触发</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onKeyUp(int,%20android.view.KeyEvent" target="_blank" rel="external">onKeyUp(int, KeyEvent)</a>)</td>
+<td style="text-align:right">有按键按下后弹起时触发</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onTrackballEvent(android.view.MotionEvent" target="_blank" rel="external">onTrackballEvent(MotionEvent)</a>)</td>
+<td style="text-align:right">轨迹球事件</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onTouchEvent(android.view.MotionEvent" target="_blank" rel="external">onTouchEvent(MotionEvent)</a>)</td>
+<td style="text-align:right">触屏事件</td>
+</tr>
+<tr>
+<td>Focus</td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onFocusChanged(boolean,%20int,%20android.graphics.Rect" target="_blank" rel="external">onFocusChanged(boolean, int, android.graphics.Rect)</a>)</td>
+<td style="text-align:right">当View获取或失去焦点时触发</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onWindowFocusChanged(boolean" target="_blank" rel="external">onWindowFocusChanged(boolean)</a>)</td>
+<td style="text-align:right">当窗口包含的view获取或失去焦点时触发</td>
+</tr>
+<tr>
+<td>Attaching</td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onAttachedToWindow(" target="_blank" rel="external">onAttachedToWindow()</a>)</td>
+<td style="text-align:right">当view被附着到一个窗口时触发</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onAttachedToWindow(" target="_blank" rel="external">onDetachedFromWindow()</a>)</td>
+<td style="text-align:right">当view离开附着的窗口时触发，该方法和  onAttachedToWindow() 是相反</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onWindowVisibilityChanged(int" target="_blank" rel="external">onWindowVisibilityChanged(int)</a>)</td>
+<td style="text-align:right">当窗口中包含的可见的view发生变化时触发</td>
+</tr>
+</tbody>
+</table>
+<p>对实现自定义View，不需要重写所有这些方法。事实上，你可以只<a href="https://developer.android.com/reference/android/view/View.html#onDraw(android.graphics.Canvas" target="_blank" rel="external">onDraw(android.graphics.Canvas)</a>)</p>
+<h2 id="View-的几个构造函数"><a href="#View-的几个构造函数" class="headerlink" title="View 的几个构造函数"></a>View 的几个构造函数</h2><ul>
+<li><p><code>public MyView(Context context)</code><br>java代码直接new一个Custom View实例的时候,会调用第一个构造函数</p>
+</li>
+<li><p><code>public MyView(Context context, AttributeSet attrs)</code><br>在xml创建但是没有指定style的时候被调用.多了一个AttributeSet类型的参数，自定义属性，在通过布局文件xml创建一个view时，会把XML内的参数通过AttributeSet带入到View内。</p>
+</li>
+<li><p><code>public MyView(Context context, AttributeSet attrs, int defStyleAttr)</code><br>构造函数中第三个参数是默认的Style，这里的默认的Style是指它在当前Application或Activity所用的Theme中的默认Style，且只有在明确调用的时候才会调用</p>
+</li>
+<li><p><code>@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)</code><br>该构造函数是在api21的时候才添加上的</p>
+</li>
+</ul>
+<p><img src="http://img.blog.csdn.net/20160607171836507" alt="http://blog.csdn.net/vfush"></p>
+<h2 id="View-的几个重要方法"><a href="#View-的几个重要方法" class="headerlink" title="View 的几个重要方法"></a>View 的几个重要方法</h2><ul>
+<li><p>requestLayout<br>View重新调用一次layout过程</p>
+</li>
+<li><p>invalidate<br>View重新调用一次draw过程</p>
+</li>
+<li><p>forceLayout<br>标识View在下一次重绘，需要重新调用layout过程。</p>
+</li>
+<li><p>postInvalidate<br>这个方法与invalidate方法的作用是一样的，都是使View树重绘，但两者的使用条件不同，postInvalidate是在非UI线程中调用，invalidate则是在UI线程中调用。</p>
+</li>
+</ul>
+<h1 id="自定义View"><a href="#自定义View" class="headerlink" title="自定义View"></a>自定义View</h1><h2 id="简单理解View的绘制"><a href="#简单理解View的绘制" class="headerlink" title="简单理解View的绘制"></a>简单理解View的绘制</h2><p>这里我们先简单理解View 的绘制，后续文章我们会深入理解。<br>1.测量——onMeasure()：决定View的大小</p>
+<p>2.布局——onLayout()：决定View在ViewGroup中的位置</p>
+<p>3.绘制——onDraw()：如何绘制这个View。</p>
+<p><img src="http://img.blog.csdn.net/20160608141154933" alt="这里写图片描述"></p>
+<h2 id="自定义View的分类"><a href="#自定义View的分类" class="headerlink" title="自定义View的分类"></a>自定义View的分类</h2><ul>
+<li>继承View</li>
+<li>继承ViewGroup</li>
+<li>继承系统控件(Button,LinearLayout…)</li>
+</ul>
+<h2 id="自定义View的过程"><a href="#自定义View的过程" class="headerlink" title="自定义View的过程"></a>自定义View的过程</h2><ol>
+<li><p>自定义 View 首先要实现一个继承自 View 的类</p>
+</li>
+<li><p>添加类的构造方法,通常是三个构造方法,不过从 Android5.0 开始构造方法已经添加到 4 个了</p>
+</li>
+<li><p><code>override</code> 父类的方法,如 <code>onDraw,(onMeasure)</code>等</p>
+</li>
+<li><p>自定义属性，需要在 values 下建立 <code>attrs.xml</code> 文件,在其中定义属性</p>
+<blockquote>
+<p>通过context.obtainStyledAttributes将构造函数中的attrs进行解析出来,就可以拿到相对应的属性.<br>TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MyView);<br>mColor = typedArray.getColor(R.styleable.MyView_myColor, 0XFF00FF00);  </p>
+<p><strong>【注意】</strong>三个函数获取尺寸的区别：<br><strong><code>getDimension()</code></strong>是基于当前DisplayMetrics进行转换，获取指定资源id对应的尺寸<br><strong><code>getDimensionPixelSize()</code></strong>与<strong><code>getDimension()</code></strong>功能类似，不同的是将结果转换为int，并且小数部分四舍五入<br><strong><code>getDimensionPixelOffset()</code></strong>与<strong><code>getDimension()</code></strong>功能类似，不同的是将结果转换为int，取整去除小数。举个例子<br>列如<strong><code>getDimension()</code></strong>返回结果是20.5f，那么<strong><code>getDimensionPixelSize()</code></strong>返回结果就是 21，<strong><code>getDimensionPixelOffset()</code></strong>返回结果就是20。</p>
+</blockquote>
+</li>
+<li><p>打开布局文件我们可以看到有很多的以xmlns开头的字段。其实这个就是XML name space 的缩写。我们可以使用<code>res-atuo</code>命名空间,就不用在添加自定义View全类名。<br><code>xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;</code></p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * Created by fuchenxuan on 16/6/4.</div><div class="line"> */</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyView</span> <span class="keyword">extends</span> <span class="title">View</span> </span>&#123;</div><div class="line">	<span class="keyword">private</span> <span class="keyword">int</span> mRadius=<span class="number">200</span>;</div><div class="line">	<span class="keyword">private</span> <span class="keyword">int</span> mColor;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyView</span><span class="params">(Context context)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>(context,<span class="keyword">null</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyView</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>(context, attrs,<span class="number">0</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyView</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context, attrs, defStyleAttr);</div><div class="line">        <span class="comment">//read custom attrs</span></div><div class="line">        TypedArray t = context.obtainStyledAttributes(attrs,</div><div class="line">                R.styleable.rainbowbar, <span class="number">0</span>, <span class="number">0</span>);</div><div class="line">       mRadius = t.getDimensionPixelSize(R.styleable.coutom_radius, (<span class="keyword">int</span>) hSpace);</div><div class="line">        t.getDimensionPixelOffset(R.styleable.coutom_at1, (<span class="keyword">int</span>) vSpace);</div><div class="line">   		mColor=t.getColor(R.styleable.color, barColor);</div><div class="line">        t.recycle();   <span class="comment">// we should always recycle after used</span></div><div class="line">     </div><div class="line">     </div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMeasure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</div><div class="line">        <span class="comment">//super.onMeasure(widthMeasureSpec, heightMeasureSpec);</span></div><div class="line">         <span class="keyword">int</span> widthMode = MeasureSpec.getMode(widthMeasureSpec);</div><div class="line">        <span class="keyword">int</span> widthSize = MeasureSpec.getSize(widthMeasureSpec);</div><div class="line">        <span class="keyword">int</span> heightMode = MeasureSpec.getMode(heightMeasureSpec);</div><div class="line">        <span class="keyword">int</span> heightSize = MeasureSpec.getSize(heightMeasureSpec);</div><div class="line"></div><div class="line">        <span class="comment">//set size</span></div><div class="line">        setMeasuredDimension(widthMode == MeasureSpec.AT_MOST ? (<span class="keyword">int</span>) mRadius * <span class="number">3</span> : widthSize, heightMode == MeasureSpec.AT_MOST ? (<span class="keyword">int</span>) mRadius * <span class="number">3</span> : heightSize);</div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="comment">//draw be invoke clire.</span></div><div class="line">    <span class="keyword">int</span> index = <span class="number">0</span>;</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;</div><div class="line">        <span class="comment">//super.onDraw(canvas);</span></div><div class="line"> 	     mPaint = <span class="keyword">new</span> Paint();</div><div class="line">        mPaint.setColor(mColor);</div><div class="line">        mPaint.setAntiAlias(<span class="keyword">true</span>);</div><div class="line">		 canvas.drawCircle(mRadius, mRadius, mRadius, mPaint);</div><div class="line">     &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里是一个普通的自定义View，里面画了圆，根据不同的模式设置了父View的大小。</p>
+<p><strong>关于View重写<code>onMeasure()</code>时机</strong>：<br>如果用了<code>wrap_content</code>。那么在<code>onMeasure()</code>中就要调用<code>setMeasuredDimension()</code>，<br>来指定view的宽高。如果使用的是<code>match_parent</code>或者一个具体的dp值。那么直接使用<code>super.onMeasure()</code>即可。</p>
+<h2 id="自定义ViewGroup"><a href="#自定义ViewGroup" class="headerlink" title="自定义ViewGroup"></a>自定义ViewGroup</h2><h2 id="自定义ViewGroup的过程"><a href="#自定义ViewGroup的过程" class="headerlink" title="自定义ViewGroup的过程"></a>自定义ViewGroup的过程</h2><ol>
+<li>自定义 ViewGroup 和自定义View 一样，只是继承自 ViewGroup 的类，和必须实现<code>onLayout()</code>函数</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"> <span class="comment">/**</span></div><div class="line"> * Created by fuchenxuan on 16-6-6.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CostumViewGroup</span> <span class="keyword">extends</span> <span class="title">ViewGroup</span> </span>&#123;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CostumViewGroup</span><span class="params">(Context context)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CostumViewGroup</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context, attrs);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMeasure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec);</div><div class="line">        <span class="keyword">int</span> childCount = getChildCount();</div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; childCount; i++) &#123;</div><div class="line">            View childView = getChildAt(i);</div><div class="line">            measureChild(childView, widthMeasureSpec, heightMeasureSpec);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onLayout</span><span class="params">(<span class="keyword">boolean</span> changed, <span class="keyword">int</span> l, <span class="keyword">int</span> t, <span class="keyword">int</span> r, <span class="keyword">int</span> b)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (changed) &#123;</div><div class="line">            <span class="keyword">int</span> childCount = getChildCount();</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; childCount; i++) &#123;</div><div class="line">                View childView = getChildAt(i);</div><div class="line">                childView.layout(i * childView.getMeasuredWidth(), <span class="number">0</span>, (i + <span class="number">1</span>) * childView.getMeasuredWidth(), childView.getMeasuredHeight());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里是一个简单的自定义ViewGroup，实现类似LinearLayout 横向排放子View位置。这就是一个简单的ViewGroup过程。</p>
+<h3 id="彻底理解MeasureSpec三种模式"><a href="#彻底理解MeasureSpec三种模式" class="headerlink" title="彻底理解MeasureSpec三种模式"></a>彻底理解MeasureSpec三种模式</h3><p>View的大小不仅由自身所决定，同时也会受到父控件的影响，为了我们的控件能更好的适应各种情况，一般会自己进行测量。他们是由 mode+size两部分组成的。widthMeasureSpec和heightMeasureSpec转化成二进制数字表示，他们都是30位的。前两位代表mode(测量模 式)，后面28位才是他们的实际数值（size）;<code>MeasureSpec.getMode()</code>获取模式,<code>MeasureSpec.getSize()</code>获取尺寸<br>测量View大小使用的是onMeasure函数，所以我们需要了解三种测量模式：  </p>
+<ul>
+<li><code>EXACTLY</code>：一般是设置了明确的值（100dp）或者是<code>MATCH_PARENT</code></li>
+<li><code>AT_MOST</code>：表示子布局限制在一个最大值内，一般为<code>WARP_CONTENT</code></li>
+<li><code>UNSPECIFIED</code>：表示子布局想要多大就多大，很少使用</li>
+</ul>
+<p><strong>关于ViewGroup重写<code>onMeasure()</code>时机</strong>：</p>
+<ul>
+<li><p>首先要先测量子View的宽高:<br><code>getChildAt(int index)</code>可以拿到index上的子view。<br><code>getChildCount()</code>得到子view的个数，再循环遍历出子view。</p>
+</li>
+<li><p>使用子view自身的测量方法<br>childView.measure(int wSpec, int hSpec); </p>
+<p>或<strong>使用viewGroup的测量子view的方法</strong>：</p>
+<ul>
+<li><p><code>measureChild(subView, int wSpec, int hSpec);</code><br>测量某一个子view，多宽，多高, 内部加上了viewGroup的padding值</p>
+</li>
+<li><p><code>measureChildren(int wSpec, int hSpec);</code><br>测量所有子view 都是 多宽，多高, 内部调用了measureChild方法    </p>
+</li>
+<li><code>measureChildWithMargins(subView, intwSpec, int wUsed, int hSpec, int hUsed);</code>测量某一个子view，多宽，多高, 内部加上了viewGroup的padding值、margin值和传入的宽高wUsed、hUsed </li>
+</ul>
+</li>
+</ul>
+<h2 id="问题总结"><a href="#问题总结" class="headerlink" title="问题总结"></a>问题总结</h2><ol>
+<li><p><strong>getWidth()和getMeasuredWidth()的区别？</strong><br>getMeasuredWidth()：只要一执行完 setMeasuredDimension() 方法，就有值了，并且不再改变。<br>getWidth()：必须执行完 onMeasure() 才有值，可能发生改变。<br>如果 onLayout 没有对子 View 实际显示的宽高进行修改，那么 getWidth() 的值 == getMeasuredWidth() 的值。</p>
+</li>
+<li><p><strong>onLayout() 和Layout()的区别？</strong><br>onLayout() ViewGroup中子View的布局方法，layout()是子View布局的方法</p>
+</li>
+<li><p><strong>View 里面的 onSavedInstanceState和onRestoreInstanceState的作用？</strong><br>View和Activity一样的，每个View都有onSavedInstanceState和onRestoreInstanceState这两个方法，可用于保存和恢复view的状态。</p>
+</li>
+</ol>
+<p>   在本章节中我们知道什么是View?，View 坐标的基本概念，理解了View的生命周期，学习了如何自定义View？虽然全是理论知识总结，在后续我们会一起来自定义View的实战学习。不管有没有任何疑问，欢迎在下方留言吧。</p>
+<p> 更多Android 面试题总结，请点击下方图片哦。</p>
+<blockquote>
+<p>水平有限，若有错漏，欢迎指正，批评，如需转载，请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a>，谢谢！<br><a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external"><img src="http://img.blog.csdn.net/20160608162227307" alt="这里写图片描述"></a></p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="fushenghua.github.io/2016/04/09/2016-04-09-Android 之美 Android 进阶（一）/" data-id="cjfc65eub000k8cmwm50gvdgy" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2015-09-11-Linux安装Android Studio" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/09/11/2015-09-11-Linux安装Android Studio/" class="article-date">
+  <time datetime="2015-09-11T03:23:32.000Z" itemprop="datePublished">2015-09-11</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/linux/">linux</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/11/2015-09-11-Linux安装Android Studio/">Linux下安装Android Studio</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <pre><code>实在是不喜欢使用Windows了，时间长了就变得卡顿，还是喜欢Linux的文件系统不会像Windows的文件系统一样产生碎片化严重、
+</code></pre><p>用Linux开发Android 感觉太好了，Android Studio 美观，编译速度也快，终端好用。这里我使用的是Ubuntu 安装Android Studio<br>非常方便。</p>
+<p>##1.百度网盘Android Studio 资源<br>Android集成环境 NDK JDK 总链接 : <a href="http://pan.baidu.com/s/1bnjaDKb" target="_blank" rel="external">http://pan.baidu.com/s/1bnjaDKb</a>;</p>
+<p>Android Studio Linux版 : <a href="http://pan.baidu.com/s/1eQjA6MA" target="_blank" rel="external">http://pan.baidu.com/s/1eQjA6MA</a> ;</p>
+<p>Adt Bundle windows 64位版 : <a href="http://pan.baidu.com/s/1bnvlVnL" target="_blank" rel="external">http://pan.baidu.com/s/1bnvlVnL</a>;</p>
+<p>Adt Bundle Linux 32位版 : <a href="http://pan.baidu.com/s/1jG41dI2" target="_blank" rel="external">http://pan.baidu.com/s/1jG41dI2</a>;</p>
+<p>Adt Bundle Linux 64位版  : <a href="http://pan.baidu.com/s/1dDxjHXv" target="_blank" rel="external">http://pan.baidu.com/s/1dDxjHXv</a>;</p>
+<p>NDK Linux 32位 : <a href="http://pan.baidu.com/s/1eQtJVe6" target="_blank" rel="external">http://pan.baidu.com/s/1eQtJVe6</a>;</p>
+<p>NDK Linux 64位 : <a href="http://pan.baidu.com/s/1bnvRRJL" target="_blank" rel="external">http://pan.baidu.com/s/1bnvRRJL</a>;</p>
+<p>NDK Windows 32位 : <a href="http://pan.baidu.com/s/1eQzj9iq" target="_blank" rel="external">http://pan.baidu.com/s/1eQzj9iq</a>;</p>
+<p>##2.下载安装JDK<br>第一:</p>
+<figure class="highlight plain"><figcaption><span>Ubuntu 中使用 PPA 安装 Java 8 ( 支持 Ubuntu 10.04 - Ubuntu 14.04 ):</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">sudo add-apt-repository ppa:webupd8team/java</div><div class="line"></div><div class="line">sudo apt-get update</div><div class="line"></div><div class="line">sudo apt-get install Oracle-java8-installer</div><div class="line"></div><div class="line">完成之后可以通过以下命令来查看版本：</div><div class="line"></div><div class="line">javac -version</div><div class="line"></div><div class="line">安装 Java 8 需要接受许可，如果你想自动安装，那么可以在安装之前运行：</div><div class="line"></div><div class="line">echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections</div><div class="line"></div><div class="line">设置 Java 8 环境变量：</div><div class="line"></div><div class="line">sudo apt-get install oracle-java8-set-default</div><div class="line"></div><div class="line">切换为 Java 7 ：</div><div class="line"></div><div class="line">sudo update-java-alternatives -s java-7-oracle</div><div class="line"></div><div class="line">再切换为 Java 8：</div><div class="line"></div><div class="line">sudo update-java-alternatives -s java-8-oracle</div></pre></td></tr></table></figure>
+<p>##3.测试</p>
+<p>打开一个终端，输入下面命令：</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -<span class="built_in">version</span></div></pre></td></tr></table></figure>
+<p>显示结果：</p>
+<p>java version “1.7.0_05”<br>Java(TM) SE Runtime Environment (build 1.7.0_05-b05)</p>
+<p>Java HotSpot(TM) Server VM (build 23.1-b03, mixed mode)</p>
+<p>这表示java命令已经可以运行了。</p>
+<p>##4.安装Android Studio<br>上面网盘的资源</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="number">1</span>、下载<span class="keyword">android </span>studio包<span class="keyword">android-studio-bundle-133.970939-linux.tgz</span></div><div class="line">解压：$ sudo tar zxvf <span class="keyword">android-studio-bundle-133.970939-linux.tgz</span></div><div class="line">解压后文件夹名为<span class="keyword">android-studio。</span></div><div class="line">移动：$ sudo mv <span class="keyword">android-studio </span>/<span class="meta">opt</span>/</div><div class="line">打开文件夹：$ cd /<span class="meta">opt</span>/<span class="keyword">android-studio/bin/</span></div><div class="line">运行：$ sudo studio.sh</div><div class="line"><span class="symbol">oh</span> shit，提示命令不存在，怎么回事？额，恩，不是这么打的吧？！</div><div class="line">再次运行：$ sudo ./studio.sh</div><div class="line"><span class="symbol">OK</span>，打开了。固定到任务栏方便以后打开</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="fushenghua.github.io/2015/09/11/2015-09-11-Linux安装Android Studio/" data-id="cjfc65etf00028cmwoxpb8ni6" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2015-09-11-给我们的apk应用瘦身计划(一)" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/" class="article-date">
+  <time datetime="2015-09-11T03:23:32.000Z" itemprop="datePublished">2015-09-11</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/android/">android</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/">给我们的apk应用瘦身计划</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>现在apk越来越大，原因有如下几个：<br>1.多dpi支持([l|m|tv|h|x|xx|xxx]dpi)<br>2.Android开发工具和生态系统的发展<br>3.为了提高用户体验的高分辨率ui设计<br>4.无用代码,重复类库的编译<br>随着项目的开发，项目体积不断增长，应用体积也变大了许多,会让很多用户会放弃安装，为了给apk瘦身,翻阅了大片文章,总结一下自己在开发中的经验</p>
+<p>我们从一下几个方面去解决:</p>
+<p>开发阶段代码优化:<br>优化查错瘦身神器之android lint<br>运行Proguard： proguard能够便利你所有的代码路径，把没有用到的代码重apk中剔除。并且能够重命名变量，尽量精简你的代码；<br>使用Lint： 上面的proguard只是分析Java代码。lint工具能够分析你资源文件（/res），使用./gradlew lint就能够检测出没有用的资源文件；</p>
+<p>什么是ProGuard工具？</p>
+<p>ProGuard是android提供的一个免费的工具，它能够移除工程中一些没用的代码，或者使用语义上隐晦的名称来重命名代码中的类、字段和函数等，达到压缩、优化和混淆代码的功能。具体来说，使用ProGuard工具，可以达到下面两个目的：<br>删除了源文件中没有调用的那部分代码，最大化的精简了字节码文件，使得最终生成的apk文件更小。<br>使用语义混淆的命名替换了代码中的类、字段和函数等，使得其他人无法反编译获取源代码，起到对代码的保护作用。</p>
+<p>add Library和add jars的区别?<br>在android项目中调用一些方法需要第三方的jar包，我们习惯做法是在android项目文件夹根目录下加一个lib文件并添加诸如.jar的文件，然后在右击该android项目，点属性(Properties),配置android,Java Build Path等。对于添加的jar文件，我们都是点 add External jars 或者 add jars，目前我还没发现两者的区别。<br>但是如果这样添加，会导致apk包增大至少2M以上，我用的办法是 添加add Library,选择User Library，如果有现成调用过的jar直接选择添加，如果没有则新建后添加，这样生成的apk比原来会减小很多。一般只有几百k左右。<br>使用webP图片格式：<br>只用一种图片xhdpi<br>只用一张xhdpi图片放到xhdpi目录时，所有的屏幕密度都能很好的适配， android系统会自动的对你的图片进行缩放， 不用为每个密度都切一版图片的， 经过实际验证我也发现确实是这样的， 于是我将hdpi下的所有和xhdpi目录有重复的图片全部删除掉。 这样下来应用就减少了将近2M ！<br>so库压缩<br>项目中使用了室内定位功能，，编译成so直接打包在apk里以jni方式调用。 我相信有不少应用对于注重性能或者功能复用的模块都使用了jni方式，带来的问题就是so经常成为apk体积膨胀的一大因素， 以这个室内定位库为例， so文件就有整整8MB。<br>为了适配armeabi和armeabi-v7a两种机型，这个库必须在libs/armeabi目录和libs/armeabi-v7a两个文件夹下各放一份。否则有可能在某种CPU类型的机器上运行出现初始化连接异常（因为找不到so库引起的）。<br>将so库使用zip压缩，可以压缩到50%~60%，然后 后只放一份到res/raw目录， 在代码里实现： 如果程序是第一次运行，则获取到raw下这个zip文件的输入流，然后将其解压到/data/data/com.xxx.xxx/lib_xxx目录， lib_xxx为你自己建的目录， 然后使用System.load加载库，而不要使用System.loadLibrary.， 这样指定路径加载肯定不会出现找不到so的问题。</p>
+<p>项目构建优化:<br>   参考我的Android studio gradle 配置文章中,构建项目的时候,只编译所用代码,自动移除无用资源.</p>
+<p>资源文件瘦身:<br>      图片资源的优化原则是：在不降低图片效果、保证APK显示效果的前提下缩小图片文件的大小。<br>使用tinypng优化大部分图片资源：<a href="https://tinypng.com/" target="_blank" rel="external">https://tinypng.com/</a></p>
+<p>未完待续……</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="fushenghua.github.io/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/" data-id="cjfc65ets00068cmw1fin2ojy" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/优化/">优化</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2015-08-11-用Android Studio Gradle 构建、打包、发布项目" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/08/12/2015-08-11-用Android Studio Gradle 构建、打包、发布项目/" class="article-date">
+  <time datetime="2015-08-12T03:23:32.000Z" itemprop="datePublished">2015-08-12</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/android/">android</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/08/12/2015-08-11-用Android Studio Gradle 构建、打包、发布项目/">用Android Studio Gradle 构建、打包、发布项目</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <pre><code>Gradle其他好处就不多说，在android应用发布的时候，如果要统计多个渠道，gradle 批量打包的好处就显示出来了,
+</code></pre><p>发现确实比Ant打包会方便很多,就说下本篇Gradle作用吧</p>
+<p>主要功能：<br>多渠道自动打包<br>beta /debug/relese /多版本打包<br>dex突破65535的限制<br>打包自动命名，提交测试时方便识别，不用每次打包测试 ，重命名啦！<br>自动移除程序LOG_DEBUG调试<br>自动移除无用资源文件，为APK瘦身<br>混淆代码<br>更多强大功能探索中……</p>
+<p>Gradle 基本概念</p>
+<p>首先我们学习几个gradle 的脚步语法，掌握了这几个语法，你就能非常简单的用gradle构建打包android项目了。 首先，我们来看下一个最简单android build.gradle。</p>
+<p>apply plugin: ‘android’//声明构建的项目类型，这里当然是android了<br>buildscript{} //设置脚本的运行环境<br>repositories{}支持java 依赖库管理（maven/ivy）,用于项目的依赖<br>dependencies{}//依赖包的定义。支持maven/ivy，远程，本地库，也支持单文件<br>android{}编译android项目的参数</p>
+<p>废话不多说，来一份我在项目中使用的完整的gradle文件配置吧：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div></pre></td><td class="code"><pre><div class="line">android &#123;</div><div class="line">    compileSdkVersion <span class="number">22</span></div><div class="line">    buildToolsVersion <span class="string">"22.0.1"</span></div><div class="line"></div><div class="line">    defaultConfig &#123;</div><div class="line">        applicationId <span class="string">"com.rtmap.sample"</span></div><div class="line">        minSdkVersion <span class="number">9</span></div><div class="line">        targetSdkVersion <span class="number">22</span></div><div class="line">        versionCode <span class="number">10</span></div><div class="line">        versionName <span class="string">"1.3"</span></div><div class="line">        <span class="comment">// dex突破65535的限制</span></div><div class="line">              multiDexEnabled <span class="keyword">true</span></div><div class="line">        manifestPlaceholders = [channel_param: <span class="string">"official"</span>]</div><div class="line">    &#125;</div><div class="line"></div><div class="line">     <span class="comment">//----begin  是为了兼容Eclipse 可忽略</span></div><div class="line">    <span class="keyword">sourceSets</span> &#123;</div><div class="line">        main &#123;</div><div class="line">            manifest.srcFile <span class="string">'AndroidManifest.xml'</span></div><div class="line">            java.srcDirs = [<span class="string">'src'</span>]</div><div class="line">            resources.srcDirs = [<span class="string">'src'</span>]</div><div class="line">            aidl.srcDirs = [<span class="string">'src'</span>]</div><div class="line">            renderscript.srcDirs = [<span class="string">'src'</span>]</div><div class="line">            res.srcDirs = [<span class="string">'res'</span>]</div><div class="line">            assets.srcDirs = [<span class="string">'assets'</span>]</div><div class="line">            jniLibs.srcDirs = [<span class="string">'libs'</span>]</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">     <span class="comment">//----end  </span></div><div class="line"></div><div class="line">    buildTypes &#123;</div><div class="line"></div><div class="line">        release &#123;</div><div class="line">            <span class="comment">// 不显示Log</span></div><div class="line">            buildConfigField <span class="string">"boolean"</span>, <span class="string">"LOG_DEBUG"</span>, <span class="string">"false"</span></div><div class="line"></div><div class="line">            minifyEnabled <span class="keyword">true</span></div><div class="line">            zipAlignEnabled <span class="keyword">true</span></div><div class="line">            <span class="comment">// 移除无用的resource文件</span></div><div class="line">            shrinkResources <span class="keyword">true</span></div><div class="line">            proguardFiles getDefaultProguardFile(<span class="string">'proguard-android.txt'</span>), <span class="string">'proguard-rules.pro'</span></div><div class="line"><span class="comment">//            signingConfig signingConfigs.release</span></div><div class="line">        &#125;</div><div class="line"></div><div class="line">        beta &#123;</div><div class="line">            <span class="comment">// 不显示Log</span></div><div class="line"><span class="comment">//            buildConfigField "boolean", "LOG_DEBUG", "false"</span></div><div class="line">            versionNameSuffix <span class="string">"-beta"</span></div><div class="line"><span class="comment">//            minifyEnabled true</span></div><div class="line">            zipAlignEnabled <span class="keyword">true</span></div><div class="line">            <span class="comment">// 移除无用的resource文件</span></div><div class="line">            minifyEnabled <span class="keyword">true</span></div><div class="line">            shrinkResources <span class="keyword">true</span></div><div class="line">            proguardFiles getDefaultProguardFile(<span class="string">'proguard-android.txt'</span>), <span class="string">'proguard-rules.pro'</span></div><div class="line"><span class="comment">//            signingConfig signingConfigs.release</span></div><div class="line">        &#125;</div><div class="line"></div><div class="line">        debug &#123;</div><div class="line">            versionNameSuffix <span class="string">"-debug"</span></div><div class="line">            zipAlignEnabled <span class="keyword">true</span></div><div class="line">            <span class="comment">// 移除无用的resource文件</span></div><div class="line">            shrinkResources <span class="keyword">true</span></div><div class="line">            proguardFiles getDefaultProguardFile(<span class="string">'proguard-android.txt'</span>), <span class="string">'proguard-rules.pro'</span></div><div class="line"><span class="comment">//            signingConfig signingConfigs.release</span></div><div class="line">        &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">        applicationVariants.all &#123; variant -&gt;</div><div class="line">            variant.outputs.<span class="keyword">each</span> &#123; output -&gt;</div><div class="line">                <span class="keyword">def</span> outputFile = output.outputFile</div><div class="line">                <span class="keyword">if</span> (variant.buildType.name.equals(<span class="string">'release'</span>)) &#123;</div><div class="line">                    <span class="keyword">if</span> (outputFile != <span class="keyword">null</span> &amp;&amp; outputFile.name.endsWith(<span class="string">'.apk'</span>)) &#123;</div><div class="line">                        <span class="comment">// erdoushop_v1.1_release_201508101027</span></div><div class="line">                        <span class="keyword">def</span> fileName = <span class="string">"erdoushop_v$&#123;defaultConfig.versionName&#125;_release_$&#123;getDate()&#125;.apk"</span></div><div class="line">                        output.outputFile = <span class="keyword">new</span> <span class="keyword">File</span>(outputFile.parent, fileName)</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                <span class="keyword">if</span> (variant.buildType.name.equals(<span class="string">'beta'</span>)) &#123;</div><div class="line">                    <span class="keyword">if</span> (outputFile != <span class="keyword">null</span> &amp;&amp; outputFile.name.endsWith(<span class="string">'.apk'</span>)) &#123;</div><div class="line">                        <span class="comment">// erdoushop_v1.1_beta_201508101027</span></div><div class="line">                        <span class="keyword">def</span> fileName = <span class="string">"erdoushop_v$&#123;defaultConfig.versionName&#125;_beta_$&#123;getDate()&#125;.apk"</span></div><div class="line">                        output.outputFile = <span class="keyword">new</span> <span class="keyword">File</span>(outputFile.parent, fileName)</div><div class="line">                    &#125;</div><div class="line">                &#125;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="keyword">def</span> getDate() &#123;</div><div class="line">    <span class="keyword">def</span> date = <span class="keyword">new</span> Date()</div><div class="line">    <span class="keyword">def</span> formattedDate = date.format(<span class="string">'yyyyMMddHHmm'</span>)</div><div class="line">    <span class="keyword">return</span> formattedDate</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>文章目前只讲到了打包，时间喘促，先写到这里，最近都比较忙，没时间写博客，后期博客会整理一下，现在就当作笔记一下 ，怕以后忘记了。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="fushenghua.github.io/2015/08/12/2015-08-11-用Android Studio Gradle 构建、打包、发布项目/" data-id="cjfc65eud000m8cmw3xfegbcw" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-2015-07-13-深入理解Handler原理" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2015/07/13/2015-07-13-深入理解Handler原理/" class="article-date">
+  <time datetime="2015-07-13T04:23:32.000Z" itemprop="datePublished">2015-07-13</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/android/">android</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2015/07/13/2015-07-13-深入理解Handler原理/">深入理解Handler原理）</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Handler在Android开发中非常重要，最常见的使用场景就是在子线程需要更新UI，用Handler来投递消息到主线程执行UI更新操作。因为 Android系统的View是非线程安全的，所以需要在主线程更新UI。总的来说Handler就是用来做线程间通信，在不同线程之间传递消息。<br>注：这篇文章所讲到的Handler是在主线程创建的，主线程在开始的时候已经创建了默认的消息循环。后面的文章会讲如何创建自己的消息循环。<br>从图中可以看出，四种颜色分别代表了四个对象，并且大致描述了几个对象之间的关系，以及消息的流转过程，首先Handler通过sendMessage将消息投递给MessageQueue，Looper通过消息循环（loop）不断的从MessageQueue中取出消息，然后消息被Handler的dispatchMessage分发到handleMessage方法消费掉。<br>消息循环中涉及的重要对象</p>
+<p>Handler</p>
+<p>通过Handler的sendMessage等方法来投递消息到MessageQueue，通过handleMessage来消费Message。Handler必须要有一个已经prepare好的Looper对象，也就是说必须调用了prepare方法(也包括prepareMainLooper方法)，究其根本是初始化一个消息队列，这一过程将在下文中详细分析。</p>
+<p>Looper</p>
+<p>Looper负责从MessageQueue中取出消息，然后通过执行message.target.dispatchMessage()消费掉这个消息，这里的target就是Handler。</p>
+<p>MessageQueue</p>
+<p>消息队列，管理Handler投递过来的消息。</p>
+<p>Message</p>
+<p>用来承载数据的消息，最终被Handler消费掉。</p>
+<p>UML类图分析</p>
+<p>Handler class diagram</p>
+<p>通过上面的类图可以清晰的了解各个类之间的关系。然后再来分析一下源码。<br>Handler的创建</p>
+<figure class="highlight monkey"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"> <span class="keyword">public</span> Handler(Callback callback, boolean async) &#123;</div><div class="line">        <span class="keyword">if</span> (FIND_POTENTIAL_LEAKS) &#123;</div><div class="line">            <span class="keyword">final</span> <span class="class"><span class="keyword">Class</span>&lt;? <span class="keyword">extends</span> <span class="title">Handler</span>&gt; <span class="title">klass</span> = <span class="title">getClass</span>();</span></div><div class="line">            <span class="keyword">if</span> ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &amp;&amp;</div><div class="line">                    (klass.getModifiers() &amp; Modifier.STATIC) == <span class="number">0</span>) &#123;</div><div class="line">                <span class="built_in">Log</span>.w(TAG, <span class="string">"The following Handler class should be static or leaks might occur: "</span> +</div><div class="line">                    klass.getCanonicalName());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        mLooper = Looper.myLooper();</div><div class="line">        <span class="keyword">if</span> (mLooper == <span class="literal">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</div><div class="line">                <span class="string">"Can't create handler inside thread that has not called Looper.prepare()"</span>);</div><div class="line">        &#125;</div><div class="line">        mQueue = mLooper.mQueue;</div><div class="line">        mCallback = callback;</div><div class="line">        mAsynchronous = async;</div><div class="line">&#125;</div><div class="line"></div><div class="line"> <span class="keyword">public</span> Handler(Callback callback, boolean async) &#123;</div><div class="line">        <span class="keyword">if</span> (FIND_POTENTIAL_LEAKS) &#123;</div><div class="line">            <span class="keyword">final</span> <span class="class"><span class="keyword">Class</span>&lt;? <span class="keyword">extends</span> <span class="title">Handler</span>&gt; <span class="title">klass</span> = <span class="title">getClass</span>();</span></div><div class="line">            <span class="keyword">if</span> ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &amp;&amp;</div><div class="line">                    (klass.getModifiers() &amp; Modifier.STATIC) == <span class="number">0</span>) &#123;</div><div class="line">                <span class="built_in">Log</span>.w(TAG, <span class="string">"The following Handler class should be static or leaks might occur: "</span> +</div><div class="line">                    klass.getCanonicalName());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"> </div><div class="line">        mLooper = Looper.myLooper();</div><div class="line">        <span class="keyword">if</span> (mLooper == <span class="literal">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</div><div class="line">                <span class="string">"Can't create handler inside thread that has not called Looper.prepare()"</span>);</div><div class="line">        &#125;</div><div class="line">        mQueue = mLooper.mQueue;</div><div class="line">        mCallback = callback;</div><div class="line">        mAsynchronous = async;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在上面这段代码中，首先是检查是否存在潜在的内存泄漏，如果该类是匿名内部类，或者是成员类且没有static修饰符时那么打印一个内存泄漏风险警告。这是由于这种类型的class持有外部类的this引用，可能导致外部类无法释放。<br>接下来就是对成员变量mLooper赋值，在文章开头就提到过，这篇文章中提到的handler对象时在主线程（UI线程）中创建，而Android主线已经有一个消息队列了,所以直接将mLooper.mQueue赋给Handler的mQueue。<br>那么主线程中的消息队列是怎么创建的呢？</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepare</span><span class="params">()</span> </span>&#123;</div><div class="line">        prepare(<span class="keyword">true</span>);</div><div class="line">&#125;</div><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepareMainLooper</span><span class="params">()</span> </span>&#123;</div><div class="line">        prepare(<span class="keyword">false</span>);</div><div class="line">        <span class="keyword">synchronized</span> (Looper.class) &#123;</div><div class="line">            <span class="keyword">if</span> (sMainLooper != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The main Looper has already been prepared."</span>);</div><div class="line">            &#125;</div><div class="line">            sMainLooper = myLooper();</div><div class="line">        &#125;</div><div class="line"> &#125;</div><div class="line"></div><div class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepare</span><span class="params">(<span class="keyword">boolean</span> quitAllowed)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (sThreadLocal.get() != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Only one Looper may be created per thread"</span>);</div><div class="line">        &#125;</div><div class="line">        将looper对象装入ThreadLocal中，Handler就是从它里面取出looper对象的</div><div class="line">        sThreadLocal.set(<span class="keyword">new</span> Looper(quitAllowed));</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="title">Looper</span><span class="params">(<span class="keyword">boolean</span> quitAllowed)</span> </span>&#123;</div><div class="line">        <span class="comment">//创建消息队列</span></div><div class="line">        mQueue = <span class="keyword">new</span> MessageQueue(quitAllowed);</div><div class="line">        mThread = Thread.currentThread();</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepare</span><span class="params">()</span> </span>&#123;</div><div class="line">        prepare(<span class="keyword">true</span>);</div><div class="line">&#125;</div><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepareMainLooper</span><span class="params">()</span> </span>&#123;</div><div class="line">        prepare(<span class="keyword">false</span>);</div><div class="line">        <span class="keyword">synchronized</span> (Looper.class) &#123;</div><div class="line">            <span class="keyword">if</span> (sMainLooper != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The main Looper has already been prepared."</span>);</div><div class="line">            &#125;</div><div class="line">            sMainLooper = myLooper();</div><div class="line">        &#125;</div><div class="line"> &#125;</div><div class="line"> </div><div class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepare</span><span class="params">(<span class="keyword">boolean</span> quitAllowed)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (sThreadLocal.get() != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Only one Looper may be created per thread"</span>);</div><div class="line">        &#125;</div><div class="line">        将looper对象装入ThreadLocal中，Handler就是从它里面取出looper对象的</div><div class="line">        sThreadLocal.set(<span class="keyword">new</span> Looper(quitAllowed));</div><div class="line">&#125;</div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">private</span> <span class="title">Looper</span><span class="params">(<span class="keyword">boolean</span> quitAllowed)</span> </span>&#123;</div><div class="line">        <span class="comment">//创建消息队列</span></div><div class="line">        mQueue = <span class="keyword">new</span> MessageQueue(quitAllowed);</div><div class="line">        mThread = Thread.currentThread();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>看上面的关键代码，UI线程在创建的时候，会调用prepareMainLooper()这个方法，创建一个不退出的消息队列。所以prepareMainLooper这个方法自己永远也不要调用，它是系统调用的，如果我们需要用自己的消息队列呢？那么就应该调用prepare()方法。</p>
+<p>消息怎么被消费的呢？</p>
+<p>整个消息循环系统中的几个重要部件的创建都已经明白了，那么消息时怎么循环起来的，又是如何消费的呢？来看看下面是loop源码的一部分关键代码。代码非常简单易懂，就是从消息队列中取出消息，然后通过msg.target.dispatchMessage(msg)将消息投递到Handler。</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div></pre></td><td class="code"><pre><div class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">loop</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">final</span> Looper me = myLooper();</div><div class="line">        <span class="keyword">if</span> (me == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"No Looper; Looper.prepare() wasn't called on this thread."</span>);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">final</span> MessageQueue queue = me.mQueue;</div><div class="line">        Binder.clearCallingIdentity();</div><div class="line">        <span class="keyword">final</span> <span class="keyword">long</span> ident = Binder.clearCallingIdentity();</div><div class="line">        <span class="keyword">for</span> (;;) &#123;</div><div class="line">            Message msg = queue.next(); <span class="comment">// might block</span></div><div class="line">            <span class="keyword">if</span> (msg == <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="comment">// No message indicates that the message queue is quitting.</span></div><div class="line">                <span class="keyword">return</span>;</div><div class="line">            &#125;</div><div class="line">            msg.<span class="keyword">target</span>.dispatchMessage(msg);</div><div class="line">            msg.recycleUnchecked();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">loop</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">final</span> Looper me = myLooper();</div><div class="line">        <span class="keyword">if</span> (me == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"No Looper; Looper.prepare() wasn't called on this thread."</span>);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">final</span> MessageQueue queue = me.mQueue;</div><div class="line">        Binder.clearCallingIdentity();</div><div class="line">        <span class="keyword">final</span> <span class="keyword">long</span> ident = Binder.clearCallingIdentity();</div><div class="line">        <span class="keyword">for</span> (;;) &#123;</div><div class="line">            Message msg = queue.next(); <span class="comment">// might block</span></div><div class="line">            <span class="keyword">if</span> (msg == <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="comment">// No message indicates that the message queue is quitting.</span></div><div class="line">                <span class="keyword">return</span>;</div><div class="line">            &#125;</div><div class="line">            msg.<span class="keyword">target</span>.dispatchMessage(msg);</div><div class="line">            msg.recycleUnchecked();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">消息传递的终点</div><div class="line"></div><div class="line"></div><div class="line"> <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">dispatchMessage</span><span class="params">(Message msg)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (msg.callback != <span class="keyword">null</span>) &#123;</div><div class="line">            handleCallback(msg);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">if</span> (mCallback != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">if</span> (mCallback.handleMessage(msg)) &#123;</div><div class="line">                    <span class="keyword">return</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            handleMessage(msg);</div><div class="line">        &#125;</div><div class="line">&#125;</div><div class="line"> <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">dispatchMessage</span><span class="params">(Message msg)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (msg.callback != <span class="keyword">null</span>) &#123;</div><div class="line">            handleCallback(msg);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">if</span> (mCallback != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">if</span> (mCallback.handleMessage(msg)) &#123;</div><div class="line">                    <span class="keyword">return</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            handleMessage(msg);</div><div class="line">        &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>当消息循环中取出的消息被再次传递给Handler的时候，这个消息就走到了生命的尽头(并不代表对象销毁，有一个消息池来回收消息)，从dispatchMessage方法可以看出，消息最终的归宿有三个，一是消息自身的callback接口，二是handler的callback接口，最后是handleMessage接口。<br>原文地址：<a href="http://vjson.com/wordpress/handler-looper%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90.html" target="_blank" rel="external">http://vjson.com/wordpress/handler-looper%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90.html</a><br>后面我们将继续分析Handler源码。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="fushenghua.github.io/2015/07/13/2015-07-13-深入理解Handler原理/" data-id="cjfc65etj00038cmwvb4intjb" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/android/">android</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础技能/">基础技能</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/性能优化/">性能优化</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/android/">android</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/linux/">linux</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/优化/">优化</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/android/" style="font-size: 10px;">android</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/优化/" style="font-size: 10px;">优化</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/06/">六月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/07/">七月 2015</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/06/07/APK 瘦身，减少APK的大小/">APK 瘦身，减少APK体积的大小</a>
+          </li>
+        
+          <li>
+            <a href="/2016/06/07/优化Gradle 依赖使用方式/">优化Gradle 依赖使用方式</a>
+          </li>
+        
+          <li>
+            <a href="/2016/04/09/2016-04-09-Android 之美 Android 进阶（一）/">Android 之美 Android 进阶（一）</a>
+          </li>
+        
+          <li>
+            <a href="/2015/09/11/2015-09-11-Linux安装Android Studio/">Linux下安装Android Studio</a>
+          </li>
+        
+          <li>
+            <a href="/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/">给我们的apk应用瘦身计划</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2018 fushenghua<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>

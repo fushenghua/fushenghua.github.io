@@ -305,7 +305,7 @@
     <link href="fushenghua.github.io/2016/06/07/%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86%E5%8F%91%E5%B8%83%E6%B5%81%E7%A8%8B/"/>
     <id>fushenghua.github.io/2016/06/07/版本管理发布流程/</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-03-29T07:14:22.195Z</updated>
+    <updated>2018-03-29T07:15:09.017Z</updated>
     
     <content type="html"><![CDATA[<h1 id="版本管理发布流程"><a href="#版本管理发布流程" class="headerlink" title="版本管理发布流程"></a>版本管理发布流程</h1><h2 id="Git-使用规范流程"><a href="#Git-使用规范流程" class="headerlink" title="Git 使用规范流程"></a>Git 使用规范流程</h2><p>为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。</p>
 <h3 id="版本命名规范"><a href="#版本命名规范" class="headerlink" title="版本命名规范"></a>版本命名规范</h3><p>软件版本号由四部分组成，第一个1为主版本号，第二个1为子版本号，第三个1为阶段版本号，第四部分为日期版本号加希腊字母版本号，希腊字母版本号共有5种，分别为：base、alpha、beta、RC、release。例如：1.1.1.051021_beta。</p>

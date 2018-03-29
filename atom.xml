@@ -305,9 +305,9 @@
     <link href="fushenghua.github.io/2016/06/07/%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86%E5%8F%91%E5%B8%83%E6%B5%81%E7%A8%8B/"/>
     <id>fushenghua.github.io/2016/06/07/版本管理发布流程/</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-03-29T07:15:09.017Z</updated>
+    <updated>2018-03-29T09:26:20.000Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="版本管理发布流程"><a href="#版本管理发布流程" class="headerlink" title="版本管理发布流程"></a>版本管理发布流程</h1><h2 id="Git-使用规范流程"><a href="#Git-使用规范流程" class="headerlink" title="Git 使用规范流程"></a>Git 使用规范流程</h2><p>为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。</p>
+    <content type="html"><![CDATA[<h2 id="Git-使用规范流程"><a href="#Git-使用规范流程" class="headerlink" title="Git 使用规范流程"></a>Git 使用规范流程</h2><p>为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。</p>
 <h3 id="版本命名规范"><a href="#版本命名规范" class="headerlink" title="版本命名规范"></a>版本命名规范</h3><p>软件版本号由四部分组成，第一个1为主版本号，第二个1为子版本号，第三个1为阶段版本号，第四部分为日期版本号加希腊字母版本号，希腊字母版本号共有5种，分别为：base、alpha、beta、RC、release。例如：1.1.1.051021_beta。</p>
 <h4 id="版本号修改规则"><a href="#版本号修改规则" class="headerlink" title="版本号修改规则"></a>版本号修改规则</h4><p>⑴ 主版本号(1)<br>当功能模块有较大的变动，比如增加多个模块或者整体架构发生变化。此版本号由项目决定是否修改。<br>⑵ 子版本号(1)<br>相对于主版本号而言，子版本号升级对应的是软件功能有一定的增加或变化，比如增加了对权限控制、增加自定义视图等功能。此版本号由项目决定是否修改。<br>⑶ 阶段版本号(1)<br>一般是 Bug 修复或是一些小的变动，要经常发布修订版，时间间隔不限，修复一个严重的bug即可发布一个修订版。此版本号由项目经理决定是否修改。<br>⑷ 日期版本号(051021)<br>用于记录修改项目的当前日期，每天对项目的修改都需要更改日期版本号。此版本号由开发人员决定是否修改。<br>⑸ 希腊字母版本号(beta)<br>此版本号用于标注当前版本的软件处于哪个开发阶段，当软件进入到另一个阶段时需要修改此版本号。此版本号由项目决定是否修改。</p>
 <h4 id="软件版本阶段说明"><a href="#软件版本阶段说明" class="headerlink" title="软件版本阶段说明"></a>软件版本阶段说明</h4><p>⑴ Base：<br>此版本表示该软件仅仅是一个假页面链接，通常包括所有的功能和页面布局，但是页面中的功能都没有做完整的实现，只是做为整体网站的一个基础架构。<br>⑵ α（Alpha）版：内测版。<br>软件的初级版本，表示该软件在此阶段以实现软件功能为主，通常只在软件开发者 内部交流，或者专业测试人员测试用，一般而言，该版本软件的Bug较多，需要继续修改，是测试版本。测试人员提交Bug经开发人员修改确认之后，发布到测试网址让测试人员测试，此时可将软件版本标注为alpha版。<br>⑶ β（Beta）版：公测版。<br>该版本相对于α版已有了很大的改进，消除了严重的错误，但还是存在着一些缺陷，需要经过多次测试来进一步消除，此版本主要的修改对像是软件的UI，供专业爱好者大规模测试用。<br>⑷ RC 版：<br>是 Release Candidate 的缩写，意思是发布倒计时，候选版本，该版本已经相当成熟了，完成全部功能并清除大部分的BUG，基本上不存在导致错误的BUG，与即将发行的正式版相差无几。<br>⑷ Release 版：<br>该版本意味“最终版本”，在前面版本的一系列测试版之后，终归会有一个正式版本，是最终交付用户使用的一个版本。该版本有时也称为标准版。一般情况下，Release不会以单词形式出现在软件封面上，取而代之的是符号(R)。</p>
@@ -348,7 +348,7 @@
     
     <summary type="html">
     
-      &lt;h1 id=&quot;版本管理发布流程&quot;&gt;&lt;a href=&quot;#版本管理发布流程&quot; class=&quot;headerlink&quot; title=&quot;版本管理发布流程&quot;&gt;&lt;/a&gt;版本管理发布流程&lt;/h1&gt;&lt;h2 id=&quot;Git-使用规范流程&quot;&gt;&lt;a href=&quot;#Git-使用规范流程&quot; class=&quot;
+      &lt;h2 id=&quot;Git-使用规范流程&quot;&gt;&lt;a href=&quot;#Git-使用规范流程&quot; class=&quot;headerlink&quot; title=&quot;Git 使用规范流程&quot;&gt;&lt;/a&gt;Git 使用规范流程&lt;/h2&gt;&lt;p&gt;为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、
     
     </summary>
     
@@ -362,9 +362,9 @@
     <link href="fushenghua.github.io/2016/06/07/APK%E5%AE%8C%E6%95%B4%E6%80%A7%E6%A0%A1%E9%AA%8C/"/>
     <id>fushenghua.github.io/2016/06/07/APK完整性校验/</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-03-29T09:24:22.000Z</updated>
+    <updated>2018-03-29T09:26:37.000Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="APP安全之APK完整性校验"><a href="#APP安全之APK完整性校验" class="headerlink" title="APP安全之APK完整性校验"></a>APP安全之APK完整性校验</h1><h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><blockquote>
+    <content type="html"><![CDATA[<h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><blockquote>
 <p>APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度。</p>
 </blockquote>
 <h2 id="一、认识APK安全性"><a href="#一、认识APK安全性" class="headerlink" title="一、认识APK安全性"></a>一、认识APK安全性</h2><h3 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h3><p>可以通过修改客户端文件篡改客户端行为。攻击者可以让客户端显示自己制作的钓鱼网站，偷取用户信息</p>
@@ -401,7 +401,10 @@
     
     <summary type="html">
     
-      &lt;h1 id=&quot;APP安全之APK完整性校验&quot;&gt;&lt;a href=&quot;#APP安全之APK完整性校验&quot; class=&quot;headerlink&quot; title=&quot;APP安全之APK完整性校验&quot;&gt;&lt;/a&gt;APP安全之APK完整性校验&lt;/h1&gt;&lt;h4 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot;
+      &lt;h4 id=&quot;前言&quot;&gt;&lt;a href=&quot;#前言&quot; class=&quot;headerlink&quot; title=&quot;前言&quot;&gt;&lt;/a&gt;前言&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度。&lt;/p&gt;
+&lt;/blockquote&gt;
+
     
     </summary>
     
@@ -735,11 +738,11 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
   </entry>
   
   <entry>
-    <title>深入理解Handler原理）</title>
+    <title>深入理解Handler原理</title>
     <link href="fushenghua.github.io/2015/07/13/2015-07-13-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Handler%E5%8E%9F%E7%90%86/"/>
     <id>fushenghua.github.io/2015/07/13/2015-07-13-深入理解Handler原理/</id>
     <published>2015-07-13T04:23:32.000Z</published>
-    <updated>2018-03-29T04:52:38.653Z</updated>
+    <updated>2018-03-29T09:26:25.000Z</updated>
     
     <content type="html"><![CDATA[<p>Handler在Android开发中非常重要，最常见的使用场景就是在子线程需要更新UI，用Handler来投递消息到主线程执行UI更新操作。因为 Android系统的View是非线程安全的，所以需要在主线程更新UI。总的来说Handler就是用来做线程间通信，在不同线程之间传递消息。<br>注：这篇文章所讲到的Handler是在主线程创建的，主线程在开始的时候已经创建了默认的消息循环。后面的文章会讲如何创建自己的消息循环。<br>从图中可以看出，四种颜色分别代表了四个对象，并且大致描述了几个对象之间的关系，以及消息的流转过程，首先Handler通过sendMessage将消息投递给MessageQueue，Looper通过消息循环（loop）不断的从MessageQueue中取出消息，然后消息被Handler的dispatchMessage分发到handleMessage方法消费掉。<br>消息循环中涉及的重要对象</p>
 <p>Handler</p>

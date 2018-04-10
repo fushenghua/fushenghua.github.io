@@ -90,7 +90,7 @@
     <link href="fushenghua.github.io/2016/06/07/APK%E5%AE%8C%E6%95%B4%E6%80%A7%E6%A0%A1%E9%AA%8C/"/>
     <id>fushenghua.github.io/2016/06/07/APK完整性校验/</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-10T07:44:59.791Z</updated>
+    <updated>2018-04-10T07:46:54.304Z</updated>
     
     <content type="html"><![CDATA[<p>APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。</p>
 <h2 id="一、认识APK安全性"><a href="#一、认识APK安全性" class="headerlink" title="一、认识APK安全性"></a>一、认识APK安全性</h2><h3 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h3><p>可以通过修改客户端文件篡改客户端行为。攻击者可以让客户端显示自己制作的钓鱼网站，偷取用户信息</p>

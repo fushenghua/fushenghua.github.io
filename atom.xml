@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="fushenghua.github.io/"/>
-  <updated>2018-04-10T07:41:44.034Z</updated>
+  <updated>2018-04-10T07:43:35.859Z</updated>
   <id>fushenghua.github.io/</id>
   
   <author>
@@ -20,10 +20,10 @@
     <link href="fushenghua.github.io/2018/04/09/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E6%9E%9A%E4%B8%BE%E6%9B%B4%E5%8D%A0%E5%86%85%E5%AD%98%EF%BC%8C%E6%9E%9A%E4%B8%BE%E5%8E%9F%E7%90%86%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/"/>
     <id>fushenghua.github.io/2018/04/09/为什么说枚举更占内存，枚举原理是什么？/</id>
     <published>2018-04-09T07:39:39.000Z</published>
-    <updated>2018-04-10T07:41:44.034Z</updated>
+    <updated>2018-04-10T07:43:35.859Z</updated>
     
-    <content type="html"><![CDATA[<blockquote>
-<p>从以前学习java 开始就听说枚举很占内存，然后老版Android开发指南文章也指出，枚举通常需要比静态常量多两倍的内存。你应该严格避免在android上使用枚举。那么究竟为什么说枚举更占内存呢？本文就是通过这种方法来分析枚举为什么占内存的，而不是说拒绝枚举。</p>
+    <content type="html"><![CDATA[<p>从以前学习java 开始就听说枚举很占内存，然后老版Android开发指南文章也指出，枚举通常需要比静态常量多两倍的内存。你应该严格避免在android上使用枚举。那么究竟为什么说枚举更占内存呢？本文就是通过这种方法来分析枚举为什么占内存的，而不是说拒绝枚举。</p>
+<blockquote>
 <p>在阅读过程中有任何问题，请及时联系。如需转载请注明 <a href="http://blog.csdn.net/vfush" target="_blank" rel="external">fuchenxuan de Blog</a>  </p>
 </blockquote>
 <h2 id="关于-Enum"><a href="#关于-Enum" class="headerlink" title="关于 Enum"></a>关于 Enum</h2><p><code>Enum</code> 一般用来表示一组相同类型可列举的常量。如性别、日期、月份、颜色等。对这些属性用常量的好处是显而易见的，不仅可以保证单例，且比较时候可以用 <code>”==”</code> 来替换 <code>equals</code> 。</p>
@@ -75,8 +75,8 @@
     
     <summary type="html">
     
-      &lt;blockquote&gt;
-&lt;p&gt;从以前学习java 开始就听说枚举很占内存，然后老版Android开发指南文章也指出，枚举通常需要比静态常量多两倍的内存。你应该严格避免在android上使用枚举。那么究竟为什么说枚举更占内存呢？本文就是通过这种方法来分析枚举为什么占内存的，而不是
+      &lt;p&gt;从以前学习java 开始就听说枚举很占内存，然后老版Android开发指南文章也指出，枚举通常需要比静态常量多两倍的内存。你应该严格避免在android上使用枚举。那么究竟为什么说枚举更占内存呢？本文就是通过这种方法来分析枚举为什么占内存的，而不是说拒绝枚举。&lt;/p&gt;
+&lt;b
     
     </summary>
     

@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="fushenghua.github.io/"/>
-  <updated>2018-04-10T07:43:35.859Z</updated>
+  <updated>2018-04-11T05:10:30.518Z</updated>
   <id>fushenghua.github.io/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="fushenghua.github.io/2018/04/09/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E6%9E%9A%E4%B8%BE%E6%9B%B4%E5%8D%A0%E5%86%85%E5%AD%98%EF%BC%8C%E6%9E%9A%E4%B8%BE%E5%8E%9F%E7%90%86%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/"/>
     <id>fushenghua.github.io/2018/04/09/为什么说枚举更占内存，枚举原理是什么？/</id>
     <published>2018-04-09T07:39:39.000Z</published>
-    <updated>2018-04-10T07:43:35.859Z</updated>
+    <updated>2018-04-11T05:10:30.518Z</updated>
     
     <content type="html"><![CDATA[<p>从以前学习java 开始就听说枚举很占内存，然后老版Android开发指南文章也指出，枚举通常需要比静态常量多两倍的内存。你应该严格避免在android上使用枚举。那么究竟为什么说枚举更占内存呢？本文就是通过这种方法来分析枚举为什么占内存的，而不是说拒绝枚举。</p>
 <blockquote>
@@ -81,58 +81,6 @@
     </summary>
     
       <category term="android" scheme="fushenghua.github.io/categories/android/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>APP安全之APK完整性校验</title>
-    <link href="fushenghua.github.io/2016/06/07/APK%E5%AE%8C%E6%95%B4%E6%80%A7%E6%A0%A1%E9%AA%8C/"/>
-    <id>fushenghua.github.io/2016/06/07/APK完整性校验/</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-10T07:46:54.304Z</updated>
-    
-    <content type="html"><![CDATA[<p>APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。</p>
-<h2 id="一、认识APK安全性"><a href="#一、认识APK安全性" class="headerlink" title="一、认识APK安全性"></a>一、认识APK安全性</h2><h3 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h3><p>可以通过修改客户端文件篡改客户端行为。攻击者可以让客户端显示自己制作的钓鱼网站，偷取用户信息</p>
-<h2 id="二、完整性校验原理"><a href="#二、完整性校验原理" class="headerlink" title="二、完整性校验原理"></a>二、完整性校验原理</h2><h3 id="完整性校验的几种方式"><a href="#完整性校验的几种方式" class="headerlink" title="完整性校验的几种方式"></a>完整性校验的几种方式</h3><ol>
-<li>CRC校验</li>
-<li>MD5值校验</li>
-<li>SHA1值校验</li>
-</ol>
-<h3 id="常见android完整性检测"><a href="#常见android完整性检测" class="headerlink" title="常见android完整性检测"></a>常见android完整性检测</h3><ol>
-<li>检测签名</li>
-<li>校验classes.dex</li>
-<li>校验整个apk</li>
-</ol>
-<h4 id="检测签名"><a href="#检测签名" class="headerlink" title="检测签名"></a>检测签名</h4><p>Android对每一个Apk文件都会进行签名，在Apk文件安装时，系统会对其签名信息进行比对，判断程序的完整性，从而决定该Apk文件是否可以安装，在一定程度上达到安全的目的。</p>
-<ol>
-<li>MANIFEST.MF：这是摘要文件。程序遍历Apk包中的所有文件(entry)，对非文件夹非签名文件的文件，逐个用SHA1生成摘要信息，再用Base64进行编码。如果你改变了apk包中的文件，那么在apk安装校验时，改变后的文件摘要信息与MANIFEST.MF的检验信息不同，于是程序就不能成功安装。</li>
-<li>CERT.SF：这是对摘要的签名文件。对前一步生成的MANIFEST.MF，使用SHA1-RSA算法，用开发者的私钥进行签名。在安装时只能使用公钥才能解密它。解密之后，将它与未加密的摘要信息（即，MANIFEST.MF文件）进行对比，如果相符，则表明内容没有被异常修改。</li>
-<li>CERT.RSA文件中保存了公钥、所采用的加密算法等信息。系统对签名文件进行解密，所需要的公钥就是从这个文件里取出来的。<br>这三个文件在apk META-INFO文件夹</li>
-</ol>
-<p>结论：从上面的总结可以看出，META-INFO里面的说那个文件环环相扣，从而保证Android程序的安全性。（只是防止开发者的程序不被攻击者修改，如果开发者的公私钥对对攻击者得到或者开发者开发出攻击程序，Android系统都无法检测出来。）</p>
-<p>虽然系统通过以上方式可以防止，但如果是root的手机就不安全了，建议通过服务器来校验，</p>
-<h4 id="校验classes-dex"><a href="#校验classes-dex" class="headerlink" title="校验classes.dex"></a>校验classes.dex</h4><p><strong>用crc32对classes.dex文件的完整性进行校验</strong></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"> </div><div class="line"><span class="meta">@Override</span></div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(BundlesavedInstanceState)</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line"> </div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line"> </div><div class="line">    String apkPath = getPackageCodePath();</div><div class="line"> </div><div class="line">    Long dexCrc = Long.parseLong(getString(R.string.classesdex_crc));</div><div class="line">    <span class="comment">//建议将dexCrc值放在服务器做校验</span></div><div class="line"> </div><div class="line">    <span class="keyword">try</span></div><div class="line"> </div><div class="line">    &#123;</div><div class="line"> </div><div class="line">        ZipFile zipfile = <span class="keyword">new</span> ZipFile(apkPath);</div><div class="line"> </div><div class="line">        ZipEntry dexentry = zipfile.getEntry(<span class="string">"classes.dex"</span>);</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"classes.dexcrc="</span>+dexentry.getCrc());</div><div class="line"> </div><div class="line">        <span class="keyword">if</span>(dexentry.getCrc() != dexCrc)&#123;</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"Dexhas been modified!"</span>);</div><div class="line"> </div><div class="line">        &#125;<span class="keyword">else</span>&#123;</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"Dex hasn't been modified!"</span>);</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"> </div><div class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line"> </div><div class="line">     <span class="comment">// TODO Auto-generated catch block</span></div><div class="line"> </div><div class="line">     e.printStackTrace();</div><div class="line"> </div><div class="line">    &#125;</div><div class="line"> </div><div class="line">   &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="校验整个apk"><a href="#校验整个apk" class="headerlink" title="校验整个apk"></a>校验整个apk</h4><p>用哈希值对整个apk完整性进行校验</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"> </div><div class="line"><span class="meta">@Override</span></div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(BundlesavedInstanceState)</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line"> </div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line"> </div><div class="line">   </div><div class="line"> String apkPath = getPackageCodePath();</div><div class="line"> </div><div class="line">     MessageDigest msgDigest = <span class="keyword">null</span>;</div><div class="line"> </div><div class="line">     <span class="keyword">try</span> &#123;</div><div class="line"> </div><div class="line">        msgDigest = MessageDigest.getInstance(<span class="string">"SHA-1"</span>);</div><div class="line"> </div><div class="line">        <span class="keyword">byte</span>[] bytes = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span>];</div><div class="line"> </div><div class="line">        <span class="keyword">int</span> byteCount;</div><div class="line"> </div><div class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(apkPath));</div><div class="line"> </div><div class="line">        <span class="keyword">while</span> ((byteCount = fis.read(bytes)) &gt; <span class="number">0</span>)</div><div class="line"> </div><div class="line">        &#123;</div><div class="line"> </div><div class="line">            msgDigest.update(bytes, <span class="number">0</span>, byteCount);</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"> </div><div class="line">        BigInteger bi = <span class="keyword">new</span> BigInteger(<span class="number">1</span>, msgDigest.digest());</div><div class="line"> </div><div class="line">        String sha = bi.toString(<span class="number">16</span>);</div><div class="line"> </div><div class="line">        fis.close();</div><div class="line"> </div><div class="line">        <span class="comment">//这里添加从服务器中获取哈希值然后进行对比校验</span></div><div class="line"> </div><div class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line"> </div><div class="line">            e.printStackTrace();</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"></div><div class="line"> </div><div class="line">   &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>我们将把crc值和sha1值放在服务器做处理，做个记录。</p>
-<p>更多Android 之美，请阅读<a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external">《Android 之美 从0到1 – 高手之路》</a>系列文章</p>
-<blockquote>
-<p>水平有限，若有错漏，欢迎指正，批评，如需转载，请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a>，谢谢！</p>
-<p>作者：fuchenxuan<br>出处：<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a><br>欢迎访问我的个人站点：<a href="http://fuchenxuan.cn" target="_blank" rel="external">http://fuchenxuan.cn</a><br>转载请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a></p>
-</blockquote>
-<p><a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external"><img src="http://img.blog.csdn.net/20160608234402229" alt="Android 之美 从0到1"></a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。&lt;/p&gt;
-&lt;h2 id=&quot;一、认识APK安全性&quot;&gt;&lt;a href=&quot;#一、认识APK安全性&quot; class=&quot;headerlink&quot; title=&quot;一、认识AP
-    
-    </summary>
-    
-      <category term="安全" scheme="fushenghua.github.io/categories/%E5%AE%89%E5%85%A8/"/>
     
     
   </entry>
@@ -366,6 +314,58 @@
   </entry>
   
   <entry>
+    <title>APP安全之APK完整性校验</title>
+    <link href="fushenghua.github.io/2016/06/07/APK%E5%AE%8C%E6%95%B4%E6%80%A7%E6%A0%A1%E9%AA%8C/"/>
+    <id>fushenghua.github.io/2016/06/07/APK完整性校验/</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-10T07:46:54.304Z</updated>
+    
+    <content type="html"><![CDATA[<p>APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。</p>
+<h2 id="一、认识APK安全性"><a href="#一、认识APK安全性" class="headerlink" title="一、认识APK安全性"></a>一、认识APK安全性</h2><h3 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h3><p>可以通过修改客户端文件篡改客户端行为。攻击者可以让客户端显示自己制作的钓鱼网站，偷取用户信息</p>
+<h2 id="二、完整性校验原理"><a href="#二、完整性校验原理" class="headerlink" title="二、完整性校验原理"></a>二、完整性校验原理</h2><h3 id="完整性校验的几种方式"><a href="#完整性校验的几种方式" class="headerlink" title="完整性校验的几种方式"></a>完整性校验的几种方式</h3><ol>
+<li>CRC校验</li>
+<li>MD5值校验</li>
+<li>SHA1值校验</li>
+</ol>
+<h3 id="常见android完整性检测"><a href="#常见android完整性检测" class="headerlink" title="常见android完整性检测"></a>常见android完整性检测</h3><ol>
+<li>检测签名</li>
+<li>校验classes.dex</li>
+<li>校验整个apk</li>
+</ol>
+<h4 id="检测签名"><a href="#检测签名" class="headerlink" title="检测签名"></a>检测签名</h4><p>Android对每一个Apk文件都会进行签名，在Apk文件安装时，系统会对其签名信息进行比对，判断程序的完整性，从而决定该Apk文件是否可以安装，在一定程度上达到安全的目的。</p>
+<ol>
+<li>MANIFEST.MF：这是摘要文件。程序遍历Apk包中的所有文件(entry)，对非文件夹非签名文件的文件，逐个用SHA1生成摘要信息，再用Base64进行编码。如果你改变了apk包中的文件，那么在apk安装校验时，改变后的文件摘要信息与MANIFEST.MF的检验信息不同，于是程序就不能成功安装。</li>
+<li>CERT.SF：这是对摘要的签名文件。对前一步生成的MANIFEST.MF，使用SHA1-RSA算法，用开发者的私钥进行签名。在安装时只能使用公钥才能解密它。解密之后，将它与未加密的摘要信息（即，MANIFEST.MF文件）进行对比，如果相符，则表明内容没有被异常修改。</li>
+<li>CERT.RSA文件中保存了公钥、所采用的加密算法等信息。系统对签名文件进行解密，所需要的公钥就是从这个文件里取出来的。<br>这三个文件在apk META-INFO文件夹</li>
+</ol>
+<p>结论：从上面的总结可以看出，META-INFO里面的说那个文件环环相扣，从而保证Android程序的安全性。（只是防止开发者的程序不被攻击者修改，如果开发者的公私钥对对攻击者得到或者开发者开发出攻击程序，Android系统都无法检测出来。）</p>
+<p>虽然系统通过以上方式可以防止，但如果是root的手机就不安全了，建议通过服务器来校验，</p>
+<h4 id="校验classes-dex"><a href="#校验classes-dex" class="headerlink" title="校验classes.dex"></a>校验classes.dex</h4><p><strong>用crc32对classes.dex文件的完整性进行校验</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"> </div><div class="line"><span class="meta">@Override</span></div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(BundlesavedInstanceState)</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line"> </div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line"> </div><div class="line">    String apkPath = getPackageCodePath();</div><div class="line"> </div><div class="line">    Long dexCrc = Long.parseLong(getString(R.string.classesdex_crc));</div><div class="line">    <span class="comment">//建议将dexCrc值放在服务器做校验</span></div><div class="line"> </div><div class="line">    <span class="keyword">try</span></div><div class="line"> </div><div class="line">    &#123;</div><div class="line"> </div><div class="line">        ZipFile zipfile = <span class="keyword">new</span> ZipFile(apkPath);</div><div class="line"> </div><div class="line">        ZipEntry dexentry = zipfile.getEntry(<span class="string">"classes.dex"</span>);</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"classes.dexcrc="</span>+dexentry.getCrc());</div><div class="line"> </div><div class="line">        <span class="keyword">if</span>(dexentry.getCrc() != dexCrc)&#123;</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"Dexhas been modified!"</span>);</div><div class="line"> </div><div class="line">        &#125;<span class="keyword">else</span>&#123;</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"Dex hasn't been modified!"</span>);</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"> </div><div class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line"> </div><div class="line">     <span class="comment">// TODO Auto-generated catch block</span></div><div class="line"> </div><div class="line">     e.printStackTrace();</div><div class="line"> </div><div class="line">    &#125;</div><div class="line"> </div><div class="line">   &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="校验整个apk"><a href="#校验整个apk" class="headerlink" title="校验整个apk"></a>校验整个apk</h4><p>用哈希值对整个apk完整性进行校验</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"> </div><div class="line"><span class="meta">@Override</span></div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(BundlesavedInstanceState)</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line"> </div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line"> </div><div class="line">   </div><div class="line"> String apkPath = getPackageCodePath();</div><div class="line"> </div><div class="line">     MessageDigest msgDigest = <span class="keyword">null</span>;</div><div class="line"> </div><div class="line">     <span class="keyword">try</span> &#123;</div><div class="line"> </div><div class="line">        msgDigest = MessageDigest.getInstance(<span class="string">"SHA-1"</span>);</div><div class="line"> </div><div class="line">        <span class="keyword">byte</span>[] bytes = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span>];</div><div class="line"> </div><div class="line">        <span class="keyword">int</span> byteCount;</div><div class="line"> </div><div class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(apkPath));</div><div class="line"> </div><div class="line">        <span class="keyword">while</span> ((byteCount = fis.read(bytes)) &gt; <span class="number">0</span>)</div><div class="line"> </div><div class="line">        &#123;</div><div class="line"> </div><div class="line">            msgDigest.update(bytes, <span class="number">0</span>, byteCount);</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"> </div><div class="line">        BigInteger bi = <span class="keyword">new</span> BigInteger(<span class="number">1</span>, msgDigest.digest());</div><div class="line"> </div><div class="line">        String sha = bi.toString(<span class="number">16</span>);</div><div class="line"> </div><div class="line">        fis.close();</div><div class="line"> </div><div class="line">        <span class="comment">//这里添加从服务器中获取哈希值然后进行对比校验</span></div><div class="line"> </div><div class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line"> </div><div class="line">            e.printStackTrace();</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"></div><div class="line"> </div><div class="line">   &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们将把crc值和sha1值放在服务器做处理，做个记录。</p>
+<p>更多Android 之美，请阅读<a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external">《Android 之美 从0到1 – 高手之路》</a>系列文章</p>
+<blockquote>
+<p>水平有限，若有错漏，欢迎指正，批评，如需转载，请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a>，谢谢！</p>
+<p>作者：fuchenxuan<br>出处：<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a><br>欢迎访问我的个人站点：<a href="http://fuchenxuan.cn" target="_blank" rel="external">http://fuchenxuan.cn</a><br>转载请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a></p>
+</blockquote>
+<p><a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external"><img src="http://img.blog.csdn.net/20160608234402229" alt="Android 之美 从0到1"></a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。&lt;/p&gt;
+&lt;h2 id=&quot;一、认识APK安全性&quot;&gt;&lt;a href=&quot;#一、认识APK安全性&quot; class=&quot;headerlink&quot; title=&quot;一、认识AP
+    
+    </summary>
+    
+      <category term="安全" scheme="fushenghua.github.io/categories/%E5%AE%89%E5%85%A8/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>优化Gradle 依赖使用方式</title>
     <link href="fushenghua.github.io/2016/06/07/%E4%BC%98%E5%8C%96Gradle%20%E4%BE%9D%E8%B5%96%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F/"/>
     <id>fushenghua.github.io/2016/06/07/优化Gradle 依赖使用方式/</id>
@@ -487,7 +487,7 @@
     <link href="fushenghua.github.io/2016/04/09/2016-04-09-Android%20%E4%B9%8B%E7%BE%8E%20Android%20%E8%BF%9B%E9%98%B6%EF%BC%88%E4%B8%80%EF%BC%89/"/>
     <id>fushenghua.github.io/2016/04/09/2016-04-09-Android 之美 Android 进阶（一）/</id>
     <published>2016-04-09T03:23:32.000Z</published>
-    <updated>2018-04-10T07:45:37.410Z</updated>
+    <updated>2018-04-11T05:10:24.051Z</updated>
     
     <content type="html"><![CDATA[<p>在前几篇文章中都是讲的基础，大家应该会觉得非常熟悉，但往往我们可能对于基础某些细节认识不够彻底或贯穿不全，我一直认为基础都是比较难的，那么本章节终于到进阶啦，主要讲的是View 的相关知识，在前面<a href="http://blog.csdn.net/vfush/article/details/51534916" target="_blank" rel="external">《Android 面试题总结之Android 基础 (六)》
 </a>中已经对View有了一定的了解，由于内容较多且也是<strong>面试必考题</strong>，所以将分两篇继续深入的理解View。</p>
@@ -748,7 +748,7 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     <link href="fushenghua.github.io/2015/09/11/2015-09-11-%E7%BB%99%E6%88%91%E4%BB%AC%E7%9A%84apk%E5%BA%94%E7%94%A8%E7%98%A6%E8%BA%AB%E8%AE%A1%E5%88%92(%E4%B8%80)/"/>
     <id>fushenghua.github.io/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/</id>
     <published>2015-09-11T03:23:32.000Z</published>
-    <updated>2015-09-14T08:45:34.000Z</updated>
+    <updated>2018-04-11T05:10:19.811Z</updated>
     
     <content type="html"><![CDATA[<p>现在apk越来越大，原因有如下几个：<br>1.多dpi支持([l|m|tv|h|x|xx|xxx]dpi)<br>2.Android开发工具和生态系统的发展<br>3.为了提高用户体验的高分辨率ui设计<br>4.无用代码,重复类库的编译<br>随着项目的开发，项目体积不断增长，应用体积也变大了许多,会让很多用户会放弃安装，为了给apk瘦身,翻阅了大片文章,总结一下自己在开发中的经验</p>
 <p>我们从一下几个方面去解决:</p>

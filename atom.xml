@@ -4,9 +4,9 @@
   <subtitle>不断提高自己认知，不断的为自己想要的努力</subtitle>
   <link href="/atom.xml" rel="self"/>
   
-  <link href="fushenghua.github.io/"/>
+  <link href="http://fushenghua.github.io/"/>
   <updated>2018-04-11T05:10:30.518Z</updated>
-  <id>fushenghua.github.io/</id>
+  <id>http://fushenghua.github.io/</id>
   
   <author>
     <name>fushenghua</name>
@@ -17,8 +17,8 @@
   
   <entry>
     <title>为什么说枚举更占内存，枚举原理是什么？</title>
-    <link href="fushenghua.github.io/2018/04/09/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E6%9E%9A%E4%B8%BE%E6%9B%B4%E5%8D%A0%E5%86%85%E5%AD%98%EF%BC%8C%E6%9E%9A%E4%B8%BE%E5%8E%9F%E7%90%86%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/"/>
-    <id>fushenghua.github.io/2018/04/09/为什么说枚举更占内存，枚举原理是什么？/</id>
+    <link href="http://fushenghua.github.io/2018/04/09/%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AF%B4%E6%9E%9A%E4%B8%BE%E6%9B%B4%E5%8D%A0%E5%86%85%E5%AD%98%EF%BC%8C%E6%9E%9A%E4%B8%BE%E5%8E%9F%E7%90%86%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F/"/>
+    <id>http://fushenghua.github.io/2018/04/09/为什么说枚举更占内存，枚举原理是什么？/</id>
     <published>2018-04-09T07:39:39.000Z</published>
     <updated>2018-04-11T05:10:30.518Z</updated>
     
@@ -80,15 +80,15 @@
     
     </summary>
     
-      <category term="android" scheme="fushenghua.github.io/categories/android/"/>
+      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
     
     
   </entry>
   
   <entry>
     <title>APK 瘦身，减少APK体积的大小</title>
-    <link href="fushenghua.github.io/2016/06/07/APK%20%E7%98%A6%E8%BA%AB%EF%BC%8C%E5%87%8F%E5%B0%91APK%E7%9A%84%E5%A4%A7%E5%B0%8F/"/>
-    <id>fushenghua.github.io/2016/06/07/APK 瘦身，减少APK的大小/</id>
+    <link href="http://fushenghua.github.io/2016/06/07/APK%20%E7%98%A6%E8%BA%AB%EF%BC%8C%E5%87%8F%E5%B0%91APK%E7%9A%84%E5%A4%A7%E5%B0%8F/"/>
+    <id>http://fushenghua.github.io/2016/06/07/APK 瘦身，减少APK的大小/</id>
     <published>2016-06-07T00:55:29.000Z</published>
     <updated>2016-08-27T10:00:48.000Z</updated>
     
@@ -308,15 +308,15 @@
     
     </summary>
     
-      <category term="性能优化" scheme="fushenghua.github.io/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
+      <category term="性能优化" scheme="http://fushenghua.github.io/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
     
     
   </entry>
   
   <entry>
     <title>APP安全之APK完整性校验</title>
-    <link href="fushenghua.github.io/2016/06/07/APK%E5%AE%8C%E6%95%B4%E6%80%A7%E6%A0%A1%E9%AA%8C/"/>
-    <id>fushenghua.github.io/2016/06/07/APK完整性校验/</id>
+    <link href="http://fushenghua.github.io/2016/06/07/APK%E5%AE%8C%E6%95%B4%E6%80%A7%E6%A0%A1%E9%AA%8C/"/>
+    <id>http://fushenghua.github.io/2016/06/07/APK完整性校验/</id>
     <published>2016-06-07T00:55:29.000Z</published>
     <updated>2018-04-10T07:46:54.304Z</updated>
     
@@ -360,15 +360,15 @@
     
     </summary>
     
-      <category term="安全" scheme="fushenghua.github.io/categories/%E5%AE%89%E5%85%A8/"/>
+      <category term="安全" scheme="http://fushenghua.github.io/categories/%E5%AE%89%E5%85%A8/"/>
     
     
   </entry>
   
   <entry>
     <title>优化Gradle 依赖使用方式</title>
-    <link href="fushenghua.github.io/2016/06/07/%E4%BC%98%E5%8C%96Gradle%20%E4%BE%9D%E8%B5%96%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F/"/>
-    <id>fushenghua.github.io/2016/06/07/优化Gradle 依赖使用方式/</id>
+    <link href="http://fushenghua.github.io/2016/06/07/%E4%BC%98%E5%8C%96Gradle%20%E4%BE%9D%E8%B5%96%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F/"/>
+    <id>http://fushenghua.github.io/2016/06/07/优化Gradle 依赖使用方式/</id>
     <published>2016-06-07T00:55:29.000Z</published>
     <updated>2018-04-10T07:47:19.986Z</updated>
     
@@ -419,15 +419,15 @@
     
     </summary>
     
-      <category term="基础技能" scheme="fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
     
     
   </entry>
   
   <entry>
     <title>版本管理发布流程</title>
-    <link href="fushenghua.github.io/2016/06/07/%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86%E5%8F%91%E5%B8%83%E6%B5%81%E7%A8%8B/"/>
-    <id>fushenghua.github.io/2016/06/07/版本管理发布流程/</id>
+    <link href="http://fushenghua.github.io/2016/06/07/%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86%E5%8F%91%E5%B8%83%E6%B5%81%E7%A8%8B/"/>
+    <id>http://fushenghua.github.io/2016/06/07/版本管理发布流程/</id>
     <published>2016-06-07T00:55:29.000Z</published>
     <updated>2018-04-10T07:45:28.309Z</updated>
     
@@ -477,15 +477,15 @@
     
     </summary>
     
-      <category term="基础技能" scheme="fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
     
     
   </entry>
   
   <entry>
     <title>Android 之美 Android 进阶（一）</title>
-    <link href="fushenghua.github.io/2016/04/09/2016-04-09-Android%20%E4%B9%8B%E7%BE%8E%20Android%20%E8%BF%9B%E9%98%B6%EF%BC%88%E4%B8%80%EF%BC%89/"/>
-    <id>fushenghua.github.io/2016/04/09/2016-04-09-Android 之美 Android 进阶（一）/</id>
+    <link href="http://fushenghua.github.io/2016/04/09/2016-04-09-Android%20%E4%B9%8B%E7%BE%8E%20Android%20%E8%BF%9B%E9%98%B6%EF%BC%88%E4%B8%80%EF%BC%89/"/>
+    <id>http://fushenghua.github.io/2016/04/09/2016-04-09-Android 之美 Android 进阶（一）/</id>
     <published>2016-04-09T03:23:32.000Z</published>
     <updated>2018-04-11T05:10:24.051Z</updated>
     
@@ -694,15 +694,46 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     
     </summary>
     
-      <category term="android" scheme="fushenghua.github.io/categories/android/"/>
+      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
     
     
   </entry>
   
   <entry>
+    <title>给我们的apk应用瘦身计划</title>
+    <link href="http://fushenghua.github.io/2015/09/11/2015-09-11-%E7%BB%99%E6%88%91%E4%BB%AC%E7%9A%84apk%E5%BA%94%E7%94%A8%E7%98%A6%E8%BA%AB%E8%AE%A1%E5%88%92(%E4%B8%80)/"/>
+    <id>http://fushenghua.github.io/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/</id>
+    <published>2015-09-11T03:23:32.000Z</published>
+    <updated>2018-04-11T05:10:19.811Z</updated>
+    
+    <content type="html"><![CDATA[<p>现在apk越来越大，原因有如下几个：<br>1.多dpi支持([l|m|tv|h|x|xx|xxx]dpi)<br>2.Android开发工具和生态系统的发展<br>3.为了提高用户体验的高分辨率ui设计<br>4.无用代码,重复类库的编译<br>随着项目的开发，项目体积不断增长，应用体积也变大了许多,会让很多用户会放弃安装，为了给apk瘦身,翻阅了大片文章,总结一下自己在开发中的经验</p>
+<p>我们从一下几个方面去解决:</p>
+<p>开发阶段代码优化:<br>优化查错瘦身神器之android lint<br>运行Proguard： proguard能够便利你所有的代码路径，把没有用到的代码重apk中剔除。并且能够重命名变量，尽量精简你的代码；<br>使用Lint： 上面的proguard只是分析Java代码。lint工具能够分析你资源文件（/res），使用./gradlew lint就能够检测出没有用的资源文件；</p>
+<p>什么是ProGuard工具？</p>
+<p>ProGuard是android提供的一个免费的工具，它能够移除工程中一些没用的代码，或者使用语义上隐晦的名称来重命名代码中的类、字段和函数等，达到压缩、优化和混淆代码的功能。具体来说，使用ProGuard工具，可以达到下面两个目的：<br>删除了源文件中没有调用的那部分代码，最大化的精简了字节码文件，使得最终生成的apk文件更小。<br>使用语义混淆的命名替换了代码中的类、字段和函数等，使得其他人无法反编译获取源代码，起到对代码的保护作用。</p>
+<p>add Library和add jars的区别?<br>在android项目中调用一些方法需要第三方的jar包，我们习惯做法是在android项目文件夹根目录下加一个lib文件并添加诸如.jar的文件，然后在右击该android项目，点属性(Properties),配置android,Java Build Path等。对于添加的jar文件，我们都是点 add External jars 或者 add jars，目前我还没发现两者的区别。<br>但是如果这样添加，会导致apk包增大至少2M以上，我用的办法是 添加add Library,选择User Library，如果有现成调用过的jar直接选择添加，如果没有则新建后添加，这样生成的apk比原来会减小很多。一般只有几百k左右。<br>使用webP图片格式：<br>只用一种图片xhdpi<br>只用一张xhdpi图片放到xhdpi目录时，所有的屏幕密度都能很好的适配， android系统会自动的对你的图片进行缩放， 不用为每个密度都切一版图片的， 经过实际验证我也发现确实是这样的， 于是我将hdpi下的所有和xhdpi目录有重复的图片全部删除掉。 这样下来应用就减少了将近2M ！<br>so库压缩<br>项目中使用了室内定位功能，，编译成so直接打包在apk里以jni方式调用。 我相信有不少应用对于注重性能或者功能复用的模块都使用了jni方式，带来的问题就是so经常成为apk体积膨胀的一大因素， 以这个室内定位库为例， so文件就有整整8MB。<br>为了适配armeabi和armeabi-v7a两种机型，这个库必须在libs/armeabi目录和libs/armeabi-v7a两个文件夹下各放一份。否则有可能在某种CPU类型的机器上运行出现初始化连接异常（因为找不到so库引起的）。<br>将so库使用zip压缩，可以压缩到50%~60%，然后 后只放一份到res/raw目录， 在代码里实现： 如果程序是第一次运行，则获取到raw下这个zip文件的输入流，然后将其解压到/data/data/com.xxx.xxx/lib_xxx目录， lib_xxx为你自己建的目录， 然后使用System.load加载库，而不要使用System.loadLibrary.， 这样指定路径加载肯定不会出现找不到so的问题。</p>
+<p>项目构建优化:<br>   参考我的Android studio gradle 配置文章中,构建项目的时候,只编译所用代码,自动移除无用资源.</p>
+<p>资源文件瘦身:<br>      图片资源的优化原则是：在不降低图片效果、保证APK显示效果的前提下缩小图片文件的大小。<br>使用tinypng优化大部分图片资源：<a href="https://tinypng.com/" target="_blank" rel="external">https://tinypng.com/</a></p>
+<p>未完待续……</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;现在apk越来越大，原因有如下几个：&lt;br&gt;1.多dpi支持([l|m|tv|h|x|xx|xxx]dpi)&lt;br&gt;2.Android开发工具和生态系统的发展&lt;br&gt;3.为了提高用户体验的高分辨率ui设计&lt;br&gt;4.无用代码,重复类库的编译&lt;br&gt;随着项目的开发，项目体积不
+    
+    </summary>
+    
+      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
+    
+    
+      <category term="优化" scheme="http://fushenghua.github.io/tags/%E4%BC%98%E5%8C%96/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Linux下安装Android Studio</title>
-    <link href="fushenghua.github.io/2015/09/11/2015-09-11-Linux%E5%AE%89%E8%A3%85Android%20Studio/"/>
-    <id>fushenghua.github.io/2015/09/11/2015-09-11-Linux安装Android Studio/</id>
+    <link href="http://fushenghua.github.io/2015/09/11/2015-09-11-Linux%E5%AE%89%E8%A3%85Android%20Studio/"/>
+    <id>http://fushenghua.github.io/2015/09/11/2015-09-11-Linux安装Android Studio/</id>
     <published>2015-09-11T03:23:32.000Z</published>
     <updated>2018-03-29T04:54:27.648Z</updated>
     
@@ -736,48 +767,17 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     
     </summary>
     
-      <category term="linux" scheme="fushenghua.github.io/categories/linux/"/>
+      <category term="linux" scheme="http://fushenghua.github.io/categories/linux/"/>
     
     
-      <category term="linux" scheme="fushenghua.github.io/tags/linux/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>给我们的apk应用瘦身计划</title>
-    <link href="fushenghua.github.io/2015/09/11/2015-09-11-%E7%BB%99%E6%88%91%E4%BB%AC%E7%9A%84apk%E5%BA%94%E7%94%A8%E7%98%A6%E8%BA%AB%E8%AE%A1%E5%88%92(%E4%B8%80)/"/>
-    <id>fushenghua.github.io/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/</id>
-    <published>2015-09-11T03:23:32.000Z</published>
-    <updated>2018-04-11T05:10:19.811Z</updated>
-    
-    <content type="html"><![CDATA[<p>现在apk越来越大，原因有如下几个：<br>1.多dpi支持([l|m|tv|h|x|xx|xxx]dpi)<br>2.Android开发工具和生态系统的发展<br>3.为了提高用户体验的高分辨率ui设计<br>4.无用代码,重复类库的编译<br>随着项目的开发，项目体积不断增长，应用体积也变大了许多,会让很多用户会放弃安装，为了给apk瘦身,翻阅了大片文章,总结一下自己在开发中的经验</p>
-<p>我们从一下几个方面去解决:</p>
-<p>开发阶段代码优化:<br>优化查错瘦身神器之android lint<br>运行Proguard： proguard能够便利你所有的代码路径，把没有用到的代码重apk中剔除。并且能够重命名变量，尽量精简你的代码；<br>使用Lint： 上面的proguard只是分析Java代码。lint工具能够分析你资源文件（/res），使用./gradlew lint就能够检测出没有用的资源文件；</p>
-<p>什么是ProGuard工具？</p>
-<p>ProGuard是android提供的一个免费的工具，它能够移除工程中一些没用的代码，或者使用语义上隐晦的名称来重命名代码中的类、字段和函数等，达到压缩、优化和混淆代码的功能。具体来说，使用ProGuard工具，可以达到下面两个目的：<br>删除了源文件中没有调用的那部分代码，最大化的精简了字节码文件，使得最终生成的apk文件更小。<br>使用语义混淆的命名替换了代码中的类、字段和函数等，使得其他人无法反编译获取源代码，起到对代码的保护作用。</p>
-<p>add Library和add jars的区别?<br>在android项目中调用一些方法需要第三方的jar包，我们习惯做法是在android项目文件夹根目录下加一个lib文件并添加诸如.jar的文件，然后在右击该android项目，点属性(Properties),配置android,Java Build Path等。对于添加的jar文件，我们都是点 add External jars 或者 add jars，目前我还没发现两者的区别。<br>但是如果这样添加，会导致apk包增大至少2M以上，我用的办法是 添加add Library,选择User Library，如果有现成调用过的jar直接选择添加，如果没有则新建后添加，这样生成的apk比原来会减小很多。一般只有几百k左右。<br>使用webP图片格式：<br>只用一种图片xhdpi<br>只用一张xhdpi图片放到xhdpi目录时，所有的屏幕密度都能很好的适配， android系统会自动的对你的图片进行缩放， 不用为每个密度都切一版图片的， 经过实际验证我也发现确实是这样的， 于是我将hdpi下的所有和xhdpi目录有重复的图片全部删除掉。 这样下来应用就减少了将近2M ！<br>so库压缩<br>项目中使用了室内定位功能，，编译成so直接打包在apk里以jni方式调用。 我相信有不少应用对于注重性能或者功能复用的模块都使用了jni方式，带来的问题就是so经常成为apk体积膨胀的一大因素， 以这个室内定位库为例， so文件就有整整8MB。<br>为了适配armeabi和armeabi-v7a两种机型，这个库必须在libs/armeabi目录和libs/armeabi-v7a两个文件夹下各放一份。否则有可能在某种CPU类型的机器上运行出现初始化连接异常（因为找不到so库引起的）。<br>将so库使用zip压缩，可以压缩到50%~60%，然后 后只放一份到res/raw目录， 在代码里实现： 如果程序是第一次运行，则获取到raw下这个zip文件的输入流，然后将其解压到/data/data/com.xxx.xxx/lib_xxx目录， lib_xxx为你自己建的目录， 然后使用System.load加载库，而不要使用System.loadLibrary.， 这样指定路径加载肯定不会出现找不到so的问题。</p>
-<p>项目构建优化:<br>   参考我的Android studio gradle 配置文章中,构建项目的时候,只编译所用代码,自动移除无用资源.</p>
-<p>资源文件瘦身:<br>      图片资源的优化原则是：在不降低图片效果、保证APK显示效果的前提下缩小图片文件的大小。<br>使用tinypng优化大部分图片资源：<a href="https://tinypng.com/" target="_blank" rel="external">https://tinypng.com/</a></p>
-<p>未完待续……</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;现在apk越来越大，原因有如下几个：&lt;br&gt;1.多dpi支持([l|m|tv|h|x|xx|xxx]dpi)&lt;br&gt;2.Android开发工具和生态系统的发展&lt;br&gt;3.为了提高用户体验的高分辨率ui设计&lt;br&gt;4.无用代码,重复类库的编译&lt;br&gt;随着项目的开发，项目体积不
-    
-    </summary>
-    
-      <category term="android" scheme="fushenghua.github.io/categories/android/"/>
-    
-    
-      <category term="优化" scheme="fushenghua.github.io/tags/%E4%BC%98%E5%8C%96/"/>
+      <category term="linux" scheme="http://fushenghua.github.io/tags/linux/"/>
     
   </entry>
   
   <entry>
     <title>用Android Studio Gradle 构建、打包、发布项目</title>
-    <link href="fushenghua.github.io/2015/08/12/2015-08-11-%E7%94%A8Android%20Studio%20Gradle%20%E6%9E%84%E5%BB%BA%E3%80%81%E6%89%93%E5%8C%85%E3%80%81%E5%8F%91%E5%B8%83%E9%A1%B9%E7%9B%AE/"/>
-    <id>fushenghua.github.io/2015/08/12/2015-08-11-用Android Studio Gradle 构建、打包、发布项目/</id>
+    <link href="http://fushenghua.github.io/2015/08/12/2015-08-11-%E7%94%A8Android%20Studio%20Gradle%20%E6%9E%84%E5%BB%BA%E3%80%81%E6%89%93%E5%8C%85%E3%80%81%E5%8F%91%E5%B8%83%E9%A1%B9%E7%9B%AE/"/>
+    <id>http://fushenghua.github.io/2015/08/12/2015-08-11-用Android Studio Gradle 构建、打包、发布项目/</id>
     <published>2015-08-12T03:23:32.000Z</published>
     <updated>2018-04-10T07:45:57.212Z</updated>
     
@@ -798,15 +798,15 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     
     </summary>
     
-      <category term="android" scheme="fushenghua.github.io/categories/android/"/>
+      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
     
     
   </entry>
   
   <entry>
     <title>深入理解Handler原理</title>
-    <link href="fushenghua.github.io/2015/07/13/2015-07-13-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Handler%E5%8E%9F%E7%90%86/"/>
-    <id>fushenghua.github.io/2015/07/13/2015-07-13-深入理解Handler原理/</id>
+    <link href="http://fushenghua.github.io/2015/07/13/2015-07-13-%E6%B7%B1%E5%85%A5%E7%90%86%E8%A7%A3Handler%E5%8E%9F%E7%90%86/"/>
+    <id>http://fushenghua.github.io/2015/07/13/2015-07-13-深入理解Handler原理/</id>
     <published>2015-07-13T04:23:32.000Z</published>
     <updated>2018-04-10T07:46:18.550Z</updated>
     
@@ -839,10 +839,10 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     
     </summary>
     
-      <category term="android" scheme="fushenghua.github.io/categories/android/"/>
+      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
     
     
-      <category term="android" scheme="fushenghua.github.io/tags/android/"/>
+      <category term="android" scheme="http://fushenghua.github.io/tags/android/"/>
     
   </entry>
   

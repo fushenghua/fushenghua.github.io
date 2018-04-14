@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://fushenghua.github.io/"/>
-  <updated>2018-04-11T05:10:30.518Z</updated>
+  <updated>2018-04-14T06:59:49.015Z</updated>
   <id>http://fushenghua.github.io/</id>
   
   <author>
@@ -14,6 +14,69 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>在Pypi上发布自己的Python包</title>
+    <link href="http://fushenghua.github.io/2018/04/09/%E5%9C%A8Pypi%E4%B8%8A%E5%8F%91%E5%B8%83%E8%87%AA%E5%B7%B1%E7%9A%84Python%E5%8C%85/"/>
+    <id>http://fushenghua.github.io/2018/04/09/在Pypi上发布自己的Python包/</id>
+    <published>2018-04-09T07:39:39.000Z</published>
+    <updated>2018-04-14T06:59:49.015Z</updated>
+    
+    <content type="html"><![CDATA[<p>使用Python编程的都知道，Python的包安装非常的方便，一般都是可以<strong>pip</strong>来安装搞定：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">sudo pip <span class="keyword">install</span></div></pre></td></tr></table></figure>
+<p>pip的安装请移步：<a href="https://pip.pypa.io/en/stable/installing/" target="_blank" rel="external">https://pip.pypa.io/en/stable/installing/</a></p>
+<p>在<a href="https://github.com/fushenghua/gitbook-plugin-summary" target="_blank" rel="external">gitbook-plugin-summary</a> 需要，发布了一个自己的pypi Python包，这里我大致分享如何发布自己的Pypi包一般过程。</p>
+<p>打包工作主要依赖python的一个叫setuptools的包来完成，在进行下面操作前请使用pip安装它：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo pip <span class="keyword">install</span> setuptools</div></pre></td></tr></table></figure>
+<h2 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h2><ul>
+<li>注册</li>
+</ul>
+<p><a href="https://pypi.python.org/pypi" target="_blank" rel="external">https://pypi.python.org/pypi</a>注册自己的用户, 点击“Register”，填写自己的用户名，密码，邮件地址后，就成功了，我是直接用Google 账户。</p>
+<p><img src="/images/15236887893053.jpg" alt=""></p>
+<p>记住自己的用户名和密码，后面上传的时候要输入的</p>
+<h3 id="准备setup-py-setup-conf文件，它是放在你包的根目录的，这一步至关重要，包括要发布的包名字，版本，license，描述，特性（classifier-等等，下面是我自己包的一个setup-py文件的内容，基本上只需要在这个上面修改就行了，具体如下："><a href="#准备setup-py-setup-conf文件，它是放在你包的根目录的，这一步至关重要，包括要发布的包名字，版本，license，描述，特性（classifier-等等，下面是我自己包的一个setup-py文件的内容，基本上只需要在这个上面修改就行了，具体如下：" class="headerlink" title="准备setup.py/setup.conf文件，它是放在你包的根目录的，这一步至关重要，包括要发布的包名字，版本，license，描述，特性（classifier)等等，下面是我自己包的一个setup.py文件的内容，基本上只需要在这个上面修改就行了，具体如下："></a>准备setup.py/setup.conf文件，它是放在你包的根目录的，这一步至关重要，包括要发布的包名字，版本，license，描述，特性（classifier)等等，下面是我自己包的一个setup.py文件的内容，基本上只需要在这个上面修改就行了，具体如下：</h3><figure class="highlight arduino"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">!/usr/bin/env python <span class="meta"># coding=utf-8</span></div><div class="line"></div><div class="line">from setuptools <span class="keyword">import</span> <span class="built_in">setup</span>, find_packages</div><div class="line"></div><div class="line"><span class="built_in">setup</span>(</div><div class="line">    name=<span class="string">''</span>,</div><div class="line">    version=,</div><div class="line">    description=( <span class="string">''</span> ),</div><div class="line">    long_description=<span class="built_in">open</span>(<span class="string">'README.rst'</span>).<span class="built_in">read</span>(),</div><div class="line">    author=<span class="string">''</span>,</div><div class="line">    author_email=<span class="string">''</span>,</div><div class="line">    maintainer=<span class="string">''</span>,</div><div class="line">    maintainer_email=<span class="string">''</span>,</div><div class="line">    license=<span class="string">'BSD License'</span>,</div><div class="line">    packages=find_packages(),</div><div class="line">    platforms=[<span class="string">"all"</span>],</div><div class="line">    url=<span class="string">''</span>,</div><div class="line">    classifiers=[ <span class="string">'Development Status :: 4 - Beta'</span>, <span class="string">'Operating System :: OS Independent'</span>, <span class="string">'Intended Audience :: Developers'</span>, <span class="string">'License :: OSI Approved :: BSD License'</span>, <span class="string">'Programming Language :: Python'</span>, <span class="string">'Programming Language :: Python :: Implementation'</span>, <span class="string">'Programming Language :: Python :: 2'</span>, <span class="string">'Programming Language :: Python :: 2.7'</span>, <span class="string">'Programming Language :: Python :: 3'</span>, <span class="string">'Programming Language :: Python :: 3.4'</span>, <span class="string">'Programming Language :: Python :: 3.5'</span>, <span class="string">'Programming Language :: Python :: 3.6'</span>, <span class="string">'Topic :: Software Development :: Libraries'</span> ],</div><div class="line">)</div></pre></td></tr></table></figure>
+<p>需要注意的上面的字段：</p>
+<ul>
+<li><strong>version</strong> - 这个简单，就是包的发布的版本，可以直接写在这，也可以从其他地方引用过来。</li>
+<li><strong>long_description</strong> - 必须是rst（reStructuredText )格式的，因为这个里面的内容是显示在pypi包首页上，具体rst的语法可以参考：<a href="http://rest-sphinx-memo.readthedocs.io/en/latest/ReST.html" target="_blank" rel="external">http://rest-sphinx-memo.readthedocs.io/en/latest/ReST.html</a></li>
+</ul>
+<p>　　　我的long_description是同目录下的README.rst的内容，同时这个README也是我的github项目首页。</p>
+<ul>
+<li><strong>packages</strong> - 申明你的包里面要包含的目录，比如  [‘mypackage’, ‘mypackage_test’]  可以是这种使用我的示例，让setuptools自动决定要包含哪些包</li>
+<li><strong>install_requires</strong> - 申明依赖包，安装包时pip会自动安装：格式如下（我上面的setup.py没有这个参数，因为我不依赖第三方包:)）：</li>
+</ul>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attr">install_requires</span>=[ <span class="string">'Twisted&gt;=13.1.0'</span>, <span class="string">'w3lib&gt;=1.17.0'</span>, <span class="string">'queuelib'</span>, <span class="string">'lxml'</span>, <span class="string">'pyOpenSSL'</span>, <span class="string">'cssselect&gt;=0.9'</span>, <span class="string">'six&gt;=1.5.2'</span>, <span class="string">'parsel&gt;=1.1'</span>, <span class="string">'PyDispatcher&gt;=2.0.5'</span>, <span class="string">'service_identity'</span>,]</div></pre></td></tr></table></figure>
+<h3 id="准备requirements-txt-和-test-requirements-txt，这个申明包的依赖包和跑自动化测试的测试依赖包，具体格式示例如下："><a href="#准备requirements-txt-和-test-requirements-txt，这个申明包的依赖包和跑自动化测试的测试依赖包，具体格式示例如下：" class="headerlink" title="准备requirements.txt 和 test-requirements.txt，这个申明包的依赖包和跑自动化测试的测试依赖包，具体格式示例如下："></a>准备requirements.txt 和 test-requirements.txt，这个申明包的依赖包和跑自动化测试的测试依赖包，具体格式示例如下：</h3><figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">mock&gt;=<span class="number">2.0</span><span class="number">.0</span></div><div class="line">flake8&gt;=<span class="number">3.2</span><span class="number">.1</span> eventlet&gt;=<span class="number">0.19</span><span class="number">.0</span></div><div class="line">nose2&gt;=<span class="number">0.6</span><span class="number">.5</span> cov_core&gt;=<span class="number">1.15</span><span class="number">.0</span></div><div class="line">virtualenv&gt;=<span class="number">15.1</span><span class="number">.0</span></div></pre></td></tr></table></figure>
+<p>以上是我的test-requirements.txt的内容，requirements.txt的格式个上面一样。</p>
+<p><strong>准备这个两个文件不是必须的。</strong></p>
+<p>但是，有了它们，用户可以自己手动安装依赖包</p>
+<figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">`<span class="javascript">pip&lt;span&gt; <span class="xml"><span class="tag">&lt;/<span class="name">span</span>&gt;</span></span></span>``<span class="javascript">install</span>` `<span class="javascript">-r requirements.txt</span>`</div></pre></td></tr></table></figure>
+<p>有了它们，结合tox等工具，可以非常方便的加入自动化测试。　</p>
+<h3 id="准备一个项目的README-rst文件-前面也提到了它的格式要求，第一次发包，可以直接copy别人的格式，这东西熟能生巧，多写就会了。"><a href="#准备一个项目的README-rst文件-前面也提到了它的格式要求，第一次发包，可以直接copy别人的格式，这东西熟能生巧，多写就会了。" class="headerlink" title="准备一个项目的README.rst文件,前面也提到了它的格式要求，第一次发包，可以直接copy别人的格式，这东西熟能生巧，多写就会了。"></a>准备一个项目的README.rst文件,前面也提到了它的格式要求，第一次发包，可以直接copy别人的格式，这东西熟能生巧，多写就会了。</h3><p>README的截图就不放了，以免广告嫌疑。有兴趣可以到参考<a href="http://rest-sphinx-memo.readthedocs.io/en/latest/ReST.html" target="_blank" rel="external">http://rest-sphinx-memo.readthedocs.io/en/latest/ReST.html</a></p>
+<h3 id="准备好上面的步骤，一个包就基本完整了，剩下的就是打包了-cd到包的根目录-："><a href="#准备好上面的步骤，一个包就基本完整了，剩下的就是打包了-cd到包的根目录-：" class="headerlink" title="准备好上面的步骤，一个包就基本完整了，剩下的就是打包了(cd到包的根目录)："></a>准备好上面的步骤，一个包就基本完整了，剩下的就是打包了(cd到包的根目录)：</h3><p>可以使用下面命令打包一个源代码的包:</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python setup<span class="selector-class">.py</span> sdist build</div></pre></td></tr></table></figure>
+<p>这样在当前目录的dist文件夹下，就会多出一个以tar.gz结尾的包了：</p>
+<p>也可以打包一个wheels格式的包，使用下面的命令搞定：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python setup<span class="selector-class">.py</span> bdist_wheel --universal</div></pre></td></tr></table></figure>
+<p>这样会在dist文件夹下生成一个whl文件，</p>
+<h3 id="上传生成的包，可以使用setuptools-或者twine上传-推荐使用twine上次，因为使用setuptools上传时，你的用户名和密码是明文或者未加密传输，安全起见还是使用twine吧"><a href="#上传生成的包，可以使用setuptools-或者twine上传-推荐使用twine上次，因为使用setuptools上传时，你的用户名和密码是明文或者未加密传输，安全起见还是使用twine吧" class="headerlink" title="上传生成的包，可以使用setuptools,或者twine上传,推荐使用twine上次，因为使用setuptools上传时，你的用户名和密码是明文或者未加密传输，安全起见还是使用twine吧"></a>上传生成的包，可以使用setuptools,或者twine上传,推荐使用twine上次，因为使用setuptools上传时，你的用户名和密码是明文或者未加密传输，安全起见还是使用twine吧</h3><h1 id="上传source-包"><a href="#上传source-包" class="headerlink" title="上传source 包"></a>上传source 包</h1><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python setup<span class="selector-class">.py</span> sdist upload</div></pre></td></tr></table></figure>
+<h1 id="上传pre-compiled包"><a href="#上传pre-compiled包" class="headerlink" title="上传pre-compiled包"></a>上传pre-compiled包</h1><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python setup<span class="selector-class">.py</span> bdist_wheel upload</div></pre></td></tr></table></figure>
+<p>使用twine上传,先安装twine</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">sudo pip <span class="keyword">install</span> twine</div><div class="line"></div><div class="line">twine upload dist/*</div></pre></td></tr></table></figure>
+<p>上次前都会提示你前面注册的用户名和密码。一切搞定，你的包现在可以通过pip在任何地方安装了。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;使用Python编程的都知道，Python的包安装非常的方便，一般都是可以&lt;strong&gt;pip&lt;/strong&gt;来安装搞定：&lt;/p&gt;
+&lt;figure class=&quot;highlight cmake&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;d
+    
+    </summary>
+    
+      <category term="python" scheme="http://fushenghua.github.io/categories/python/"/>
+    
+    
+  </entry>
   
   <entry>
     <title>为什么说枚举更占内存，枚举原理是什么？</title>
@@ -81,6 +144,123 @@
     </summary>
     
       <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>版本管理发布流程</title>
+    <link href="http://fushenghua.github.io/2016/06/07/%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86%E5%8F%91%E5%B8%83%E6%B5%81%E7%A8%8B/"/>
+    <id>http://fushenghua.github.io/2016/06/07/版本管理发布流程/</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-10T07:45:28.309Z</updated>
+    
+    <content type="html"><![CDATA[<p>为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。</p>
+<h3 id="版本命名规范"><a href="#版本命名规范" class="headerlink" title="版本命名规范"></a>版本命名规范</h3><p>软件版本号由四部分组成，第一个1为主版本号，第二个1为子版本号，第三个1为阶段版本号，第四部分为日期版本号加希腊字母版本号，希腊字母版本号共有5种，分别为：base、alpha、beta、RC、release。例如：1.1.1.051021_beta。</p>
+<h4 id="版本号修改规则"><a href="#版本号修改规则" class="headerlink" title="版本号修改规则"></a>版本号修改规则</h4><p>⑴ 主版本号(1)<br>当功能模块有较大的变动，比如增加多个模块或者整体架构发生变化。此版本号由项目决定是否修改。<br>⑵ 子版本号(1)<br>相对于主版本号而言，子版本号升级对应的是软件功能有一定的增加或变化，比如增加了对权限控制、增加自定义视图等功能。此版本号由项目决定是否修改。<br>⑶ 阶段版本号(1)<br>一般是 Bug 修复或是一些小的变动，要经常发布修订版，时间间隔不限，修复一个严重的bug即可发布一个修订版。此版本号由项目经理决定是否修改。<br>⑷ 日期版本号(051021)<br>用于记录修改项目的当前日期，每天对项目的修改都需要更改日期版本号。此版本号由开发人员决定是否修改。<br>⑸ 希腊字母版本号(beta)<br>此版本号用于标注当前版本的软件处于哪个开发阶段，当软件进入到另一个阶段时需要修改此版本号。此版本号由项目决定是否修改。</p>
+<h4 id="软件版本阶段说明"><a href="#软件版本阶段说明" class="headerlink" title="软件版本阶段说明"></a>软件版本阶段说明</h4><p>⑴ Base：<br>此版本表示该软件仅仅是一个假页面链接，通常包括所有的功能和页面布局，但是页面中的功能都没有做完整的实现，只是做为整体网站的一个基础架构。<br>⑵ α（Alpha）版：内测版。<br>软件的初级版本，表示该软件在此阶段以实现软件功能为主，通常只在软件开发者 内部交流，或者专业测试人员测试用，一般而言，该版本软件的Bug较多，需要继续修改，是测试版本。测试人员提交Bug经开发人员修改确认之后，发布到测试网址让测试人员测试，此时可将软件版本标注为alpha版。<br>⑶ β（Beta）版：公测版。<br>该版本相对于α版已有了很大的改进，消除了严重的错误，但还是存在着一些缺陷，需要经过多次测试来进一步消除，此版本主要的修改对像是软件的UI，供专业爱好者大规模测试用。<br>⑷ RC 版：<br>是 Release Candidate 的缩写，意思是发布倒计时，候选版本，该版本已经相当成熟了，完成全部功能并清除大部分的BUG，基本上不存在导致错误的BUG，与即将发行的正式版相差无几。<br>⑷ Release 版：<br>该版本意味“最终版本”，在前面版本的一系列测试版之后，终归会有一个正式版本，是最终交付用户使用的一个版本。该版本有时也称为标准版。一般情况下，Release不会以单词形式出现在软件封面上，取而代之的是符号(R)。</p>
+<h4 id="版本号修改举例说明"><a href="#版本号修改举例说明" class="headerlink" title="版本号修改举例说明"></a>版本号修改举例说明</h4><p>比如版本号为：1.0.0.0321_alpha ，此时为内部测试阶段<br>⑴ 开发人员修复了测试人员提交的bug并经测试人员测试验证关闭bug之后，发布到外网时，此时就进入了软件的下一个阶段，版本号可改为：1.0.0.0321_beta ，如当前日期跟上一个版本号的日期不一样，版本号可改为：1.0.0.0322_beta。<br>⑵ 如果修复了一些重大Bug 并按照流程发布到外网时就可发布一个修订版，如1.0.1.0322_beta，日期为发布的当前日期。<br>⑶ 如果对软件进行了一些功能上的改进或增强，进行了一些局部变动的时候要修改次版本号，如：1.1.0.0322_beta（上一级有变动时，下级要归零）。<br>⑷ 当功能模块有较大变动，增加模块或整体架构发生变化时要修改主版本号，如新增加了退款功能，则版本号要改为：2.0.0.0322_beta 。<br>⑸ 紧急情况：如果bug比较紧急可跳过一般流程，由开发人员尽快修复bug，测试确认之后直接发布该版本的beta版。</p>
+<h4 id="APK-文件命名"><a href="#APK-文件命名" class="headerlink" title="APK 文件命名"></a>APK 文件命名</h4><p>appName_版本号，即中间用“下划线”分割。</p>
+<h2 id="持续集成流程"><a href="#持续集成流程" class="headerlink" title="持续集成流程"></a>持续集成流程</h2><p>引用自百科的话来说，持续集成是一种软件开发实践，即团队开发成员经常集成它们的工作，通过每个成员每天至少集成一次，也就意味着每天可能会发生多次集成。每次集成都通过自动化的构建（包括编译，发布，自动化测试）来验证，从而尽早地发现集成错误。</p>
+<h2 id="项目自动化流程"><a href="#项目自动化流程" class="headerlink" title="项目自动化流程"></a>项目自动化流程</h2><p>在没有自动化的开发过程中，很多事就需要我们人为去做，那就增长我们的时间成本，而且难免会有疏忽的一些问题，比如某个配置文件忘改了，哪个版本出问题，代码的集成，重复构建等一些耗时且易于犯错的问题。</p>
+<p>于是我们引入一些自动化的Java构建工具：</p>
+<h3 id="Apache-Ant"><a href="#Apache-Ant" class="headerlink" title="Apache Ant"></a>Apache Ant</h3><p>Apache Ant，是一个将软件编译、测试、部署等步骤联系在一起加以自动化的一个工具，大多用于Java环境中的软件开发。由Apache软件基金会所提供。默认情况下，它的buildfile(XML文件)名为build.xml。每一个buildfile含有一个<project>和至少一个预设的<target>，这些targets包含许多task elements。每一个task element有一个用来被参考的id，此id必须是唯一的</target></project></p>
+<p>build.xml 示例：<br><figure class="highlight plain"><figcaption><span>version="1.0" ?> </span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;project name=&quot;Hello World&quot; default=&quot;execute&quot;&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;init&quot;&gt;</div><div class="line">		&lt;mkdir dir=&quot;build/classes&quot;/&gt;</div><div class="line">		&lt;mkdir dir=&quot;dist&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	&lt;target name=&quot;compile&quot; depends=&quot;init&quot;&gt;</div><div class="line">		&lt;javac srcdir=&quot;src&quot; destdir=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	</div><div class="line">	&lt;target name=&quot;compress&quot; depends=&quot;compile&quot;&gt;</div><div class="line">	        &lt;jar destfile=&quot;dist/HelloWorld.jar&quot; basedir=&quot;build/classes&quot;  /&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;execute&quot; depends=&quot;compile&quot;&gt;</div><div class="line">		&lt;java classname=&quot;HelloWorld&quot; classpath=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure></p>
+<h3 id="Apache-Maven"><a href="#Apache-Maven" class="headerlink" title="Apache Maven"></a>Apache Maven</h3><p>Apache Maven，是一个软件（特别是Java软件）项目管理及自动构建工具，由Apache软件基金会所提供。基于项目对象模型（缩写：POM）概念，Maven利用一个中央信息片断能管理一个项目的构建、报告和文档等步骤。<br>Maven也可被用于构建和管理各种项目，例如C#，Ruby，Scala和其他语言编写的项目。Maven曾是Jakarta项目的子项目，现为由Apache软件基金会主持的独立Apache项目</p>
+<p>Maven项目使用项目对象模型（Project Object Model，POM）来配置。<br>项目对象模型存储在名为 pom.xml 的文件中。<br>以下是一个简单的示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">  &lt;!-- model version is always 4.0.0 for Maven 2.x POMs --&gt;</div><div class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</div><div class="line">  </div><div class="line">  &lt;!-- project coordinates, i.e. a group of values which</div><div class="line">       uniquely identify this project --&gt;</div><div class="line">  </div><div class="line">  &lt;groupId&gt;com.mycompany.app&lt;/groupId&gt;</div><div class="line">  &lt;artifactId&gt;my-app&lt;/artifactId&gt;</div><div class="line">  &lt;version&gt;1.0&lt;/version&gt;</div><div class="line"></div><div class="line">  &lt;!-- library dependencies --&gt;</div><div class="line">  </div><div class="line">  &lt;dependencies&gt;</div><div class="line">    &lt;dependency&gt;</div><div class="line">    </div><div class="line">      &lt;!-- coordinates of the required library --&gt;</div><div class="line">      </div><div class="line">      &lt;groupId&gt;junit&lt;/groupId&gt;</div><div class="line">      &lt;artifactId&gt;junit&lt;/artifactId&gt;</div><div class="line">      &lt;version&gt;3.8.1&lt;/version&gt;</div><div class="line">      </div><div class="line">      &lt;!-- this dependency is only used for running and compiling tests --&gt;</div><div class="line">      </div><div class="line">      &lt;scope&gt;test&lt;/scope&gt;</div><div class="line">      </div><div class="line">    &lt;/dependency&gt;</div><div class="line">  &lt;/dependencies&gt;</div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure>
+<p>引自<a href="https://zh.wikipedia.org/wiki/Apache_Maven介绍" target="_blank" rel="external">https://zh.wikipedia.org/wiki/Apache_Maven介绍</a></p>
+<p>目前JavaEE使用Apache_Maven的比较多，而我们选择了Android Studio 内置的封装布署工具，拥有以上工具中优秀特性并且更棒的工具Gradle。</p>
+<h3 id="Gradle"><a href="#Gradle" class="headerlink" title="Gradle"></a>Gradle</h3><p>Gradle是一个基于Apache Ant和Apache Maven概念的项目自动化建构工具。它使用一种基于Groovy的特定领域语言来声明项目设置，而不是传统的XML。[2]<br>当前其支持的语言限于Java、Groovy和Scala[3]，计划未来将支持更多的语言。</p>
+<h4 id="使用-Gradle-的优势"><a href="#使用-Gradle-的优势" class="headerlink" title="使用 Gradle 的优势"></a>使用 Gradle 的优势</h4><pre><code>•    自动处理包相依关系 - 取自 Maven Repos 的概念
+•    自动处理布署问题 - 取自 Ant 的概念
+•    条件判断写法直觉 - 使用 Groovy 语言
+</code></pre><p>过去 Java 开发者常用 Maven 和 Ant 等工具进行封装布署的自动化，或是两者兼用，不过这两个包彼此有优缺点，如果频繁改变相依包版本，使用 Ant 相当麻烦，如果琐碎工作很多，Maven 功能不足，而且两者都使用 XML 描述，相当不利于设计 if、switch 等判段式，即使写了可读性也不佳，而 Gradle 改良了过去 Maven、Ant 带给开发者的问题，至今也成为 Android Studio 内置的封装布署工具。</p>
+<h2 id="代码检测流程"><a href="#代码检测流程" class="headerlink" title="代码检测流程"></a>代码检测流程</h2><p>在我们日常开发过程中，使用静态代码检查工具自动进行代码检查，对软件开发者来讲是有利的事情，因为这些工具相比人工方式，能更快捷的查找软件存在的缺陷。但是，在很多情况下，这些工具并没用被开发者所广泛采用。</p>
+<p>尽管在我们开发中编译和测试的结果给出了一些产品健康状态的基本报告，但没有提供代码质量的基本报告，也没有任何地方可以查看到我们开发代码质量，产品质量的趋势，来帮助我们发现问题提升产品质量，我们公司内部构建平台会对代码质量，产品质量做一些分析，来推进产品的前进。</p>
+<h3 id="代码覆盖率"><a href="#代码覆盖率" class="headerlink" title="代码覆盖率"></a>代码覆盖率</h3><p>在Java中有很多免费和商业的代码覆盖率工具，大多数这些工具都可以集成在我们的构建平台上。这里我们列举几个Gradle比较流行的代码覆盖率工具。</p>
+<h4 id="Cobertura"><a href="#Cobertura" class="headerlink" title="Cobertura"></a>Cobertura</h4><p><a href="http://cobertura.sourceforge.net/" target="_blank" rel="external">Cobertura</a> 是一种开源工具，它通过检测基本的代码，并观察在测试包运行时执行了哪些代码和没有执行哪些代码，来测量测试覆盖率。除了找出未测试到的代码并发现 bug 外，Cobertura 还可以通过标记无用的、执行不到的代码来优化代码。</p>
+<h4 id="Emma"><a href="#Emma" class="headerlink" title="Emma"></a>Emma</h4><p><a href="http://emma.sourceforge.net/" target="_blank" rel="external">EMMA</a> 是一个开源、面向 Java 程序测试覆盖率收集和报告工具。它通过对编译后的 Java 字节码文件进行插装，在测试执行过程中收集覆盖率信息，并通过支持多种报表格式对覆盖率结果进行展示。 EMMA 所使用的字节码插装不仅保证 EMMA 不会给源代码带来“脏代码”，还确保 EMMA 摆脱了源代码的束缚，这一特点使 EMMA 应用于功能测试成为了可能。</p>
+<h4 id="Clover"><a href="#Clover" class="headerlink" title="Clover"></a>Clover</h4><p><a href="https://www.atlassian.com/software/clover" target="_blank" rel="external">Clover</a>是一款量度单元测试代码覆盖率（Code Coverage）的软件，用于检测Java单元测试是否完整覆盖代码中所有可能的路径，能够快速、准确地检测测试是否覆盖代码中的所有路径。</p>
+<p>团队成员通过Code review来发现架构、逻辑设计方面、安全缺漏和一些潜在的bug，但随着项目业务的增长，Code review的过程难免也会疏忽很多潜在的bug等问题。</p>
+<p>在我们工作中还有一些静态代码检查工具如<a href="http://checkstyle.sourceforge.net/" target="_blank" rel="external">Checkstyle</a>、<a href="http://findbugs.sourceforge.net/" target="_blank" rel="external">Findbugs</a>、<a href="http://pmd.sourceforge.net/" target="_blank" rel="external">PMD</a>等，将他们集成在我们的构建平台上，并成为我们构建流程中的一步骤。</p>
+<h2 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h2><p>对于开发流程，在不同的项目团队中，开发流程不太一样，但大致可为：<br>每天下班前RD必须把今天工作代码全部提交到Git上。</p>
+<p>####</p>
+<ul>
+<li>使用Jenkins CI ，每天定期会从Git上拉去最新代码，自定编译构建生成APK发出邮件，二维码等到产品维护人员的邮箱，并且将应用更新至公司内测分发平台。</li>
+<li>编译构建成功，进行自动化测试、单元测试覆盖率（Cobertura、Emma或Clover等生成）、功能测试结果（如Selenium）、静态代码检查结果（Checkstyle、Findbugs、PMD等）</li>
+<li>测试人员对产品进行test，测试中若有紧急问题也可以让开发人员可以随时修改提交代码。并且立即重新构建测试安装包。</li>
+</ul>
+<h2 id="打包和发布流程"><a href="#打包和发布流程" class="headerlink" title="打包和发布流程"></a>打包和发布流程</h2><p>以上版本管理发布流程只是参考指南，而不是具体规则。你可以根据自己实际情况来选择适合自己的版本管理发布流程或微调来满足自己的需要。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。&lt;/p&gt;
+&lt;h3 id=&quot;版本命名规范&quot;&gt;&lt;a href=&quot;#版本命名
+    
+    </summary>
+    
+      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>优化Gradle 依赖使用方式</title>
+    <link href="http://fushenghua.github.io/2016/06/07/%E4%BC%98%E5%8C%96Gradle%20%E4%BE%9D%E8%B5%96%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F/"/>
+    <id>http://fushenghua.github.io/2016/06/07/优化Gradle 依赖使用方式/</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-10T07:47:19.986Z</updated>
+    
+    <content type="html"><![CDATA[<p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p>
+<blockquote>
+<p><a href="http://stash.lab.tclclouds.com/projects/CLEAN/repos/cleaner_module/commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318" target="_blank" rel="external">commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318</a></p>
+</blockquote>
+<p>现在仍有些问题,比如 <strong>SpaceBase</strong> 依赖了 <strong>VirusEngine</strong> 等问题。</p>
+<h3 id="全新的依赖方式"><a href="#全新的依赖方式" class="headerlink" title="全新的依赖方式"></a>全新的依赖方式</h3><h4 id="需要那个开那个"><a href="#需要那个开那个" class="headerlink" title="需要那个开那个"></a>需要那个开那个</h4><p>修改项目中 <code>module.properties</code> 的配置, <code>true</code> 代表以<code>Project</code> 方式引入,反之则是<code>aar</code>方式,<strong>该配置已被忽略,只对当前工程配置有效。</strong></p>
+<p>如果你确实想提交修改,请使用 <code>git add -f module.properties</code> 命令强制添加。</p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="params">...</span></div><div class="line">isBoostengineDebug=<span class="literal">false</span></div><div class="line">isAppmgrDebug=<span class="literal">false</span></div><div class="line">isCpuDebug=<span class="literal">false</span></div><div class="line">isNotifyboxDebug=<span class="literal">false</span></div><div class="line">isHardwareDebug=<span class="literal">false</span></div><div class="line">isAntivirusDebug=<span class="literal">false</span></div><div class="line">isJunkDebug=<span class="literal">false</span></div><div class="line">isAllDebug=<span class="literal">false</span><span class="comment">// 全部 Debug，即编译Project模式</span></div></pre></td></tr></table></figure>
+<h4 id="添加新的模块依赖"><a href="#添加新的模块依赖" class="headerlink" title="添加新的模块依赖"></a>添加新的模块依赖</h4><p>如果你需要添加新的模块依赖,请按照以下方法,在 <code>module.gradle</code> 脚本中新增 <code>compile_*</code> 方法,如下:</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">def</span> compile_junk(<span class="keyword">Project</span> projectModule)&#123;</div><div class="line">    projectModule.<span class="keyword">dependencies</span>&#123;</div><div class="line">        <span class="keyword">if</span> (isAllDebug.toBoolean() || isJunkDebug.toBoolean()) &#123;</div><div class="line">            <span class="keyword">compile</span> <span class="keyword">project</span>(<span class="string">':junk'</span>)</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">compile</span>(name: <span class="string">'junk'</span>, ext: <span class="string">'aar'</span>)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后通过闭包形式传递出去,在 <code>module.gradle</code> 脚本中有<code>ext</code> 扩展属性 ，添加如下：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class">ext </span>&#123;</div><div class="line">  compile_junk = this.<span class="variable">&amp;compile_junk</span>  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最终通过以下方式使用</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compile_junk(<span class="name">getProject</span>())</div></pre></td></tr></table></figure>
+<h3 id="模块公用的Libs库"><a href="#模块公用的Libs库" class="headerlink" title="模块公用的Libs库"></a>模块公用的Libs库</h3><p>在工程目录的顶级 <code>libs</code> 文件夹中存放着各个模块的 <code>aar</code> ,如果需要更新,可以通过脚本进行<br>全量更新,或者各模块部分更新。</p>
+<h3 id="更新AAR"><a href="#更新AAR" class="headerlink" title="更新AAR"></a>更新AAR</h3><p>在<code>cleaner</code> 工程目录下，在你每次<strong>运行</strong>程序时 <code>update-aar.gradle</code>会自动更新<strong>已开启</strong>模块(如<code>isJunkDebug=true</code>)的<code>aar</code> 到 公用<code>libs</code>库中，你所需要做的就是 <code>commit</code>，这样能保证各位小伙伴使用的都是较新的<code>aar</code>。</p>
+<p>同样的你也可以手动触发<code>Task</code>来更新<code>aar</code>，相应<code>Task</code> 如下：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">task</span> updateAAR &lt;&lt; &#123;</div><div class="line">    eachLibsAAR()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="版本发布"><a href="#版本发布" class="headerlink" title="版本发布"></a>版本发布</h3><p>如果需要全部通过 <code>Project</code> 形式构建<strong>版本发布</strong>,只需添加动态参数 <code>isAllDebug=true</code> ，比如：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAllDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
+<p>同样的可以添加更多的模块参数,来表示某些模块通过 <code>Project</code> 形式构建，比如：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAppmgrDebug=<span class="literal">true</span> -PisJunkDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
+<blockquote>
+<p>注意: 默认都是以引入<code>aar</code> 形式构建(除<strong>SpaceBase</strong>),所以如果不添加参数,需要及时更新<code>aar</code></p>
+</blockquote>
+<h3 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h3><h4 id="2017-4-21-优化Gradle编译速度，最快3s。"><a href="#2017-4-21-优化Gradle编译速度，最快3s。" class="headerlink" title="2017/4/21 优化Gradle编译速度，最快3s。"></a>2017/4/21 优化Gradle编译速度，最快3s。</h4><blockquote>
+<p>1、修改<strong><code>isAllDebug</code></strong> 作用域，由原存放在<code>module.properties</code> 修改存放在<code>gradle.properties</code>中。<br>2、可选模块<strong>include</strong>，只有在<code>module.properties</code>配置文件中开关为<strong>true</strong> 的模块，才会被Android Studio 所<strong>include</strong>。<br>3、新增<code>task</code> 耗时监听，方便查看耗时<code>task</code>，在<em>Gradle Console</em> 中输出。<br>4、区分测试开发输出，新增<strong><code>dev</code></strong> <code>productFlavors</code>,同时关闭一些不用的<code>productFlavors</code>，其中<strong><code>dev</code></strong> 用于测试Jenkins 输出apk <code>flavors</code>，<strong><code>buildVersion</code></strong> 用于研发本地输出apk，<strong>minSdkVersion=21</strong>，关闭<strong>fabric</strong> 在<strong><code>buildVersion</code></strong> 中上报初始化，同时也优化了其他模块的依赖。<br>5、本地默认只有<strong><code>buildVersion</code></strong><code>flavors</code>，只有在<code>isAllDebug=true</code>的情况，才会开启其他的<code>flavors</code>。以便获得更好的编译体验。<strong>还有修改完gradle配置文件后记得点build sync<img src="/images/toolbar-sync-gradle.png" alt="Alt text">进行同步一下。</strong></p>
+</blockquote>
+<h4 id="2017-5-27-添加自动合并多语言task"><a href="#2017-5-27-添加自动合并多语言task" class="headerlink" title="2017/5/27  添加自动合并多语言task"></a>2017/5/27  添加自动合并多语言task</h4><blockquote>
+<p>1 、使用<code>Python</code>脚本自动化合入多语言的<code>task</code>，所以在使用前需要有<code>Python</code>环境，相应代码块如下：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">task mergeLanguage(<span class="built_in">type</span>: Exec) &#123;</div><div class="line">    workingDir <span class="string">'./'</span></div><div class="line">    <span class="built_in">command</span>Line <span class="string">"python"</span>, <span class="string">"merge_strs.py"</span>,</div><div class="line"><span class="string">"/home/silver/ssd/AndroidStudioProjects/cleaner_module/spaceplus_android/junk/src/main/res/"</span>,</div><div class="line">            <span class="string">"/home/silver/桌面/清理缓存0502-多语言/"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中第一个参数是需要添入多语言模块文件目录，第二个参数是存放多语言文件目录。修改参数 执行<strong><code>mergeLanguage</code></strong> <code>task</code>即可合并多语言。<br><img src="/images/2017-05-27 19:26:37屏幕截图.png" alt="Alt text"></p>
+<h4 id="2017-5-31-Auto-Update-Librarys-AAR"><a href="#2017-5-31-Auto-Update-Librarys-AAR" class="headerlink" title="2017/5/31  Auto Update Librarys AAR"></a>2017/5/31  Auto Update Librarys AAR</h4><blockquote>
+<p>1 、<strong><code>quartz-robot</code></strong>会在<strong>每周一至周五(8,12,16,20h)</strong>准时自动更新<code>aar</code>到git repos。</p>
+</blockquote>
+<h4 id="2017-5-1-更新说明"><a href="#2017-5-1-更新说明" class="headerlink" title="2017/5/1  更新说明"></a>2017/5/1  更新说明</h4><p>以上是模块化后解决过渡时期编译速度慢,方便开发调试等各种便利的方案,各位研发大拿体验<br>下,感受如丝般顺滑,如有问题及时沟通。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 &lt;strong&gt;commit&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;a href=&quot;http://stash.lab.
+    
+    </summary>
+    
+      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
     
     
   </entry>
@@ -366,123 +546,6 @@
   </entry>
   
   <entry>
-    <title>版本管理发布流程</title>
-    <link href="http://fushenghua.github.io/2016/06/07/%E7%89%88%E6%9C%AC%E7%AE%A1%E7%90%86%E5%8F%91%E5%B8%83%E6%B5%81%E7%A8%8B/"/>
-    <id>http://fushenghua.github.io/2016/06/07/版本管理发布流程/</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-10T07:45:28.309Z</updated>
-    
-    <content type="html"><![CDATA[<p>为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。</p>
-<h3 id="版本命名规范"><a href="#版本命名规范" class="headerlink" title="版本命名规范"></a>版本命名规范</h3><p>软件版本号由四部分组成，第一个1为主版本号，第二个1为子版本号，第三个1为阶段版本号，第四部分为日期版本号加希腊字母版本号，希腊字母版本号共有5种，分别为：base、alpha、beta、RC、release。例如：1.1.1.051021_beta。</p>
-<h4 id="版本号修改规则"><a href="#版本号修改规则" class="headerlink" title="版本号修改规则"></a>版本号修改规则</h4><p>⑴ 主版本号(1)<br>当功能模块有较大的变动，比如增加多个模块或者整体架构发生变化。此版本号由项目决定是否修改。<br>⑵ 子版本号(1)<br>相对于主版本号而言，子版本号升级对应的是软件功能有一定的增加或变化，比如增加了对权限控制、增加自定义视图等功能。此版本号由项目决定是否修改。<br>⑶ 阶段版本号(1)<br>一般是 Bug 修复或是一些小的变动，要经常发布修订版，时间间隔不限，修复一个严重的bug即可发布一个修订版。此版本号由项目经理决定是否修改。<br>⑷ 日期版本号(051021)<br>用于记录修改项目的当前日期，每天对项目的修改都需要更改日期版本号。此版本号由开发人员决定是否修改。<br>⑸ 希腊字母版本号(beta)<br>此版本号用于标注当前版本的软件处于哪个开发阶段，当软件进入到另一个阶段时需要修改此版本号。此版本号由项目决定是否修改。</p>
-<h4 id="软件版本阶段说明"><a href="#软件版本阶段说明" class="headerlink" title="软件版本阶段说明"></a>软件版本阶段说明</h4><p>⑴ Base：<br>此版本表示该软件仅仅是一个假页面链接，通常包括所有的功能和页面布局，但是页面中的功能都没有做完整的实现，只是做为整体网站的一个基础架构。<br>⑵ α（Alpha）版：内测版。<br>软件的初级版本，表示该软件在此阶段以实现软件功能为主，通常只在软件开发者 内部交流，或者专业测试人员测试用，一般而言，该版本软件的Bug较多，需要继续修改，是测试版本。测试人员提交Bug经开发人员修改确认之后，发布到测试网址让测试人员测试，此时可将软件版本标注为alpha版。<br>⑶ β（Beta）版：公测版。<br>该版本相对于α版已有了很大的改进，消除了严重的错误，但还是存在着一些缺陷，需要经过多次测试来进一步消除，此版本主要的修改对像是软件的UI，供专业爱好者大规模测试用。<br>⑷ RC 版：<br>是 Release Candidate 的缩写，意思是发布倒计时，候选版本，该版本已经相当成熟了，完成全部功能并清除大部分的BUG，基本上不存在导致错误的BUG，与即将发行的正式版相差无几。<br>⑷ Release 版：<br>该版本意味“最终版本”，在前面版本的一系列测试版之后，终归会有一个正式版本，是最终交付用户使用的一个版本。该版本有时也称为标准版。一般情况下，Release不会以单词形式出现在软件封面上，取而代之的是符号(R)。</p>
-<h4 id="版本号修改举例说明"><a href="#版本号修改举例说明" class="headerlink" title="版本号修改举例说明"></a>版本号修改举例说明</h4><p>比如版本号为：1.0.0.0321_alpha ，此时为内部测试阶段<br>⑴ 开发人员修复了测试人员提交的bug并经测试人员测试验证关闭bug之后，发布到外网时，此时就进入了软件的下一个阶段，版本号可改为：1.0.0.0321_beta ，如当前日期跟上一个版本号的日期不一样，版本号可改为：1.0.0.0322_beta。<br>⑵ 如果修复了一些重大Bug 并按照流程发布到外网时就可发布一个修订版，如1.0.1.0322_beta，日期为发布的当前日期。<br>⑶ 如果对软件进行了一些功能上的改进或增强，进行了一些局部变动的时候要修改次版本号，如：1.1.0.0322_beta（上一级有变动时，下级要归零）。<br>⑷ 当功能模块有较大变动，增加模块或整体架构发生变化时要修改主版本号，如新增加了退款功能，则版本号要改为：2.0.0.0322_beta 。<br>⑸ 紧急情况：如果bug比较紧急可跳过一般流程，由开发人员尽快修复bug，测试确认之后直接发布该版本的beta版。</p>
-<h4 id="APK-文件命名"><a href="#APK-文件命名" class="headerlink" title="APK 文件命名"></a>APK 文件命名</h4><p>appName_版本号，即中间用“下划线”分割。</p>
-<h2 id="持续集成流程"><a href="#持续集成流程" class="headerlink" title="持续集成流程"></a>持续集成流程</h2><p>引用自百科的话来说，持续集成是一种软件开发实践，即团队开发成员经常集成它们的工作，通过每个成员每天至少集成一次，也就意味着每天可能会发生多次集成。每次集成都通过自动化的构建（包括编译，发布，自动化测试）来验证，从而尽早地发现集成错误。</p>
-<h2 id="项目自动化流程"><a href="#项目自动化流程" class="headerlink" title="项目自动化流程"></a>项目自动化流程</h2><p>在没有自动化的开发过程中，很多事就需要我们人为去做，那就增长我们的时间成本，而且难免会有疏忽的一些问题，比如某个配置文件忘改了，哪个版本出问题，代码的集成，重复构建等一些耗时且易于犯错的问题。</p>
-<p>于是我们引入一些自动化的Java构建工具：</p>
-<h3 id="Apache-Ant"><a href="#Apache-Ant" class="headerlink" title="Apache Ant"></a>Apache Ant</h3><p>Apache Ant，是一个将软件编译、测试、部署等步骤联系在一起加以自动化的一个工具，大多用于Java环境中的软件开发。由Apache软件基金会所提供。默认情况下，它的buildfile(XML文件)名为build.xml。每一个buildfile含有一个<project>和至少一个预设的<target>，这些targets包含许多task elements。每一个task element有一个用来被参考的id，此id必须是唯一的</target></project></p>
-<p>build.xml 示例：<br><figure class="highlight plain"><figcaption><span>version="1.0" ?> </span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;project name=&quot;Hello World&quot; default=&quot;execute&quot;&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;init&quot;&gt;</div><div class="line">		&lt;mkdir dir=&quot;build/classes&quot;/&gt;</div><div class="line">		&lt;mkdir dir=&quot;dist&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	&lt;target name=&quot;compile&quot; depends=&quot;init&quot;&gt;</div><div class="line">		&lt;javac srcdir=&quot;src&quot; destdir=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	</div><div class="line">	&lt;target name=&quot;compress&quot; depends=&quot;compile&quot;&gt;</div><div class="line">	        &lt;jar destfile=&quot;dist/HelloWorld.jar&quot; basedir=&quot;build/classes&quot;  /&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;execute&quot; depends=&quot;compile&quot;&gt;</div><div class="line">		&lt;java classname=&quot;HelloWorld&quot; classpath=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure></p>
-<h3 id="Apache-Maven"><a href="#Apache-Maven" class="headerlink" title="Apache Maven"></a>Apache Maven</h3><p>Apache Maven，是一个软件（特别是Java软件）项目管理及自动构建工具，由Apache软件基金会所提供。基于项目对象模型（缩写：POM）概念，Maven利用一个中央信息片断能管理一个项目的构建、报告和文档等步骤。<br>Maven也可被用于构建和管理各种项目，例如C#，Ruby，Scala和其他语言编写的项目。Maven曾是Jakarta项目的子项目，现为由Apache软件基金会主持的独立Apache项目</p>
-<p>Maven项目使用项目对象模型（Project Object Model，POM）来配置。<br>项目对象模型存储在名为 pom.xml 的文件中。<br>以下是一个简单的示例：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">  &lt;!-- model version is always 4.0.0 for Maven 2.x POMs --&gt;</div><div class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</div><div class="line">  </div><div class="line">  &lt;!-- project coordinates, i.e. a group of values which</div><div class="line">       uniquely identify this project --&gt;</div><div class="line">  </div><div class="line">  &lt;groupId&gt;com.mycompany.app&lt;/groupId&gt;</div><div class="line">  &lt;artifactId&gt;my-app&lt;/artifactId&gt;</div><div class="line">  &lt;version&gt;1.0&lt;/version&gt;</div><div class="line"></div><div class="line">  &lt;!-- library dependencies --&gt;</div><div class="line">  </div><div class="line">  &lt;dependencies&gt;</div><div class="line">    &lt;dependency&gt;</div><div class="line">    </div><div class="line">      &lt;!-- coordinates of the required library --&gt;</div><div class="line">      </div><div class="line">      &lt;groupId&gt;junit&lt;/groupId&gt;</div><div class="line">      &lt;artifactId&gt;junit&lt;/artifactId&gt;</div><div class="line">      &lt;version&gt;3.8.1&lt;/version&gt;</div><div class="line">      </div><div class="line">      &lt;!-- this dependency is only used for running and compiling tests --&gt;</div><div class="line">      </div><div class="line">      &lt;scope&gt;test&lt;/scope&gt;</div><div class="line">      </div><div class="line">    &lt;/dependency&gt;</div><div class="line">  &lt;/dependencies&gt;</div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure>
-<p>引自<a href="https://zh.wikipedia.org/wiki/Apache_Maven介绍" target="_blank" rel="external">https://zh.wikipedia.org/wiki/Apache_Maven介绍</a></p>
-<p>目前JavaEE使用Apache_Maven的比较多，而我们选择了Android Studio 内置的封装布署工具，拥有以上工具中优秀特性并且更棒的工具Gradle。</p>
-<h3 id="Gradle"><a href="#Gradle" class="headerlink" title="Gradle"></a>Gradle</h3><p>Gradle是一个基于Apache Ant和Apache Maven概念的项目自动化建构工具。它使用一种基于Groovy的特定领域语言来声明项目设置，而不是传统的XML。[2]<br>当前其支持的语言限于Java、Groovy和Scala[3]，计划未来将支持更多的语言。</p>
-<h4 id="使用-Gradle-的优势"><a href="#使用-Gradle-的优势" class="headerlink" title="使用 Gradle 的优势"></a>使用 Gradle 的优势</h4><pre><code>•    自动处理包相依关系 - 取自 Maven Repos 的概念
-•    自动处理布署问题 - 取自 Ant 的概念
-•    条件判断写法直觉 - 使用 Groovy 语言
-</code></pre><p>过去 Java 开发者常用 Maven 和 Ant 等工具进行封装布署的自动化，或是两者兼用，不过这两个包彼此有优缺点，如果频繁改变相依包版本，使用 Ant 相当麻烦，如果琐碎工作很多，Maven 功能不足，而且两者都使用 XML 描述，相当不利于设计 if、switch 等判段式，即使写了可读性也不佳，而 Gradle 改良了过去 Maven、Ant 带给开发者的问题，至今也成为 Android Studio 内置的封装布署工具。</p>
-<h2 id="代码检测流程"><a href="#代码检测流程" class="headerlink" title="代码检测流程"></a>代码检测流程</h2><p>在我们日常开发过程中，使用静态代码检查工具自动进行代码检查，对软件开发者来讲是有利的事情，因为这些工具相比人工方式，能更快捷的查找软件存在的缺陷。但是，在很多情况下，这些工具并没用被开发者所广泛采用。</p>
-<p>尽管在我们开发中编译和测试的结果给出了一些产品健康状态的基本报告，但没有提供代码质量的基本报告，也没有任何地方可以查看到我们开发代码质量，产品质量的趋势，来帮助我们发现问题提升产品质量，我们公司内部构建平台会对代码质量，产品质量做一些分析，来推进产品的前进。</p>
-<h3 id="代码覆盖率"><a href="#代码覆盖率" class="headerlink" title="代码覆盖率"></a>代码覆盖率</h3><p>在Java中有很多免费和商业的代码覆盖率工具，大多数这些工具都可以集成在我们的构建平台上。这里我们列举几个Gradle比较流行的代码覆盖率工具。</p>
-<h4 id="Cobertura"><a href="#Cobertura" class="headerlink" title="Cobertura"></a>Cobertura</h4><p><a href="http://cobertura.sourceforge.net/" target="_blank" rel="external">Cobertura</a> 是一种开源工具，它通过检测基本的代码，并观察在测试包运行时执行了哪些代码和没有执行哪些代码，来测量测试覆盖率。除了找出未测试到的代码并发现 bug 外，Cobertura 还可以通过标记无用的、执行不到的代码来优化代码。</p>
-<h4 id="Emma"><a href="#Emma" class="headerlink" title="Emma"></a>Emma</h4><p><a href="http://emma.sourceforge.net/" target="_blank" rel="external">EMMA</a> 是一个开源、面向 Java 程序测试覆盖率收集和报告工具。它通过对编译后的 Java 字节码文件进行插装，在测试执行过程中收集覆盖率信息，并通过支持多种报表格式对覆盖率结果进行展示。 EMMA 所使用的字节码插装不仅保证 EMMA 不会给源代码带来“脏代码”，还确保 EMMA 摆脱了源代码的束缚，这一特点使 EMMA 应用于功能测试成为了可能。</p>
-<h4 id="Clover"><a href="#Clover" class="headerlink" title="Clover"></a>Clover</h4><p><a href="https://www.atlassian.com/software/clover" target="_blank" rel="external">Clover</a>是一款量度单元测试代码覆盖率（Code Coverage）的软件，用于检测Java单元测试是否完整覆盖代码中所有可能的路径，能够快速、准确地检测测试是否覆盖代码中的所有路径。</p>
-<p>团队成员通过Code review来发现架构、逻辑设计方面、安全缺漏和一些潜在的bug，但随着项目业务的增长，Code review的过程难免也会疏忽很多潜在的bug等问题。</p>
-<p>在我们工作中还有一些静态代码检查工具如<a href="http://checkstyle.sourceforge.net/" target="_blank" rel="external">Checkstyle</a>、<a href="http://findbugs.sourceforge.net/" target="_blank" rel="external">Findbugs</a>、<a href="http://pmd.sourceforge.net/" target="_blank" rel="external">PMD</a>等，将他们集成在我们的构建平台上，并成为我们构建流程中的一步骤。</p>
-<h2 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h2><p>对于开发流程，在不同的项目团队中，开发流程不太一样，但大致可为：<br>每天下班前RD必须把今天工作代码全部提交到Git上。</p>
-<p>####</p>
-<ul>
-<li>使用Jenkins CI ，每天定期会从Git上拉去最新代码，自定编译构建生成APK发出邮件，二维码等到产品维护人员的邮箱，并且将应用更新至公司内测分发平台。</li>
-<li>编译构建成功，进行自动化测试、单元测试覆盖率（Cobertura、Emma或Clover等生成）、功能测试结果（如Selenium）、静态代码检查结果（Checkstyle、Findbugs、PMD等）</li>
-<li>测试人员对产品进行test，测试中若有紧急问题也可以让开发人员可以随时修改提交代码。并且立即重新构建测试安装包。</li>
-</ul>
-<h2 id="打包和发布流程"><a href="#打包和发布流程" class="headerlink" title="打包和发布流程"></a>打包和发布流程</h2><p>以上版本管理发布流程只是参考指南，而不是具体规则。你可以根据自己实际情况来选择适合自己的版本管理发布流程或微调来满足自己的需要。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。&lt;/p&gt;
-&lt;h3 id=&quot;版本命名规范&quot;&gt;&lt;a href=&quot;#版本命名
-    
-    </summary>
-    
-      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>优化Gradle 依赖使用方式</title>
-    <link href="http://fushenghua.github.io/2016/06/07/%E4%BC%98%E5%8C%96Gradle%20%E4%BE%9D%E8%B5%96%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F/"/>
-    <id>http://fushenghua.github.io/2016/06/07/优化Gradle 依赖使用方式/</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-10T07:47:19.986Z</updated>
-    
-    <content type="html"><![CDATA[<p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p>
-<blockquote>
-<p><a href="http://stash.lab.tclclouds.com/projects/CLEAN/repos/cleaner_module/commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318" target="_blank" rel="external">commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318</a></p>
-</blockquote>
-<p>现在仍有些问题,比如 <strong>SpaceBase</strong> 依赖了 <strong>VirusEngine</strong> 等问题。</p>
-<h3 id="全新的依赖方式"><a href="#全新的依赖方式" class="headerlink" title="全新的依赖方式"></a>全新的依赖方式</h3><h4 id="需要那个开那个"><a href="#需要那个开那个" class="headerlink" title="需要那个开那个"></a>需要那个开那个</h4><p>修改项目中 <code>module.properties</code> 的配置, <code>true</code> 代表以<code>Project</code> 方式引入,反之则是<code>aar</code>方式,<strong>该配置已被忽略,只对当前工程配置有效。</strong></p>
-<p>如果你确实想提交修改,请使用 <code>git add -f module.properties</code> 命令强制添加。</p>
-<figure class="highlight lasso"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="params">...</span></div><div class="line">isBoostengineDebug=<span class="literal">false</span></div><div class="line">isAppmgrDebug=<span class="literal">false</span></div><div class="line">isCpuDebug=<span class="literal">false</span></div><div class="line">isNotifyboxDebug=<span class="literal">false</span></div><div class="line">isHardwareDebug=<span class="literal">false</span></div><div class="line">isAntivirusDebug=<span class="literal">false</span></div><div class="line">isJunkDebug=<span class="literal">false</span></div><div class="line">isAllDebug=<span class="literal">false</span><span class="comment">// 全部 Debug，即编译Project模式</span></div></pre></td></tr></table></figure>
-<h4 id="添加新的模块依赖"><a href="#添加新的模块依赖" class="headerlink" title="添加新的模块依赖"></a>添加新的模块依赖</h4><p>如果你需要添加新的模块依赖,请按照以下方法,在 <code>module.gradle</code> 脚本中新增 <code>compile_*</code> 方法,如下:</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">def</span> compile_junk(<span class="keyword">Project</span> projectModule)&#123;</div><div class="line">    projectModule.<span class="keyword">dependencies</span>&#123;</div><div class="line">        <span class="keyword">if</span> (isAllDebug.toBoolean() || isJunkDebug.toBoolean()) &#123;</div><div class="line">            <span class="keyword">compile</span> <span class="keyword">project</span>(<span class="string">':junk'</span>)</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">compile</span>(name: <span class="string">'junk'</span>, ext: <span class="string">'aar'</span>)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>然后通过闭包形式传递出去,在 <code>module.gradle</code> 脚本中有<code>ext</code> 扩展属性 ，添加如下：</p>
-<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class">ext </span>&#123;</div><div class="line">  compile_junk = this.<span class="variable">&amp;compile_junk</span>  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>最终通过以下方式使用</p>
-<figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compile_junk(<span class="name">getProject</span>())</div></pre></td></tr></table></figure>
-<h3 id="模块公用的Libs库"><a href="#模块公用的Libs库" class="headerlink" title="模块公用的Libs库"></a>模块公用的Libs库</h3><p>在工程目录的顶级 <code>libs</code> 文件夹中存放着各个模块的 <code>aar</code> ,如果需要更新,可以通过脚本进行<br>全量更新,或者各模块部分更新。</p>
-<h3 id="更新AAR"><a href="#更新AAR" class="headerlink" title="更新AAR"></a>更新AAR</h3><p>在<code>cleaner</code> 工程目录下，在你每次<strong>运行</strong>程序时 <code>update-aar.gradle</code>会自动更新<strong>已开启</strong>模块(如<code>isJunkDebug=true</code>)的<code>aar</code> 到 公用<code>libs</code>库中，你所需要做的就是 <code>commit</code>，这样能保证各位小伙伴使用的都是较新的<code>aar</code>。</p>
-<p>同样的你也可以手动触发<code>Task</code>来更新<code>aar</code>，相应<code>Task</code> 如下：</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">task</span> updateAAR &lt;&lt; &#123;</div><div class="line">    eachLibsAAR()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="版本发布"><a href="#版本发布" class="headerlink" title="版本发布"></a>版本发布</h3><p>如果需要全部通过 <code>Project</code> 形式构建<strong>版本发布</strong>,只需添加动态参数 <code>isAllDebug=true</code> ，比如：</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAllDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
-<p>同样的可以添加更多的模块参数,来表示某些模块通过 <code>Project</code> 形式构建，比如：</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAppmgrDebug=<span class="literal">true</span> -PisJunkDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
-<blockquote>
-<p>注意: 默认都是以引入<code>aar</code> 形式构建(除<strong>SpaceBase</strong>),所以如果不添加参数,需要及时更新<code>aar</code></p>
-</blockquote>
-<h3 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h3><h4 id="2017-4-21-优化Gradle编译速度，最快3s。"><a href="#2017-4-21-优化Gradle编译速度，最快3s。" class="headerlink" title="2017/4/21 优化Gradle编译速度，最快3s。"></a>2017/4/21 优化Gradle编译速度，最快3s。</h4><blockquote>
-<p>1、修改<strong><code>isAllDebug</code></strong> 作用域，由原存放在<code>module.properties</code> 修改存放在<code>gradle.properties</code>中。<br>2、可选模块<strong>include</strong>，只有在<code>module.properties</code>配置文件中开关为<strong>true</strong> 的模块，才会被Android Studio 所<strong>include</strong>。<br>3、新增<code>task</code> 耗时监听，方便查看耗时<code>task</code>，在<em>Gradle Console</em> 中输出。<br>4、区分测试开发输出，新增<strong><code>dev</code></strong> <code>productFlavors</code>,同时关闭一些不用的<code>productFlavors</code>，其中<strong><code>dev</code></strong> 用于测试Jenkins 输出apk <code>flavors</code>，<strong><code>buildVersion</code></strong> 用于研发本地输出apk，<strong>minSdkVersion=21</strong>，关闭<strong>fabric</strong> 在<strong><code>buildVersion</code></strong> 中上报初始化，同时也优化了其他模块的依赖。<br>5、本地默认只有<strong><code>buildVersion</code></strong><code>flavors</code>，只有在<code>isAllDebug=true</code>的情况，才会开启其他的<code>flavors</code>。以便获得更好的编译体验。<strong>还有修改完gradle配置文件后记得点build sync<img src="/images/toolbar-sync-gradle.png" alt="Alt text">进行同步一下。</strong></p>
-</blockquote>
-<h4 id="2017-5-27-添加自动合并多语言task"><a href="#2017-5-27-添加自动合并多语言task" class="headerlink" title="2017/5/27  添加自动合并多语言task"></a>2017/5/27  添加自动合并多语言task</h4><blockquote>
-<p>1 、使用<code>Python</code>脚本自动化合入多语言的<code>task</code>，所以在使用前需要有<code>Python</code>环境，相应代码块如下：</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">task mergeLanguage(<span class="built_in">type</span>: Exec) &#123;</div><div class="line">    workingDir <span class="string">'./'</span></div><div class="line">    <span class="built_in">command</span>Line <span class="string">"python"</span>, <span class="string">"merge_strs.py"</span>,</div><div class="line"><span class="string">"/home/silver/ssd/AndroidStudioProjects/cleaner_module/spaceplus_android/junk/src/main/res/"</span>,</div><div class="line">            <span class="string">"/home/silver/桌面/清理缓存0502-多语言/"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>其中第一个参数是需要添入多语言模块文件目录，第二个参数是存放多语言文件目录。修改参数 执行<strong><code>mergeLanguage</code></strong> <code>task</code>即可合并多语言。<br><img src="/images/2017-05-27 19:26:37屏幕截图.png" alt="Alt text"></p>
-<h4 id="2017-5-31-Auto-Update-Librarys-AAR"><a href="#2017-5-31-Auto-Update-Librarys-AAR" class="headerlink" title="2017/5/31  Auto Update Librarys AAR"></a>2017/5/31  Auto Update Librarys AAR</h4><blockquote>
-<p>1 、<strong><code>quartz-robot</code></strong>会在<strong>每周一至周五(8,12,16,20h)</strong>准时自动更新<code>aar</code>到git repos。</p>
-</blockquote>
-<h4 id="2017-5-1-更新说明"><a href="#2017-5-1-更新说明" class="headerlink" title="2017/5/1  更新说明"></a>2017/5/1  更新说明</h4><p>以上是模块化后解决过渡时期编译速度慢,方便开发调试等各种便利的方案,各位研发大拿体验<br>下,感受如丝般顺滑,如有问题及时沟通。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 &lt;strong&gt;commit&lt;/strong&gt;：&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;http://stash.lab.
-    
-    </summary>
-    
-      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
-    
-    
-  </entry>
-  
-  <entry>
     <title>Android 之美 Android 进阶（一）</title>
     <link href="http://fushenghua.github.io/2016/04/09/2016-04-09-Android%20%E4%B9%8B%E7%BE%8E%20Android%20%E8%BF%9B%E9%98%B6%EF%BC%88%E4%B8%80%EF%BC%89/"/>
     <id>http://fushenghua.github.io/2016/04/09/2016-04-09-Android 之美 Android 进阶（一）/</id>
@@ -700,6 +763,37 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
   </entry>
   
   <entry>
+    <title>给我们的apk应用瘦身计划</title>
+    <link href="http://fushenghua.github.io/2015/09/11/2015-09-11-%E7%BB%99%E6%88%91%E4%BB%AC%E7%9A%84apk%E5%BA%94%E7%94%A8%E7%98%A6%E8%BA%AB%E8%AE%A1%E5%88%92(%E4%B8%80)/"/>
+    <id>http://fushenghua.github.io/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/</id>
+    <published>2015-09-11T03:23:32.000Z</published>
+    <updated>2018-04-11T05:10:19.811Z</updated>
+    
+    <content type="html"><![CDATA[<p>现在apk越来越大，原因有如下几个：<br>1.多dpi支持([l|m|tv|h|x|xx|xxx]dpi)<br>2.Android开发工具和生态系统的发展<br>3.为了提高用户体验的高分辨率ui设计<br>4.无用代码,重复类库的编译<br>随着项目的开发，项目体积不断增长，应用体积也变大了许多,会让很多用户会放弃安装，为了给apk瘦身,翻阅了大片文章,总结一下自己在开发中的经验</p>
+<p>我们从一下几个方面去解决:</p>
+<p>开发阶段代码优化:<br>优化查错瘦身神器之android lint<br>运行Proguard： proguard能够便利你所有的代码路径，把没有用到的代码重apk中剔除。并且能够重命名变量，尽量精简你的代码；<br>使用Lint： 上面的proguard只是分析Java代码。lint工具能够分析你资源文件（/res），使用./gradlew lint就能够检测出没有用的资源文件；</p>
+<p>什么是ProGuard工具？</p>
+<p>ProGuard是android提供的一个免费的工具，它能够移除工程中一些没用的代码，或者使用语义上隐晦的名称来重命名代码中的类、字段和函数等，达到压缩、优化和混淆代码的功能。具体来说，使用ProGuard工具，可以达到下面两个目的：<br>删除了源文件中没有调用的那部分代码，最大化的精简了字节码文件，使得最终生成的apk文件更小。<br>使用语义混淆的命名替换了代码中的类、字段和函数等，使得其他人无法反编译获取源代码，起到对代码的保护作用。</p>
+<p>add Library和add jars的区别?<br>在android项目中调用一些方法需要第三方的jar包，我们习惯做法是在android项目文件夹根目录下加一个lib文件并添加诸如.jar的文件，然后在右击该android项目，点属性(Properties),配置android,Java Build Path等。对于添加的jar文件，我们都是点 add External jars 或者 add jars，目前我还没发现两者的区别。<br>但是如果这样添加，会导致apk包增大至少2M以上，我用的办法是 添加add Library,选择User Library，如果有现成调用过的jar直接选择添加，如果没有则新建后添加，这样生成的apk比原来会减小很多。一般只有几百k左右。<br>使用webP图片格式：<br>只用一种图片xhdpi<br>只用一张xhdpi图片放到xhdpi目录时，所有的屏幕密度都能很好的适配， android系统会自动的对你的图片进行缩放， 不用为每个密度都切一版图片的， 经过实际验证我也发现确实是这样的， 于是我将hdpi下的所有和xhdpi目录有重复的图片全部删除掉。 这样下来应用就减少了将近2M ！<br>so库压缩<br>项目中使用了室内定位功能，，编译成so直接打包在apk里以jni方式调用。 我相信有不少应用对于注重性能或者功能复用的模块都使用了jni方式，带来的问题就是so经常成为apk体积膨胀的一大因素， 以这个室内定位库为例， so文件就有整整8MB。<br>为了适配armeabi和armeabi-v7a两种机型，这个库必须在libs/armeabi目录和libs/armeabi-v7a两个文件夹下各放一份。否则有可能在某种CPU类型的机器上运行出现初始化连接异常（因为找不到so库引起的）。<br>将so库使用zip压缩，可以压缩到50%~60%，然后 后只放一份到res/raw目录， 在代码里实现： 如果程序是第一次运行，则获取到raw下这个zip文件的输入流，然后将其解压到/data/data/com.xxx.xxx/lib_xxx目录， lib_xxx为你自己建的目录， 然后使用System.load加载库，而不要使用System.loadLibrary.， 这样指定路径加载肯定不会出现找不到so的问题。</p>
+<p>项目构建优化:<br>   参考我的Android studio gradle 配置文章中,构建项目的时候,只编译所用代码,自动移除无用资源.</p>
+<p>资源文件瘦身:<br>      图片资源的优化原则是：在不降低图片效果、保证APK显示效果的前提下缩小图片文件的大小。<br>使用tinypng优化大部分图片资源：<a href="https://tinypng.com/" target="_blank" rel="external">https://tinypng.com/</a></p>
+<p>未完待续……</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;现在apk越来越大，原因有如下几个：&lt;br&gt;1.多dpi支持([l|m|tv|h|x|xx|xxx]dpi)&lt;br&gt;2.Android开发工具和生态系统的发展&lt;br&gt;3.为了提高用户体验的高分辨率ui设计&lt;br&gt;4.无用代码,重复类库的编译&lt;br&gt;随着项目的开发，项目体积不
+    
+    </summary>
+    
+      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
+    
+    
+      <category term="优化" scheme="http://fushenghua.github.io/tags/%E4%BC%98%E5%8C%96/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Linux下安装Android Studio</title>
     <link href="http://fushenghua.github.io/2015/09/11/2015-09-11-Linux%E5%AE%89%E8%A3%85Android%20Studio/"/>
     <id>http://fushenghua.github.io/2015/09/11/2015-09-11-Linux安装Android Studio/</id>
@@ -740,37 +834,6 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     
     
       <category term="linux" scheme="http://fushenghua.github.io/tags/linux/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>给我们的apk应用瘦身计划</title>
-    <link href="http://fushenghua.github.io/2015/09/11/2015-09-11-%E7%BB%99%E6%88%91%E4%BB%AC%E7%9A%84apk%E5%BA%94%E7%94%A8%E7%98%A6%E8%BA%AB%E8%AE%A1%E5%88%92(%E4%B8%80)/"/>
-    <id>http://fushenghua.github.io/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/</id>
-    <published>2015-09-11T03:23:32.000Z</published>
-    <updated>2018-04-11T05:10:19.811Z</updated>
-    
-    <content type="html"><![CDATA[<p>现在apk越来越大，原因有如下几个：<br>1.多dpi支持([l|m|tv|h|x|xx|xxx]dpi)<br>2.Android开发工具和生态系统的发展<br>3.为了提高用户体验的高分辨率ui设计<br>4.无用代码,重复类库的编译<br>随着项目的开发，项目体积不断增长，应用体积也变大了许多,会让很多用户会放弃安装，为了给apk瘦身,翻阅了大片文章,总结一下自己在开发中的经验</p>
-<p>我们从一下几个方面去解决:</p>
-<p>开发阶段代码优化:<br>优化查错瘦身神器之android lint<br>运行Proguard： proguard能够便利你所有的代码路径，把没有用到的代码重apk中剔除。并且能够重命名变量，尽量精简你的代码；<br>使用Lint： 上面的proguard只是分析Java代码。lint工具能够分析你资源文件（/res），使用./gradlew lint就能够检测出没有用的资源文件；</p>
-<p>什么是ProGuard工具？</p>
-<p>ProGuard是android提供的一个免费的工具，它能够移除工程中一些没用的代码，或者使用语义上隐晦的名称来重命名代码中的类、字段和函数等，达到压缩、优化和混淆代码的功能。具体来说，使用ProGuard工具，可以达到下面两个目的：<br>删除了源文件中没有调用的那部分代码，最大化的精简了字节码文件，使得最终生成的apk文件更小。<br>使用语义混淆的命名替换了代码中的类、字段和函数等，使得其他人无法反编译获取源代码，起到对代码的保护作用。</p>
-<p>add Library和add jars的区别?<br>在android项目中调用一些方法需要第三方的jar包，我们习惯做法是在android项目文件夹根目录下加一个lib文件并添加诸如.jar的文件，然后在右击该android项目，点属性(Properties),配置android,Java Build Path等。对于添加的jar文件，我们都是点 add External jars 或者 add jars，目前我还没发现两者的区别。<br>但是如果这样添加，会导致apk包增大至少2M以上，我用的办法是 添加add Library,选择User Library，如果有现成调用过的jar直接选择添加，如果没有则新建后添加，这样生成的apk比原来会减小很多。一般只有几百k左右。<br>使用webP图片格式：<br>只用一种图片xhdpi<br>只用一张xhdpi图片放到xhdpi目录时，所有的屏幕密度都能很好的适配， android系统会自动的对你的图片进行缩放， 不用为每个密度都切一版图片的， 经过实际验证我也发现确实是这样的， 于是我将hdpi下的所有和xhdpi目录有重复的图片全部删除掉。 这样下来应用就减少了将近2M ！<br>so库压缩<br>项目中使用了室内定位功能，，编译成so直接打包在apk里以jni方式调用。 我相信有不少应用对于注重性能或者功能复用的模块都使用了jni方式，带来的问题就是so经常成为apk体积膨胀的一大因素， 以这个室内定位库为例， so文件就有整整8MB。<br>为了适配armeabi和armeabi-v7a两种机型，这个库必须在libs/armeabi目录和libs/armeabi-v7a两个文件夹下各放一份。否则有可能在某种CPU类型的机器上运行出现初始化连接异常（因为找不到so库引起的）。<br>将so库使用zip压缩，可以压缩到50%~60%，然后 后只放一份到res/raw目录， 在代码里实现： 如果程序是第一次运行，则获取到raw下这个zip文件的输入流，然后将其解压到/data/data/com.xxx.xxx/lib_xxx目录， lib_xxx为你自己建的目录， 然后使用System.load加载库，而不要使用System.loadLibrary.， 这样指定路径加载肯定不会出现找不到so的问题。</p>
-<p>项目构建优化:<br>   参考我的Android studio gradle 配置文章中,构建项目的时候,只编译所用代码,自动移除无用资源.</p>
-<p>资源文件瘦身:<br>      图片资源的优化原则是：在不降低图片效果、保证APK显示效果的前提下缩小图片文件的大小。<br>使用tinypng优化大部分图片资源：<a href="https://tinypng.com/" target="_blank" rel="external">https://tinypng.com/</a></p>
-<p>未完待续……</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;现在apk越来越大，原因有如下几个：&lt;br&gt;1.多dpi支持([l|m|tv|h|x|xx|xxx]dpi)&lt;br&gt;2.Android开发工具和生态系统的发展&lt;br&gt;3.为了提高用户体验的高分辨率ui设计&lt;br&gt;4.无用代码,重复类库的编译&lt;br&gt;随着项目的开发，项目体积不
-    
-    </summary>
-    
-      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
-    
-    
-      <category term="优化" scheme="http://fushenghua.github.io/tags/%E4%BC%98%E5%8C%96/"/>
     
   </entry>
   

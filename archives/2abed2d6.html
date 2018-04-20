@@ -1,0 +1,206 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="不断提高自己认知，不断的为自己想要的努力"><title>Android 之美 Android 进阶（一） | fuchenxuan’ blog</title><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/4.2.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/grids-responsive-min.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css"><script type="text/javascript" src="/weixin.js"></script><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Android 之美 Android 进阶（一）</h1><a id="logo" href="/.">fuchenxuan’ blog</a><p class="description">不断提高自己认知，不断的为自己想要的努力</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/" class="current"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/message/"><i class="fa fa-comments"> 留言</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Android 之美 Android 进阶（一）</h1><div class="post-meta">Apr 9, 2016<span> | </span><span class="category"><a href="/categories/android/">android</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> Hits</span></span></div><a data-disqus-identifier="archives/2abed2d6.html" href="/archives/2abed2d6.html#disqus_thread" class="disqus-comment-count"></a><div class="post-content"><p>在前几篇文章中都是讲的基础，大家应该会觉得非常熟悉，但往往我们可能对于基础某些细节认识不够彻底或贯穿不全，我一直认为基础都是比较难的，那么本章节终于到进阶啦，主要讲的是View 的相关知识，在前面<a href="http://blog.csdn.net/vfush/article/details/51534916" target="_blank" rel="external">《Android 面试题总结之Android 基础 (六)》
+</a>中已经对View有了一定的了解，由于内容较多且也是<strong>面试必考题</strong>，所以将分两篇继续深入的理解View。</p>
+<blockquote>
+<p>在阅读过程中有任何问题，请及时联系。如需转载请注明 <a href="http://blog.csdn.net/vfush" target="_blank" rel="external">fuchenxuan de Blog</a><br>  本章系<a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external">《Android 之美 从0到1 – 高手之路》</a>Android进阶（一）自定义View的过程</p>
+</blockquote>
+<p>[TOC]</p>
+<h1 id="掌握"><a href="#掌握" class="headerlink" title="掌握"></a>掌握</h1><ol>
+<li>什么是View?</li>
+<li>View 坐标的基本概念</li>
+<li>View的生命周期</li>
+<li>如何自定义View</li>
+</ol>
+<h1 id="什么是View"><a href="#什么是View" class="headerlink" title="什么是View?"></a>什么是View?</h1><p>android.app.View 就是手机的UI，View 负责绘制UI，处理事件(evnet),Android 利用 View 打造出所 Widgets，利用 Widget 可打造出互动式的使用者介面，每个View 负责一定区域的绘制。</p>
+<p>一张图理解常用控件层级关系</p>
+<p><img src="http://img.blog.csdn.net/20160608135802023" alt="这里写图片描述"></p>
+<h1 id="View-坐标的基本概念"><a href="#View-坐标的基本概念" class="headerlink" title="View 坐标的基本概念"></a>View 坐标的基本概念</h1><p>View的宽高是有top、left、right、bottom参数决定的 而X，Y和translationX，和translationY则负责View位置的改变。</p>
+<blockquote>
+<p>从Android3.0开始，加入了translation的概念，即相对于父容器的偏移量以及X,Y坐标的概念，X,Y代表左上顶点的横纵坐标。当View在发生平移时，getX，getY，setX，setY<br>get/setTranslationX/Y来获得当前左上点的坐标。</p>
+</blockquote>
+<p>X=left+translationX Y同理。<br>注意：在View发生改变的过程中，top，left等值代表原始位置，是不会改变的。改变的只有X,Y，translationX/Y。  </p>
+<p>一张图理解View的坐标概念<br><img src="http://img.blog.csdn.net/20160608162836872" alt="这里写图片描述"></p>
+<h1 id="View的生命周期"><a href="#View的生命周期" class="headerlink" title="View的生命周期"></a>View的生命周期</h1><table>
+<thead>
+<tr>
+<th>Category</th>
+<th style="text-align:center">Methods</th>
+<th style="text-align:right">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Creation</td>
+<td style="text-align:center">Constructors</td>
+<td style="text-align:right">几个View的构造函数</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onFinishInflate(" target="_blank" rel="external">onFinishInflate()</a>)</td>
+<td style="text-align:right">当系统解析完View之后调用onFinishInflate方法</td>
+</tr>
+<tr>
+<td>Layout</td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onMeasure(int,%20int" target="_blank" rel="external">onMeasure(int, int)</a>)</td>
+<td style="text-align:right">确定所有子View的大小</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onLayout(boolean,%20int,%20int,%20int,%20int" target="_blank" rel="external">onLayout(boolean, int, int, int, int)</a>)</td>
+<td style="text-align:right">当ViewGroup分配所有的子View的大小和位置时触发</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onSizeChanged(int,%20int,%20int,%20int" target="_blank" rel="external">onSizeChanged(int, int, int, int)</a>)</td>
+<td style="text-align:right">当view的大小发生变化时触发</td>
+</tr>
+<tr>
+<td>Drawing</td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onDraw(android.graphics.Canvas" target="_blank" rel="external">onDraw(android.graphics.Canvas)</a>)</td>
+<td style="text-align:right">view渲染内容的细节</td>
+</tr>
+<tr>
+<td>Event processing</td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onKeyDown(int,%20android.view.KeyEvent" target="_blank" rel="external">onKeyDown(int, KeyEvent)</a>)</td>
+<td style="text-align:right">有按键按下后触发</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onKeyUp(int,%20android.view.KeyEvent" target="_blank" rel="external">onKeyUp(int, KeyEvent)</a>)</td>
+<td style="text-align:right">有按键按下后弹起时触发</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onTrackballEvent(android.view.MotionEvent" target="_blank" rel="external">onTrackballEvent(MotionEvent)</a>)</td>
+<td style="text-align:right">轨迹球事件</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onTouchEvent(android.view.MotionEvent" target="_blank" rel="external">onTouchEvent(MotionEvent)</a>)</td>
+<td style="text-align:right">触屏事件</td>
+</tr>
+<tr>
+<td>Focus</td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onFocusChanged(boolean,%20int,%20android.graphics.Rect" target="_blank" rel="external">onFocusChanged(boolean, int, android.graphics.Rect)</a>)</td>
+<td style="text-align:right">当View获取或失去焦点时触发</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onWindowFocusChanged(boolean" target="_blank" rel="external">onWindowFocusChanged(boolean)</a>)</td>
+<td style="text-align:right">当窗口包含的view获取或失去焦点时触发</td>
+</tr>
+<tr>
+<td>Attaching</td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onAttachedToWindow(" target="_blank" rel="external">onAttachedToWindow()</a>)</td>
+<td style="text-align:right">当view被附着到一个窗口时触发</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onAttachedToWindow(" target="_blank" rel="external">onDetachedFromWindow()</a>)</td>
+<td style="text-align:right">当view离开附着的窗口时触发，该方法和  onAttachedToWindow() 是相反</td>
+</tr>
+<tr>
+<td></td>
+<td style="text-align:center"><a href="http://developer.android.com/reference/android/view/View.html#onWindowVisibilityChanged(int" target="_blank" rel="external">onWindowVisibilityChanged(int)</a>)</td>
+<td style="text-align:right">当窗口中包含的可见的view发生变化时触发</td>
+</tr>
+</tbody>
+</table>
+<p>对实现自定义View，不需要重写所有这些方法。事实上，你可以只<a href="https://developer.android.com/reference/android/view/View.html#onDraw(android.graphics.Canvas" target="_blank" rel="external">onDraw(android.graphics.Canvas)</a>)</p>
+<h2 id="View-的几个构造函数"><a href="#View-的几个构造函数" class="headerlink" title="View 的几个构造函数"></a>View 的几个构造函数</h2><ul>
+<li><p><code>public MyView(Context context)</code><br>java代码直接new一个Custom View实例的时候,会调用第一个构造函数</p>
+</li>
+<li><p><code>public MyView(Context context, AttributeSet attrs)</code><br>在xml创建但是没有指定style的时候被调用.多了一个AttributeSet类型的参数，自定义属性，在通过布局文件xml创建一个view时，会把XML内的参数通过AttributeSet带入到View内。</p>
+</li>
+<li><p><code>public MyView(Context context, AttributeSet attrs, int defStyleAttr)</code><br>构造函数中第三个参数是默认的Style，这里的默认的Style是指它在当前Application或Activity所用的Theme中的默认Style，且只有在明确调用的时候才会调用</p>
+</li>
+<li><p><code>@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)</code><br>该构造函数是在api21的时候才添加上的</p>
+</li>
+</ul>
+<p><img src="http://img.blog.csdn.net/20160607171836507" alt="http://blog.csdn.net/vfush"></p>
+<h2 id="View-的几个重要方法"><a href="#View-的几个重要方法" class="headerlink" title="View 的几个重要方法"></a>View 的几个重要方法</h2><ul>
+<li><p>requestLayout<br>View重新调用一次layout过程</p>
+</li>
+<li><p>invalidate<br>View重新调用一次draw过程</p>
+</li>
+<li><p>forceLayout<br>标识View在下一次重绘，需要重新调用layout过程。</p>
+</li>
+<li><p>postInvalidate<br>这个方法与invalidate方法的作用是一样的，都是使View树重绘，但两者的使用条件不同，postInvalidate是在非UI线程中调用，invalidate则是在UI线程中调用。</p>
+</li>
+</ul>
+<h1 id="自定义View"><a href="#自定义View" class="headerlink" title="自定义View"></a>自定义View</h1><h2 id="简单理解View的绘制"><a href="#简单理解View的绘制" class="headerlink" title="简单理解View的绘制"></a>简单理解View的绘制</h2><p>这里我们先简单理解View 的绘制，后续文章我们会深入理解。<br>1.测量——onMeasure()：决定View的大小</p>
+<p>2.布局——onLayout()：决定View在ViewGroup中的位置</p>
+<p>3.绘制——onDraw()：如何绘制这个View。</p>
+<p><img src="http://img.blog.csdn.net/20160608141154933" alt="这里写图片描述"></p>
+<h2 id="自定义View的分类"><a href="#自定义View的分类" class="headerlink" title="自定义View的分类"></a>自定义View的分类</h2><ul>
+<li>继承View</li>
+<li>继承ViewGroup</li>
+<li>继承系统控件(Button,LinearLayout…)</li>
+</ul>
+<h2 id="自定义View的过程"><a href="#自定义View的过程" class="headerlink" title="自定义View的过程"></a>自定义View的过程</h2><ol>
+<li><p>自定义 View 首先要实现一个继承自 View 的类</p>
+</li>
+<li><p>添加类的构造方法,通常是三个构造方法,不过从 Android5.0 开始构造方法已经添加到 4 个了</p>
+</li>
+<li><p><code>override</code> 父类的方法,如 <code>onDraw,(onMeasure)</code>等</p>
+</li>
+<li><p>自定义属性，需要在 values 下建立 <code>attrs.xml</code> 文件,在其中定义属性</p>
+<blockquote>
+<p>通过context.obtainStyledAttributes将构造函数中的attrs进行解析出来,就可以拿到相对应的属性.<br>TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MyView);<br>mColor = typedArray.getColor(R.styleable.MyView_myColor, 0XFF00FF00);  </p>
+<p><strong>【注意】</strong>三个函数获取尺寸的区别：<br><strong><code>getDimension()</code></strong>是基于当前DisplayMetrics进行转换，获取指定资源id对应的尺寸<br><strong><code>getDimensionPixelSize()</code></strong>与<strong><code>getDimension()</code></strong>功能类似，不同的是将结果转换为int，并且小数部分四舍五入<br><strong><code>getDimensionPixelOffset()</code></strong>与<strong><code>getDimension()</code></strong>功能类似，不同的是将结果转换为int，取整去除小数。举个例子<br>列如<strong><code>getDimension()</code></strong>返回结果是20.5f，那么<strong><code>getDimensionPixelSize()</code></strong>返回结果就是 21，<strong><code>getDimensionPixelOffset()</code></strong>返回结果就是20。</p>
+</blockquote>
+</li>
+<li><p>打开布局文件我们可以看到有很多的以xmlns开头的字段。其实这个就是XML name space 的缩写。我们可以使用<code>res-atuo</code>命名空间,就不用在添加自定义View全类名。<br><code>xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;</code></p>
+</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * Created by fuchenxuan on 16/6/4.</div><div class="line"> */</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyView</span> <span class="keyword">extends</span> <span class="title">View</span> </span>&#123;</div><div class="line">	<span class="keyword">private</span> <span class="keyword">int</span> mRadius=<span class="number">200</span>;</div><div class="line">	<span class="keyword">private</span> <span class="keyword">int</span> mColor;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyView</span><span class="params">(Context context)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>(context,<span class="keyword">null</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyView</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>(context, attrs,<span class="number">0</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyView</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context, attrs, defStyleAttr);</div><div class="line">        <span class="comment">//read custom attrs</span></div><div class="line">        TypedArray t = context.obtainStyledAttributes(attrs,</div><div class="line">                R.styleable.rainbowbar, <span class="number">0</span>, <span class="number">0</span>);</div><div class="line">       mRadius = t.getDimensionPixelSize(R.styleable.coutom_radius, (<span class="keyword">int</span>) hSpace);</div><div class="line">        t.getDimensionPixelOffset(R.styleable.coutom_at1, (<span class="keyword">int</span>) vSpace);</div><div class="line">   		mColor=t.getColor(R.styleable.color, barColor);</div><div class="line">        t.recycle();   <span class="comment">// we should always recycle after used</span></div><div class="line">     </div><div class="line">     </div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMeasure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</div><div class="line">        <span class="comment">//super.onMeasure(widthMeasureSpec, heightMeasureSpec);</span></div><div class="line">         <span class="keyword">int</span> widthMode = MeasureSpec.getMode(widthMeasureSpec);</div><div class="line">        <span class="keyword">int</span> widthSize = MeasureSpec.getSize(widthMeasureSpec);</div><div class="line">        <span class="keyword">int</span> heightMode = MeasureSpec.getMode(heightMeasureSpec);</div><div class="line">        <span class="keyword">int</span> heightSize = MeasureSpec.getSize(heightMeasureSpec);</div><div class="line"></div><div class="line">        <span class="comment">//set size</span></div><div class="line">        setMeasuredDimension(widthMode == MeasureSpec.AT_MOST ? (<span class="keyword">int</span>) mRadius * <span class="number">3</span> : widthSize, heightMode == MeasureSpec.AT_MOST ? (<span class="keyword">int</span>) mRadius * <span class="number">3</span> : heightSize);</div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="comment">//draw be invoke clire.</span></div><div class="line">    <span class="keyword">int</span> index = <span class="number">0</span>;</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;</div><div class="line">        <span class="comment">//super.onDraw(canvas);</span></div><div class="line"> 	     mPaint = <span class="keyword">new</span> Paint();</div><div class="line">        mPaint.setColor(mColor);</div><div class="line">        mPaint.setAntiAlias(<span class="keyword">true</span>);</div><div class="line">		 canvas.drawCircle(mRadius, mRadius, mRadius, mPaint);</div><div class="line">     &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里是一个普通的自定义View，里面画了圆，根据不同的模式设置了父View的大小。</p>
+<p><strong>关于View重写<code>onMeasure()</code>时机</strong>：<br>如果用了<code>wrap_content</code>。那么在<code>onMeasure()</code>中就要调用<code>setMeasuredDimension()</code>，<br>来指定view的宽高。如果使用的是<code>match_parent</code>或者一个具体的dp值。那么直接使用<code>super.onMeasure()</code>即可。</p>
+<h2 id="自定义ViewGroup"><a href="#自定义ViewGroup" class="headerlink" title="自定义ViewGroup"></a>自定义ViewGroup</h2><h2 id="自定义ViewGroup的过程"><a href="#自定义ViewGroup的过程" class="headerlink" title="自定义ViewGroup的过程"></a>自定义ViewGroup的过程</h2><ol>
+<li>自定义 ViewGroup 和自定义View 一样，只是继承自 ViewGroup 的类，和必须实现<code>onLayout()</code>函数</li>
+</ol>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"> <span class="comment">/**</span></div><div class="line"> * Created by fuchenxuan on 16-6-6.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CostumViewGroup</span> <span class="keyword">extends</span> <span class="title">ViewGroup</span> </span>&#123;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CostumViewGroup</span><span class="params">(Context context)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CostumViewGroup</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context, attrs);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMeasure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onMeasure(widthMeasureSpec, heightMeasureSpec);</div><div class="line">        <span class="keyword">int</span> childCount = getChildCount();</div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; childCount; i++) &#123;</div><div class="line">            View childView = getChildAt(i);</div><div class="line">            measureChild(childView, widthMeasureSpec, heightMeasureSpec);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onLayout</span><span class="params">(<span class="keyword">boolean</span> changed, <span class="keyword">int</span> l, <span class="keyword">int</span> t, <span class="keyword">int</span> r, <span class="keyword">int</span> b)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (changed) &#123;</div><div class="line">            <span class="keyword">int</span> childCount = getChildCount();</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; childCount; i++) &#123;</div><div class="line">                View childView = getChildAt(i);</div><div class="line">                childView.layout(i * childView.getMeasuredWidth(), <span class="number">0</span>, (i + <span class="number">1</span>) * childView.getMeasuredWidth(), childView.getMeasuredHeight());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这里是一个简单的自定义ViewGroup，实现类似LinearLayout 横向排放子View位置。这就是一个简单的ViewGroup过程。</p>
+<h3 id="彻底理解MeasureSpec三种模式"><a href="#彻底理解MeasureSpec三种模式" class="headerlink" title="彻底理解MeasureSpec三种模式"></a>彻底理解MeasureSpec三种模式</h3><p>View的大小不仅由自身所决定，同时也会受到父控件的影响，为了我们的控件能更好的适应各种情况，一般会自己进行测量。他们是由 mode+size两部分组成的。widthMeasureSpec和heightMeasureSpec转化成二进制数字表示，他们都是30位的。前两位代表mode(测量模 式)，后面28位才是他们的实际数值（size）;<code>MeasureSpec.getMode()</code>获取模式,<code>MeasureSpec.getSize()</code>获取尺寸<br>测量View大小使用的是onMeasure函数，所以我们需要了解三种测量模式：  </p>
+<ul>
+<li><code>EXACTLY</code>：一般是设置了明确的值（100dp）或者是<code>MATCH_PARENT</code></li>
+<li><code>AT_MOST</code>：表示子布局限制在一个最大值内，一般为<code>WARP_CONTENT</code></li>
+<li><code>UNSPECIFIED</code>：表示子布局想要多大就多大，很少使用</li>
+</ul>
+<p><strong>关于ViewGroup重写<code>onMeasure()</code>时机</strong>：</p>
+<ul>
+<li><p>首先要先测量子View的宽高:<br><code>getChildAt(int index)</code>可以拿到index上的子view。<br><code>getChildCount()</code>得到子view的个数，再循环遍历出子view。</p>
+</li>
+<li><p>使用子view自身的测量方法<br>childView.measure(int wSpec, int hSpec); </p>
+<p>或<strong>使用viewGroup的测量子view的方法</strong>：</p>
+<ul>
+<li><p><code>measureChild(subView, int wSpec, int hSpec);</code><br>测量某一个子view，多宽，多高, 内部加上了viewGroup的padding值</p>
+</li>
+<li><p><code>measureChildren(int wSpec, int hSpec);</code><br>测量所有子view 都是 多宽，多高, 内部调用了measureChild方法    </p>
+</li>
+<li><code>measureChildWithMargins(subView, intwSpec, int wUsed, int hSpec, int hUsed);</code>测量某一个子view，多宽，多高, 内部加上了viewGroup的padding值、margin值和传入的宽高wUsed、hUsed </li>
+</ul>
+</li>
+</ul>
+<h2 id="问题总结"><a href="#问题总结" class="headerlink" title="问题总结"></a>问题总结</h2><ol>
+<li><p><strong>getWidth()和getMeasuredWidth()的区别？</strong><br>getMeasuredWidth()：只要一执行完 setMeasuredDimension() 方法，就有值了，并且不再改变。<br>getWidth()：必须执行完 onMeasure() 才有值，可能发生改变。<br>如果 onLayout 没有对子 View 实际显示的宽高进行修改，那么 getWidth() 的值 == getMeasuredWidth() 的值。</p>
+</li>
+<li><p><strong>onLayout() 和Layout()的区别？</strong><br>onLayout() ViewGroup中子View的布局方法，layout()是子View布局的方法</p>
+</li>
+<li><p><strong>View 里面的 onSavedInstanceState和onRestoreInstanceState的作用？</strong><br>View和Activity一样的，每个View都有onSavedInstanceState和onRestoreInstanceState这两个方法，可用于保存和恢复view的状态。</p>
+</li>
+</ol>
+<p>   在本章节中我们知道什么是View?，View 坐标的基本概念，理解了View的生命周期，学习了如何自定义View？虽然全是理论知识总结，在后续我们会一起来自定义View的实战学习。不管有没有任何疑问，欢迎在下方留言吧。</p>
+<p> 更多Android 面试题总结，请点击下方图片哦。</p>
+<blockquote>
+<p>水平有限，若有错漏，欢迎指正，批评，如需转载，请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a>，谢谢！<br><a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external"><img src="http://img.blog.csdn.net/20160608162227307" alt="这里写图片描述"></a></p>
+</blockquote>
+</div><div class="tags"></div><div class="post-nav"><a href="/archives/8e05eece.html" class="pre">git仓库迁移</a><a href="/archives/6412bd09.html" class="next">给我们的apk应用瘦身计划</a></div><div id="disqus_thread"><script>var disqus_shortname = 'fushenghua';
+var disqus_identifier = 'archives/2abed2d6.html';
+var disqus_title = 'Android 之美 Android 进阶（一）';
+var disqus_url = 'http://fushenghua.github.io/archives/2abed2d6.html';
+(function() {
+  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//fushenghua.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://fushenghua.github.io"/></form></div><div class="widget"><form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="search" name="word" maxlength="20" placeholder="Search"/><input type="hidden" name="si" value="http://fushenghua.github.io"/><input name="tn" type="hidden" value="bds"/><input name="cl" type="hidden" value="3"/><input name="ct" type="hidden" value="2097152"/><input name="s" type="hidden" value="on"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础技能/">基础技能</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/安全/">安全</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/性能优化/">性能优化</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/android/" style="font-size: 15px;">android</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/优化/" style="font-size: 15px;">优化</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/archives/ed6915f6.html">在Pypi上发布自己的Python包</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/3e3728fd.html">为什么说枚举更占内存，枚举原理是什么？</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/a72a1e10.html">app安全之Apk完整性校验</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/375726b.html">版本管理发布流程</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/235d5e38.html">ViewStub原理分析</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/db6d97a8.html">APK 瘦身，减少APK体积的大小</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/c66eed35.html">优化Gradle 依赖使用方式</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/8e05eece.html">git仓库迁移</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/2abed2d6.html">Android 之美 Android 进阶（一）</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/6412bd09.html">给我们的apk应用瘦身计划</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> 最近评论</i></div><script type="text/javascript" src="//fushenghua.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">© <a href="/." rel="nofollow">fuchenxuan’ blog</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/weixin.js"></script><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css?v=0.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

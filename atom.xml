@@ -370,7 +370,7 @@
     <link href="http://fushenghua.github.io/2016/06/07/git%E4%BB%93%E5%BA%93%E8%BF%81%E7%A7%BB/"/>
     <id>http://fushenghua.github.io/2016/06/07/git仓库迁移/</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T04:46:50.485Z</updated>
+    <updated>2018-04-20T04:48:58.369Z</updated>
     
     <content type="html"><![CDATA[<p>最近又要把公司<code>Stash</code>上的项目在别部门一个私有仓库,平移到自己部门项目组的仓库，要求迁移的时候要保留已有的分支和以前的提交记录，类似的需求经常遇到，刚好做个记录。</p>
 <p>1). 从原地址克隆一份裸版本库(纯仓库形式)，比如原本托管于 GitHub。</p>
@@ -399,7 +399,7 @@
     
     </summary>
     
-      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
     
     
   </entry>

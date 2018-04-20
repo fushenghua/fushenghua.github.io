@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://fushenghua.github.io/"/>
-  <updated>2018-04-20T03:22:18.556Z</updated>
+  <updated>2018-04-14T06:59:49.015Z</updated>
   <id>http://fushenghua.github.io/</id>
   
   <author>
@@ -14,32 +14,6 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title></title>
-    <link href="http://fushenghua.github.io/2018/04/20/ViewStub%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/"/>
-    <id>http://fushenghua.github.io/2018/04/20/ViewStub原理分析/</id>
-    <published>2018-04-20T03:21:16.801Z</published>
-    <updated>2018-04-20T03:22:18.556Z</updated>
-    
-    <content type="html"><![CDATA[<p>ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 <code>inflate()</code> 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调用了 <code>setVisibility(int)</code> 或 <code>inflate()</code>。</p>
-<p>我们先来看看构造方法：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr, <span class="keyword">int</span> defStyleRes)</span> </span>&#123;</div><div class="line">    <span class="keyword">super</span>(context);</div><div class="line"></div><div class="line">    <span class="keyword">final</span> TypedArray a = context.obtainStyledAttributes(attrs,</div><div class="line">            R.styleable.ViewStub, defStyleAttr, defStyleRes);</div><div class="line">    <span class="comment">// 要被加载的布局 Id</span></div><div class="line">    mInflatedId = a.getResourceId(R.styleable.ViewStub_inflatedId, NO_ID);</div><div class="line">    <span class="comment">// 要被加载的布局</span></div><div class="line">    mLayoutResource = a.getResourceId(R.styleable.ViewStub_layout, <span class="number">0</span>);</div><div class="line">    <span class="comment">// ViewStub 的 Id</span></div><div class="line">    mID = a.getResourceId(R.styleable.ViewStub_id, NO_ID);</div><div class="line">    a.recycle();</div><div class="line"></div><div class="line">    <span class="comment">// 初始状态为 GONE</span></div><div class="line">    setVisibility(GONE);</div><div class="line">    <span class="comment">// 设置为不会绘制</span></div><div class="line">    setWillNotDraw(<span class="keyword">true</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>接下来就看看关键的方法，ViewStub 很轻量，代码真的很少，很值得去看看具体实现，花不了多少时间。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 复写了 setVisibility(int) 方法</span></div><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="meta">@android</span>.view.<span class="function">RemotableViewMethod</span></div><div class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setVisibility</span><span class="params">(<span class="keyword">int</span> visibility)</span> &#123;</div><div class="line">    <span class="comment">// private WeakReference&lt;View&gt; mInflatedViewRef;</span></div><div class="line">    <span class="comment">// mInflatedViewRef 是对布局的弱引用</span></div><div class="line">    <span class="keyword">if</span> (mInflatedViewRef != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="comment">// 如果不为 null,就拿到懒加载的 View</span></div><div class="line">        View view = mInflatedViewRef.get();</div><div class="line">        <span class="keyword">if</span> (view != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="comment">// 然后就直接对 View 进行 setVisibility 操作</span></div><div class="line">            view.setVisibility(visibility);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">// 如果为 null，就抛出异常</span></div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"setVisibility called on un-referenced view"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">super</span>.setVisibility(visibility);</div><div class="line">        <span class="comment">// 之前说过，setVisibility(int) 也可以进行加载布局</span></div><div class="line">        <span class="keyword">if</span> (visibility == VISIBLE || visibility == INVISIBLE) &#123;</div><div class="line">            <span class="comment">// 因为在这里调用了 inflate()</span></div><div class="line">            inflate();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>inflate() 是关键的加载实现</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> View <span class="title">inflate</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="comment">// 获取父视图</span></div><div class="line">    <span class="keyword">final</span> ViewParent viewParent = getParent();</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (viewParent != <span class="keyword">null</span> &amp;&amp; viewParent <span class="keyword">instanceof</span> ViewGroup) &#123;</div><div class="line">        <span class="comment">// 如果没有指定布局，就会抛出异常</span></div><div class="line">        <span class="keyword">if</span> (mLayoutResource != <span class="number">0</span>) &#123;</div><div class="line">            <span class="comment">// viewParent 需为 ViewGroup</span></div><div class="line">            <span class="keyword">final</span> ViewGroup parent = (ViewGroup) viewParent;</div><div class="line">            <span class="keyword">final</span> LayoutInflater factory;</div><div class="line">            <span class="keyword">if</span> (mInflater != <span class="keyword">null</span>) &#123;</div><div class="line">                factory = mInflater;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="comment">// 如果没有指定 LayoutInflater</span></div><div class="line">                factory = LayoutInflater.from(mContext);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 获取布局</span></div><div class="line">            <span class="keyword">final</span> View view = factory.inflate(mLayoutResource, parent,</div><div class="line">                    <span class="keyword">false</span>);</div><div class="line">            <span class="comment">// 为 view 设置 Id</span></div><div class="line">            <span class="keyword">if</span> (mInflatedId != NO_ID) &#123;</div><div class="line">                view.setId(mInflatedId);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 计算出 ViewStub 在 parent 中的位置</span></div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> index = parent.indexOfChild(<span class="keyword">this</span>);</div><div class="line">            <span class="comment">// 把 ViewStub 从 parent 中移除</span></div><div class="line">            parent.removeViewInLayout(<span class="keyword">this</span>);</div><div class="line"></div><div class="line">            <span class="comment">// 接下来就是把 view 加到 parent 的 index 位置中</span></div><div class="line">            <span class="keyword">final</span> ViewGroup.LayoutParams layoutParams = getLayoutParams();</div><div class="line">            <span class="keyword">if</span> (layoutParams != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="comment">// 如果 ViewStub 的 layoutParams 不为空</span></div><div class="line">                <span class="comment">// 就设置给 view</span></div><div class="line">                parent.addView(view, index, layoutParams);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                parent.addView(view, index);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="comment">// mInflatedViewRef 就是在这里对 view 进行了弱引用</span></div><div class="line">            mInflatedViewRef = <span class="keyword">new</span> WeakReference&lt;View&gt;(view);</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (mInflateListener != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="comment">// 回调</span></div><div class="line">                mInflateListener.onInflate(<span class="keyword">this</span>, view);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">return</span> view;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"ViewStub must have a valid layoutResource"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"ViewStub must have a non-null ViewGroup viewParent"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>好了，主要的都分析完了，知道原理之后就可以自己动手写一个加强版的 ViewStub </p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 &lt;code&gt;inflate()&lt;/code&gt; 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调
-    
-    </summary>
-    
-    
-  </entry>
   
   <entry>
     <title>在Pypi上发布自己的Python包</title>
@@ -170,65 +144,6 @@
     </summary>
     
       <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>优化Gradle 依赖使用方式</title>
-    <link href="http://fushenghua.github.io/2016/06/07/%E4%BC%98%E5%8C%96Gradle%20%E4%BE%9D%E8%B5%96%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F/"/>
-    <id>http://fushenghua.github.io/2016/06/07/优化Gradle 依赖使用方式/</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-10T07:47:19.986Z</updated>
-    
-    <content type="html"><![CDATA[<p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p>
-<blockquote>
-<p><a href="http://stash.lab.tclclouds.com/projects/CLEAN/repos/cleaner_module/commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318" target="_blank" rel="external">commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318</a></p>
-</blockquote>
-<p>现在仍有些问题,比如 <strong>SpaceBase</strong> 依赖了 <strong>VirusEngine</strong> 等问题。</p>
-<h3 id="全新的依赖方式"><a href="#全新的依赖方式" class="headerlink" title="全新的依赖方式"></a>全新的依赖方式</h3><h4 id="需要那个开那个"><a href="#需要那个开那个" class="headerlink" title="需要那个开那个"></a>需要那个开那个</h4><p>修改项目中 <code>module.properties</code> 的配置, <code>true</code> 代表以<code>Project</code> 方式引入,反之则是<code>aar</code>方式,<strong>该配置已被忽略,只对当前工程配置有效。</strong></p>
-<p>如果你确实想提交修改,请使用 <code>git add -f module.properties</code> 命令强制添加。</p>
-<figure class="highlight lasso"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="params">...</span></div><div class="line">isBoostengineDebug=<span class="literal">false</span></div><div class="line">isAppmgrDebug=<span class="literal">false</span></div><div class="line">isCpuDebug=<span class="literal">false</span></div><div class="line">isNotifyboxDebug=<span class="literal">false</span></div><div class="line">isHardwareDebug=<span class="literal">false</span></div><div class="line">isAntivirusDebug=<span class="literal">false</span></div><div class="line">isJunkDebug=<span class="literal">false</span></div><div class="line">isAllDebug=<span class="literal">false</span><span class="comment">// 全部 Debug，即编译Project模式</span></div></pre></td></tr></table></figure>
-<h4 id="添加新的模块依赖"><a href="#添加新的模块依赖" class="headerlink" title="添加新的模块依赖"></a>添加新的模块依赖</h4><p>如果你需要添加新的模块依赖,请按照以下方法,在 <code>module.gradle</code> 脚本中新增 <code>compile_*</code> 方法,如下:</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">def</span> compile_junk(<span class="keyword">Project</span> projectModule)&#123;</div><div class="line">    projectModule.<span class="keyword">dependencies</span>&#123;</div><div class="line">        <span class="keyword">if</span> (isAllDebug.toBoolean() || isJunkDebug.toBoolean()) &#123;</div><div class="line">            <span class="keyword">compile</span> <span class="keyword">project</span>(<span class="string">':junk'</span>)</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">compile</span>(name: <span class="string">'junk'</span>, ext: <span class="string">'aar'</span>)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>然后通过闭包形式传递出去,在 <code>module.gradle</code> 脚本中有<code>ext</code> 扩展属性 ，添加如下：</p>
-<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class">ext </span>&#123;</div><div class="line">  compile_junk = this.<span class="variable">&amp;compile_junk</span>  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>最终通过以下方式使用</p>
-<figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compile_junk(<span class="name">getProject</span>())</div></pre></td></tr></table></figure>
-<h3 id="模块公用的Libs库"><a href="#模块公用的Libs库" class="headerlink" title="模块公用的Libs库"></a>模块公用的Libs库</h3><p>在工程目录的顶级 <code>libs</code> 文件夹中存放着各个模块的 <code>aar</code> ,如果需要更新,可以通过脚本进行<br>全量更新,或者各模块部分更新。</p>
-<h3 id="更新AAR"><a href="#更新AAR" class="headerlink" title="更新AAR"></a>更新AAR</h3><p>在<code>cleaner</code> 工程目录下，在你每次<strong>运行</strong>程序时 <code>update-aar.gradle</code>会自动更新<strong>已开启</strong>模块(如<code>isJunkDebug=true</code>)的<code>aar</code> 到 公用<code>libs</code>库中，你所需要做的就是 <code>commit</code>，这样能保证各位小伙伴使用的都是较新的<code>aar</code>。</p>
-<p>同样的你也可以手动触发<code>Task</code>来更新<code>aar</code>，相应<code>Task</code> 如下：</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">task</span> updateAAR &lt;&lt; &#123;</div><div class="line">    eachLibsAAR()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="版本发布"><a href="#版本发布" class="headerlink" title="版本发布"></a>版本发布</h3><p>如果需要全部通过 <code>Project</code> 形式构建<strong>版本发布</strong>,只需添加动态参数 <code>isAllDebug=true</code> ，比如：</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAllDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
-<p>同样的可以添加更多的模块参数,来表示某些模块通过 <code>Project</code> 形式构建，比如：</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAppmgrDebug=<span class="literal">true</span> -PisJunkDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
-<blockquote>
-<p>注意: 默认都是以引入<code>aar</code> 形式构建(除<strong>SpaceBase</strong>),所以如果不添加参数,需要及时更新<code>aar</code></p>
-</blockquote>
-<h3 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h3><h4 id="2017-4-21-优化Gradle编译速度，最快3s。"><a href="#2017-4-21-优化Gradle编译速度，最快3s。" class="headerlink" title="2017/4/21 优化Gradle编译速度，最快3s。"></a>2017/4/21 优化Gradle编译速度，最快3s。</h4><blockquote>
-<p>1、修改<strong><code>isAllDebug</code></strong> 作用域，由原存放在<code>module.properties</code> 修改存放在<code>gradle.properties</code>中。<br>2、可选模块<strong>include</strong>，只有在<code>module.properties</code>配置文件中开关为<strong>true</strong> 的模块，才会被Android Studio 所<strong>include</strong>。<br>3、新增<code>task</code> 耗时监听，方便查看耗时<code>task</code>，在<em>Gradle Console</em> 中输出。<br>4、区分测试开发输出，新增<strong><code>dev</code></strong> <code>productFlavors</code>,同时关闭一些不用的<code>productFlavors</code>，其中<strong><code>dev</code></strong> 用于测试Jenkins 输出apk <code>flavors</code>，<strong><code>buildVersion</code></strong> 用于研发本地输出apk，<strong>minSdkVersion=21</strong>，关闭<strong>fabric</strong> 在<strong><code>buildVersion</code></strong> 中上报初始化，同时也优化了其他模块的依赖。<br>5、本地默认只有<strong><code>buildVersion</code></strong><code>flavors</code>，只有在<code>isAllDebug=true</code>的情况，才会开启其他的<code>flavors</code>。以便获得更好的编译体验。<strong>还有修改完gradle配置文件后记得点build sync<img src="/images/toolbar-sync-gradle.png" alt="Alt text">进行同步一下。</strong></p>
-</blockquote>
-<h4 id="2017-5-27-添加自动合并多语言task"><a href="#2017-5-27-添加自动合并多语言task" class="headerlink" title="2017/5/27  添加自动合并多语言task"></a>2017/5/27  添加自动合并多语言task</h4><blockquote>
-<p>1 、使用<code>Python</code>脚本自动化合入多语言的<code>task</code>，所以在使用前需要有<code>Python</code>环境，相应代码块如下：</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">task mergeLanguage(<span class="built_in">type</span>: Exec) &#123;</div><div class="line">    workingDir <span class="string">'./'</span></div><div class="line">    <span class="built_in">command</span>Line <span class="string">"python"</span>, <span class="string">"merge_strs.py"</span>,</div><div class="line"><span class="string">"/home/silver/ssd/AndroidStudioProjects/cleaner_module/spaceplus_android/junk/src/main/res/"</span>,</div><div class="line">            <span class="string">"/home/silver/桌面/清理缓存0502-多语言/"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>其中第一个参数是需要添入多语言模块文件目录，第二个参数是存放多语言文件目录。修改参数 执行<strong><code>mergeLanguage</code></strong> <code>task</code>即可合并多语言。<br><img src="/images/2017-05-27 19:26:37屏幕截图.png" alt="Alt text"></p>
-<h4 id="2017-5-31-Auto-Update-Librarys-AAR"><a href="#2017-5-31-Auto-Update-Librarys-AAR" class="headerlink" title="2017/5/31  Auto Update Librarys AAR"></a>2017/5/31  Auto Update Librarys AAR</h4><blockquote>
-<p>1 、<strong><code>quartz-robot</code></strong>会在<strong>每周一至周五(8,12,16,20h)</strong>准时自动更新<code>aar</code>到git repos。</p>
-</blockquote>
-<h4 id="2017-5-1-更新说明"><a href="#2017-5-1-更新说明" class="headerlink" title="2017/5/1  更新说明"></a>2017/5/1  更新说明</h4><p>以上是模块化后解决过渡时期编译速度慢,方便开发调试等各种便利的方案,各位研发大拿体验<br>下,感受如丝般顺滑,如有问题及时沟通。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 &lt;strong&gt;commit&lt;/strong&gt;：&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;http://stash.lab.
-    
-    </summary>
-    
-      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
     
     
   </entry>
@@ -572,6 +487,93 @@
   </entry>
   
   <entry>
+    <title>ViewStub原理分析</title>
+    <link href="http://fushenghua.github.io/2016/06/07/ViewStub%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90/"/>
+    <id>http://fushenghua.github.io/2016/06/07/ViewStub原理分析/</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-20T03:23:33.990Z</updated>
+    
+    <content type="html"><![CDATA[<p>ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 <code>inflate()</code> 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调用了 <code>setVisibility(int)</code> 或 <code>inflate()</code>。</p>
+<p>我们先来看看构造方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr, <span class="keyword">int</span> defStyleRes)</span> </span>&#123;</div><div class="line">    <span class="keyword">super</span>(context);</div><div class="line"></div><div class="line">    <span class="keyword">final</span> TypedArray a = context.obtainStyledAttributes(attrs,</div><div class="line">            R.styleable.ViewStub, defStyleAttr, defStyleRes);</div><div class="line">    <span class="comment">// 要被加载的布局 Id</span></div><div class="line">    mInflatedId = a.getResourceId(R.styleable.ViewStub_inflatedId, NO_ID);</div><div class="line">    <span class="comment">// 要被加载的布局</span></div><div class="line">    mLayoutResource = a.getResourceId(R.styleable.ViewStub_layout, <span class="number">0</span>);</div><div class="line">    <span class="comment">// ViewStub 的 Id</span></div><div class="line">    mID = a.getResourceId(R.styleable.ViewStub_id, NO_ID);</div><div class="line">    a.recycle();</div><div class="line"></div><div class="line">    <span class="comment">// 初始状态为 GONE</span></div><div class="line">    setVisibility(GONE);</div><div class="line">    <span class="comment">// 设置为不会绘制</span></div><div class="line">    setWillNotDraw(<span class="keyword">true</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>接下来就看看关键的方法，ViewStub 很轻量，代码真的很少，很值得去看看具体实现，花不了多少时间。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 复写了 setVisibility(int) 方法</span></div><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="meta">@android</span>.view.<span class="function">RemotableViewMethod</span></div><div class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setVisibility</span><span class="params">(<span class="keyword">int</span> visibility)</span> &#123;</div><div class="line">    <span class="comment">// private WeakReference&lt;View&gt; mInflatedViewRef;</span></div><div class="line">    <span class="comment">// mInflatedViewRef 是对布局的弱引用</span></div><div class="line">    <span class="keyword">if</span> (mInflatedViewRef != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="comment">// 如果不为 null,就拿到懒加载的 View</span></div><div class="line">        View view = mInflatedViewRef.get();</div><div class="line">        <span class="keyword">if</span> (view != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="comment">// 然后就直接对 View 进行 setVisibility 操作</span></div><div class="line">            view.setVisibility(visibility);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">// 如果为 null，就抛出异常</span></div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"setVisibility called on un-referenced view"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">super</span>.setVisibility(visibility);</div><div class="line">        <span class="comment">// 之前说过，setVisibility(int) 也可以进行加载布局</span></div><div class="line">        <span class="keyword">if</span> (visibility == VISIBLE || visibility == INVISIBLE) &#123;</div><div class="line">            <span class="comment">// 因为在这里调用了 inflate()</span></div><div class="line">            inflate();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>inflate() 是关键的加载实现</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> View <span class="title">inflate</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="comment">// 获取父视图</span></div><div class="line">    <span class="keyword">final</span> ViewParent viewParent = getParent();</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (viewParent != <span class="keyword">null</span> &amp;&amp; viewParent <span class="keyword">instanceof</span> ViewGroup) &#123;</div><div class="line">        <span class="comment">// 如果没有指定布局，就会抛出异常</span></div><div class="line">        <span class="keyword">if</span> (mLayoutResource != <span class="number">0</span>) &#123;</div><div class="line">            <span class="comment">// viewParent 需为 ViewGroup</span></div><div class="line">            <span class="keyword">final</span> ViewGroup parent = (ViewGroup) viewParent;</div><div class="line">            <span class="keyword">final</span> LayoutInflater factory;</div><div class="line">            <span class="keyword">if</span> (mInflater != <span class="keyword">null</span>) &#123;</div><div class="line">                factory = mInflater;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="comment">// 如果没有指定 LayoutInflater</span></div><div class="line">                factory = LayoutInflater.from(mContext);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 获取布局</span></div><div class="line">            <span class="keyword">final</span> View view = factory.inflate(mLayoutResource, parent,</div><div class="line">                    <span class="keyword">false</span>);</div><div class="line">            <span class="comment">// 为 view 设置 Id</span></div><div class="line">            <span class="keyword">if</span> (mInflatedId != NO_ID) &#123;</div><div class="line">                view.setId(mInflatedId);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 计算出 ViewStub 在 parent 中的位置</span></div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> index = parent.indexOfChild(<span class="keyword">this</span>);</div><div class="line">            <span class="comment">// 把 ViewStub 从 parent 中移除</span></div><div class="line">            parent.removeViewInLayout(<span class="keyword">this</span>);</div><div class="line"></div><div class="line">            <span class="comment">// 接下来就是把 view 加到 parent 的 index 位置中</span></div><div class="line">            <span class="keyword">final</span> ViewGroup.LayoutParams layoutParams = getLayoutParams();</div><div class="line">            <span class="keyword">if</span> (layoutParams != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="comment">// 如果 ViewStub 的 layoutParams 不为空</span></div><div class="line">                <span class="comment">// 就设置给 view</span></div><div class="line">                parent.addView(view, index, layoutParams);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                parent.addView(view, index);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="comment">// mInflatedViewRef 就是在这里对 view 进行了弱引用</span></div><div class="line">            mInflatedViewRef = <span class="keyword">new</span> WeakReference&lt;View&gt;(view);</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (mInflateListener != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="comment">// 回调</span></div><div class="line">                mInflateListener.onInflate(<span class="keyword">this</span>, view);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">return</span> view;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"ViewStub must have a valid layoutResource"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"ViewStub must have a non-null ViewGroup viewParent"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>好了，主要的都分析完了，知道原理之后就可以自己动手写一个加强版的 ViewStub </p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 &lt;code&gt;inflate()&lt;/code&gt; 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调
+    
+    </summary>
+    
+      <category term="性能优化" scheme="http://fushenghua.github.io/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>优化Gradle 依赖使用方式</title>
+    <link href="http://fushenghua.github.io/2016/06/07/%E4%BC%98%E5%8C%96Gradle%20%E4%BE%9D%E8%B5%96%E4%BD%BF%E7%94%A8%E6%96%B9%E5%BC%8F/"/>
+    <id>http://fushenghua.github.io/2016/06/07/优化Gradle 依赖使用方式/</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-10T07:47:19.986Z</updated>
+    
+    <content type="html"><![CDATA[<p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p>
+<blockquote>
+<p><a href="http://stash.lab.tclclouds.com/projects/CLEAN/repos/cleaner_module/commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318" target="_blank" rel="external">commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318</a></p>
+</blockquote>
+<p>现在仍有些问题,比如 <strong>SpaceBase</strong> 依赖了 <strong>VirusEngine</strong> 等问题。</p>
+<h3 id="全新的依赖方式"><a href="#全新的依赖方式" class="headerlink" title="全新的依赖方式"></a>全新的依赖方式</h3><h4 id="需要那个开那个"><a href="#需要那个开那个" class="headerlink" title="需要那个开那个"></a>需要那个开那个</h4><p>修改项目中 <code>module.properties</code> 的配置, <code>true</code> 代表以<code>Project</code> 方式引入,反之则是<code>aar</code>方式,<strong>该配置已被忽略,只对当前工程配置有效。</strong></p>
+<p>如果你确实想提交修改,请使用 <code>git add -f module.properties</code> 命令强制添加。</p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="params">...</span></div><div class="line">isBoostengineDebug=<span class="literal">false</span></div><div class="line">isAppmgrDebug=<span class="literal">false</span></div><div class="line">isCpuDebug=<span class="literal">false</span></div><div class="line">isNotifyboxDebug=<span class="literal">false</span></div><div class="line">isHardwareDebug=<span class="literal">false</span></div><div class="line">isAntivirusDebug=<span class="literal">false</span></div><div class="line">isJunkDebug=<span class="literal">false</span></div><div class="line">isAllDebug=<span class="literal">false</span><span class="comment">// 全部 Debug，即编译Project模式</span></div></pre></td></tr></table></figure>
+<h4 id="添加新的模块依赖"><a href="#添加新的模块依赖" class="headerlink" title="添加新的模块依赖"></a>添加新的模块依赖</h4><p>如果你需要添加新的模块依赖,请按照以下方法,在 <code>module.gradle</code> 脚本中新增 <code>compile_*</code> 方法,如下:</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">def</span> compile_junk(<span class="keyword">Project</span> projectModule)&#123;</div><div class="line">    projectModule.<span class="keyword">dependencies</span>&#123;</div><div class="line">        <span class="keyword">if</span> (isAllDebug.toBoolean() || isJunkDebug.toBoolean()) &#123;</div><div class="line">            <span class="keyword">compile</span> <span class="keyword">project</span>(<span class="string">':junk'</span>)</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">compile</span>(name: <span class="string">'junk'</span>, ext: <span class="string">'aar'</span>)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后通过闭包形式传递出去,在 <code>module.gradle</code> 脚本中有<code>ext</code> 扩展属性 ，添加如下：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class">ext </span>&#123;</div><div class="line">  compile_junk = this.<span class="variable">&amp;compile_junk</span>  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最终通过以下方式使用</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compile_junk(<span class="name">getProject</span>())</div></pre></td></tr></table></figure>
+<h3 id="模块公用的Libs库"><a href="#模块公用的Libs库" class="headerlink" title="模块公用的Libs库"></a>模块公用的Libs库</h3><p>在工程目录的顶级 <code>libs</code> 文件夹中存放着各个模块的 <code>aar</code> ,如果需要更新,可以通过脚本进行<br>全量更新,或者各模块部分更新。</p>
+<h3 id="更新AAR"><a href="#更新AAR" class="headerlink" title="更新AAR"></a>更新AAR</h3><p>在<code>cleaner</code> 工程目录下，在你每次<strong>运行</strong>程序时 <code>update-aar.gradle</code>会自动更新<strong>已开启</strong>模块(如<code>isJunkDebug=true</code>)的<code>aar</code> 到 公用<code>libs</code>库中，你所需要做的就是 <code>commit</code>，这样能保证各位小伙伴使用的都是较新的<code>aar</code>。</p>
+<p>同样的你也可以手动触发<code>Task</code>来更新<code>aar</code>，相应<code>Task</code> 如下：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">task</span> updateAAR &lt;&lt; &#123;</div><div class="line">    eachLibsAAR()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="版本发布"><a href="#版本发布" class="headerlink" title="版本发布"></a>版本发布</h3><p>如果需要全部通过 <code>Project</code> 形式构建<strong>版本发布</strong>,只需添加动态参数 <code>isAllDebug=true</code> ，比如：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAllDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
+<p>同样的可以添加更多的模块参数,来表示某些模块通过 <code>Project</code> 形式构建，比如：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAppmgrDebug=<span class="literal">true</span> -PisJunkDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
+<blockquote>
+<p>注意: 默认都是以引入<code>aar</code> 形式构建(除<strong>SpaceBase</strong>),所以如果不添加参数,需要及时更新<code>aar</code></p>
+</blockquote>
+<h3 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h3><h4 id="2017-4-21-优化Gradle编译速度，最快3s。"><a href="#2017-4-21-优化Gradle编译速度，最快3s。" class="headerlink" title="2017/4/21 优化Gradle编译速度，最快3s。"></a>2017/4/21 优化Gradle编译速度，最快3s。</h4><blockquote>
+<p>1、修改<strong><code>isAllDebug</code></strong> 作用域，由原存放在<code>module.properties</code> 修改存放在<code>gradle.properties</code>中。<br>2、可选模块<strong>include</strong>，只有在<code>module.properties</code>配置文件中开关为<strong>true</strong> 的模块，才会被Android Studio 所<strong>include</strong>。<br>3、新增<code>task</code> 耗时监听，方便查看耗时<code>task</code>，在<em>Gradle Console</em> 中输出。<br>4、区分测试开发输出，新增<strong><code>dev</code></strong> <code>productFlavors</code>,同时关闭一些不用的<code>productFlavors</code>，其中<strong><code>dev</code></strong> 用于测试Jenkins 输出apk <code>flavors</code>，<strong><code>buildVersion</code></strong> 用于研发本地输出apk，<strong>minSdkVersion=21</strong>，关闭<strong>fabric</strong> 在<strong><code>buildVersion</code></strong> 中上报初始化，同时也优化了其他模块的依赖。<br>5、本地默认只有<strong><code>buildVersion</code></strong><code>flavors</code>，只有在<code>isAllDebug=true</code>的情况，才会开启其他的<code>flavors</code>。以便获得更好的编译体验。<strong>还有修改完gradle配置文件后记得点build sync<img src="/images/toolbar-sync-gradle.png" alt="Alt text">进行同步一下。</strong></p>
+</blockquote>
+<h4 id="2017-5-27-添加自动合并多语言task"><a href="#2017-5-27-添加自动合并多语言task" class="headerlink" title="2017/5/27  添加自动合并多语言task"></a>2017/5/27  添加自动合并多语言task</h4><blockquote>
+<p>1 、使用<code>Python</code>脚本自动化合入多语言的<code>task</code>，所以在使用前需要有<code>Python</code>环境，相应代码块如下：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">task mergeLanguage(<span class="built_in">type</span>: Exec) &#123;</div><div class="line">    workingDir <span class="string">'./'</span></div><div class="line">    <span class="built_in">command</span>Line <span class="string">"python"</span>, <span class="string">"merge_strs.py"</span>,</div><div class="line"><span class="string">"/home/silver/ssd/AndroidStudioProjects/cleaner_module/spaceplus_android/junk/src/main/res/"</span>,</div><div class="line">            <span class="string">"/home/silver/桌面/清理缓存0502-多语言/"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中第一个参数是需要添入多语言模块文件目录，第二个参数是存放多语言文件目录。修改参数 执行<strong><code>mergeLanguage</code></strong> <code>task</code>即可合并多语言。<br><img src="/images/2017-05-27 19:26:37屏幕截图.png" alt="Alt text"></p>
+<h4 id="2017-5-31-Auto-Update-Librarys-AAR"><a href="#2017-5-31-Auto-Update-Librarys-AAR" class="headerlink" title="2017/5/31  Auto Update Librarys AAR"></a>2017/5/31  Auto Update Librarys AAR</h4><blockquote>
+<p>1 、<strong><code>quartz-robot</code></strong>会在<strong>每周一至周五(8,12,16,20h)</strong>准时自动更新<code>aar</code>到git repos。</p>
+</blockquote>
+<h4 id="2017-5-1-更新说明"><a href="#2017-5-1-更新说明" class="headerlink" title="2017/5/1  更新说明"></a>2017/5/1  更新说明</h4><p>以上是模块化后解决过渡时期编译速度慢,方便开发调试等各种便利的方案,各位研发大拿体验<br>下,感受如丝般顺滑,如有问题及时沟通。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 &lt;strong&gt;commit&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;a href=&quot;http://stash.lab.
+    
+    </summary>
+    
+      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>Android 之美 Android 进阶（一）</title>
     <link href="http://fushenghua.github.io/2016/04/09/2016-04-09-Android%20%E4%B9%8B%E7%BE%8E%20Android%20%E8%BF%9B%E9%98%B6%EF%BC%88%E4%B8%80%EF%BC%89/"/>
     <id>http://fushenghua.github.io/2016/04/09/2016-04-09-Android 之美 Android 进阶（一）/</id>
@@ -789,50 +791,6 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
   </entry>
   
   <entry>
-    <title>Linux下安装Android Studio</title>
-    <link href="http://fushenghua.github.io/2015/09/11/2015-09-11-Linux%E5%AE%89%E8%A3%85Android%20Studio/"/>
-    <id>http://fushenghua.github.io/2015/09/11/2015-09-11-Linux安装Android Studio/</id>
-    <published>2015-09-11T03:23:32.000Z</published>
-    <updated>2018-04-11T05:29:36.527Z</updated>
-    
-    <content type="html"><![CDATA[<pre><code>实在是不喜欢使用Windows了，时间长了就变得卡顿，还是喜欢Linux的文件系统不会像Windows的文件系统一样产生碎片化严重、
-</code></pre><p>用Linux开发Android 感觉太好了，Android Studio 美观，编译速度也快，终端好用。这里我使用的是Ubuntu 安装Android Studio<br>非常方便。</p>
-<p>##1.百度网盘Android Studio 资源<br>Android集成环境 NDK JDK 总链接 : <a href="http://pan.baidu.com/s/1bnjaDKb" target="_blank" rel="external">http://pan.baidu.com/s/1bnjaDKb</a>;</p>
-<p>Android Studio Linux版 : <a href="http://pan.baidu.com/s/1eQjA6MA" target="_blank" rel="external">http://pan.baidu.com/s/1eQjA6MA</a> ;</p>
-<p>Adt Bundle windows 64位版 : <a href="http://pan.baidu.com/s/1bnvlVnL" target="_blank" rel="external">http://pan.baidu.com/s/1bnvlVnL</a>;</p>
-<p>Adt Bundle Linux 32位版 : <a href="http://pan.baidu.com/s/1jG41dI2" target="_blank" rel="external">http://pan.baidu.com/s/1jG41dI2</a>;</p>
-<p>Adt Bundle Linux 64位版  : <a href="http://pan.baidu.com/s/1dDxjHXv" target="_blank" rel="external">http://pan.baidu.com/s/1dDxjHXv</a>;</p>
-<p>NDK Linux 32位 : <a href="http://pan.baidu.com/s/1eQtJVe6" target="_blank" rel="external">http://pan.baidu.com/s/1eQtJVe6</a>;</p>
-<p>NDK Linux 64位 : <a href="http://pan.baidu.com/s/1bnvRRJL" target="_blank" rel="external">http://pan.baidu.com/s/1bnvRRJL</a>;</p>
-<p>NDK Windows 32位 : <a href="http://pan.baidu.com/s/1eQzj9iq" target="_blank" rel="external">http://pan.baidu.com/s/1eQzj9iq</a>;</p>
-<p>##2.下载安装JDK<br>第一:</p>
-<figure class="highlight plain"><figcaption><span>Ubuntu 中使用 PPA 安装 Java 8 ( 支持 Ubuntu 10.04 - Ubuntu 14.04 ):</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">sudo add-apt-repository ppa:webupd8team/java</div><div class="line"></div><div class="line">sudo apt-get update</div><div class="line"></div><div class="line">sudo apt-get install Oracle-java8-installer</div><div class="line"></div><div class="line">完成之后可以通过以下命令来查看版本：</div><div class="line"></div><div class="line">javac -version</div><div class="line"></div><div class="line">安装 Java 8 需要接受许可，如果你想自动安装，那么可以在安装之前运行：</div><div class="line"></div><div class="line">echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections</div><div class="line"></div><div class="line">设置 Java 8 环境变量：</div><div class="line"></div><div class="line">sudo apt-get install oracle-java8-set-default</div><div class="line"></div><div class="line">切换为 Java 7 ：</div><div class="line"></div><div class="line">sudo update-java-alternatives -s java-7-oracle</div><div class="line"></div><div class="line">再切换为 Java 8：</div><div class="line"></div><div class="line">sudo update-java-alternatives -s java-8-oracle</div></pre></td></tr></table></figure>
-<p>##3.测试</p>
-<p>打开一个终端，输入下面命令：</p>
-<figure class="highlight applescript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -<span class="built_in">version</span></div></pre></td></tr></table></figure>
-<p>显示结果：</p>
-<p>java version “1.7.0_05”<br>Java(TM) SE Runtime Environment (build 1.7.0_05-b05)</p>
-<p>Java HotSpot(TM) Server VM (build 23.1-b03, mixed mode)</p>
-<p>这表示java命令已经可以运行了。</p>
-<p>##4.安装Android Studio<br>上面网盘的资源</p>
-<figure class="highlight armasm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="number">1</span>、下载<span class="keyword">android </span>studio包<span class="keyword">android-studio-bundle-133.970939-linux.tgz</span></div><div class="line">解压：$ sudo tar zxvf <span class="keyword">android-studio-bundle-133.970939-linux.tgz</span></div><div class="line">解压后文件夹名为<span class="keyword">android-studio。</span></div><div class="line">移动：$ sudo mv <span class="keyword">android-studio </span>/<span class="meta">opt</span>/</div><div class="line">打开文件夹：$ cd /<span class="meta">opt</span>/<span class="keyword">android-studio/bin/</span></div><div class="line">运行：$ sudo studio.sh</div><div class="line"><span class="symbol">oh</span> shit，提示命令不存在，怎么回事？额，恩，不是这么打的吧？！</div><div class="line">再次运行：$ sudo ./studio.sh</div><div class="line"><span class="symbol">OK</span>，打开了。固定到任务栏方便以后打开</div></pre></td></tr></table></figure>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;pre&gt;&lt;code&gt;实在是不喜欢使用Windows了，时间长了就变得卡顿，还是喜欢Linux的文件系统不会像Windows的文件系统一样产生碎片化严重、
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;用Linux开发Android 感觉太好了，Android Studio 美观，编译速度也快
-    
-    </summary>
-    
-      <category term="linux" scheme="http://fushenghua.github.io/categories/linux/"/>
-    
-    
-      <category term="linux" scheme="http://fushenghua.github.io/tags/linux/"/>
-    
-  </entry>
-  
-  <entry>
     <title>给我们的apk应用瘦身计划</title>
     <link href="http://fushenghua.github.io/2015/09/11/2015-09-11-%E7%BB%99%E6%88%91%E4%BB%AC%E7%9A%84apk%E5%BA%94%E7%94%A8%E7%98%A6%E8%BA%AB%E8%AE%A1%E5%88%92(%E4%B8%80)/"/>
     <id>http://fushenghua.github.io/2015/09/11/2015-09-11-给我们的apk应用瘦身计划(一)/</id>
@@ -880,6 +838,50 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     
     
       <category term="优化" scheme="http://fushenghua.github.io/tags/%E4%BC%98%E5%8C%96/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Linux下安装Android Studio</title>
+    <link href="http://fushenghua.github.io/2015/09/11/2015-09-11-Linux%E5%AE%89%E8%A3%85Android%20Studio/"/>
+    <id>http://fushenghua.github.io/2015/09/11/2015-09-11-Linux安装Android Studio/</id>
+    <published>2015-09-11T03:23:32.000Z</published>
+    <updated>2018-04-11T05:29:36.527Z</updated>
+    
+    <content type="html"><![CDATA[<pre><code>实在是不喜欢使用Windows了，时间长了就变得卡顿，还是喜欢Linux的文件系统不会像Windows的文件系统一样产生碎片化严重、
+</code></pre><p>用Linux开发Android 感觉太好了，Android Studio 美观，编译速度也快，终端好用。这里我使用的是Ubuntu 安装Android Studio<br>非常方便。</p>
+<p>##1.百度网盘Android Studio 资源<br>Android集成环境 NDK JDK 总链接 : <a href="http://pan.baidu.com/s/1bnjaDKb" target="_blank" rel="external">http://pan.baidu.com/s/1bnjaDKb</a>;</p>
+<p>Android Studio Linux版 : <a href="http://pan.baidu.com/s/1eQjA6MA" target="_blank" rel="external">http://pan.baidu.com/s/1eQjA6MA</a> ;</p>
+<p>Adt Bundle windows 64位版 : <a href="http://pan.baidu.com/s/1bnvlVnL" target="_blank" rel="external">http://pan.baidu.com/s/1bnvlVnL</a>;</p>
+<p>Adt Bundle Linux 32位版 : <a href="http://pan.baidu.com/s/1jG41dI2" target="_blank" rel="external">http://pan.baidu.com/s/1jG41dI2</a>;</p>
+<p>Adt Bundle Linux 64位版  : <a href="http://pan.baidu.com/s/1dDxjHXv" target="_blank" rel="external">http://pan.baidu.com/s/1dDxjHXv</a>;</p>
+<p>NDK Linux 32位 : <a href="http://pan.baidu.com/s/1eQtJVe6" target="_blank" rel="external">http://pan.baidu.com/s/1eQtJVe6</a>;</p>
+<p>NDK Linux 64位 : <a href="http://pan.baidu.com/s/1bnvRRJL" target="_blank" rel="external">http://pan.baidu.com/s/1bnvRRJL</a>;</p>
+<p>NDK Windows 32位 : <a href="http://pan.baidu.com/s/1eQzj9iq" target="_blank" rel="external">http://pan.baidu.com/s/1eQzj9iq</a>;</p>
+<p>##2.下载安装JDK<br>第一:</p>
+<figure class="highlight plain"><figcaption><span>Ubuntu 中使用 PPA 安装 Java 8 ( 支持 Ubuntu 10.04 - Ubuntu 14.04 ):</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">sudo add-apt-repository ppa:webupd8team/java</div><div class="line"></div><div class="line">sudo apt-get update</div><div class="line"></div><div class="line">sudo apt-get install Oracle-java8-installer</div><div class="line"></div><div class="line">完成之后可以通过以下命令来查看版本：</div><div class="line"></div><div class="line">javac -version</div><div class="line"></div><div class="line">安装 Java 8 需要接受许可，如果你想自动安装，那么可以在安装之前运行：</div><div class="line"></div><div class="line">echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections</div><div class="line"></div><div class="line">设置 Java 8 环境变量：</div><div class="line"></div><div class="line">sudo apt-get install oracle-java8-set-default</div><div class="line"></div><div class="line">切换为 Java 7 ：</div><div class="line"></div><div class="line">sudo update-java-alternatives -s java-7-oracle</div><div class="line"></div><div class="line">再切换为 Java 8：</div><div class="line"></div><div class="line">sudo update-java-alternatives -s java-8-oracle</div></pre></td></tr></table></figure>
+<p>##3.测试</p>
+<p>打开一个终端，输入下面命令：</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -<span class="built_in">version</span></div></pre></td></tr></table></figure>
+<p>显示结果：</p>
+<p>java version “1.7.0_05”<br>Java(TM) SE Runtime Environment (build 1.7.0_05-b05)</p>
+<p>Java HotSpot(TM) Server VM (build 23.1-b03, mixed mode)</p>
+<p>这表示java命令已经可以运行了。</p>
+<p>##4.安装Android Studio<br>上面网盘的资源</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="number">1</span>、下载<span class="keyword">android </span>studio包<span class="keyword">android-studio-bundle-133.970939-linux.tgz</span></div><div class="line">解压：$ sudo tar zxvf <span class="keyword">android-studio-bundle-133.970939-linux.tgz</span></div><div class="line">解压后文件夹名为<span class="keyword">android-studio。</span></div><div class="line">移动：$ sudo mv <span class="keyword">android-studio </span>/<span class="meta">opt</span>/</div><div class="line">打开文件夹：$ cd /<span class="meta">opt</span>/<span class="keyword">android-studio/bin/</span></div><div class="line">运行：$ sudo studio.sh</div><div class="line"><span class="symbol">oh</span> shit，提示命令不存在，怎么回事？额，恩，不是这么打的吧？！</div><div class="line">再次运行：$ sudo ./studio.sh</div><div class="line"><span class="symbol">OK</span>，打开了。固定到任务栏方便以后打开</div></pre></td></tr></table></figure>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;pre&gt;&lt;code&gt;实在是不喜欢使用Windows了，时间长了就变得卡顿，还是喜欢Linux的文件系统不会像Windows的文件系统一样产生碎片化严重、
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;用Linux开发Android 感觉太好了，Android Studio 美观，编译速度也快
+    
+    </summary>
+    
+      <category term="linux" scheme="http://fushenghua.github.io/categories/linux/"/>
+    
+    
+      <category term="linux" scheme="http://fushenghua.github.io/tags/linux/"/>
     
   </entry>
   

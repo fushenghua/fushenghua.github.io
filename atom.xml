@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://fushenghua.github.io/"/>
-  <updated>2018-04-14T06:59:49.015Z</updated>
+  <updated>2018-04-20T05:25:03.649Z</updated>
   <id>http://fushenghua.github.io/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://fushenghua.github.io/archives/ed6915f6.html"/>
     <id>http://fushenghua.github.io/archives/ed6915f6.html</id>
     <published>2018-04-09T07:39:39.000Z</published>
-    <updated>2018-04-14T06:59:49.015Z</updated>
+    <updated>2018-04-20T05:25:03.649Z</updated>
     
     <content type="html"><![CDATA[<p>使用Python编程的都知道，Python的包安装非常的方便，一般都是可以<strong>pip</strong>来安装搞定：</p>
 <figure class="highlight cmake"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">sudo pip <span class="keyword">install</span></div></pre></td></tr></table></figure>
@@ -83,7 +83,7 @@
     <link href="http://fushenghua.github.io/archives/3e3728fd.html"/>
     <id>http://fushenghua.github.io/archives/3e3728fd.html</id>
     <published>2018-04-09T07:39:39.000Z</published>
-    <updated>2018-04-11T05:10:30.518Z</updated>
+    <updated>2018-04-20T05:25:03.643Z</updated>
     
     <content type="html"><![CDATA[<p>从以前学习java 开始就听说枚举很占内存，然后老版Android开发指南文章也指出，枚举通常需要比静态常量多两倍的内存。你应该严格避免在android上使用枚举。那么究竟为什么说枚举更占内存呢？本文就是通过这种方法来分析枚举为什么占内存的，而不是说拒绝枚举。</p>
 <blockquote>
@@ -153,7 +153,7 @@
     <link href="http://fushenghua.github.io/archives/a72a1e10.html"/>
     <id>http://fushenghua.github.io/archives/a72a1e10.html</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-12T03:02:07.792Z</updated>
+    <updated>2018-04-20T05:25:03.638Z</updated>
     
     <content type="html"><![CDATA[<p>APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。</p>
 <h2 id="一、认识APK安全性"><a href="#一、认识APK安全性" class="headerlink" title="一、认识APK安全性"></a>一、认识APK安全性</h2><h3 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h3><p>可以通过修改客户端文件篡改客户端行为。攻击者可以让客户端显示自己制作的钓鱼网站，偷取用户信息</p>
@@ -205,7 +205,7 @@
     <link href="http://fushenghua.github.io/archives/375726b.html"/>
     <id>http://fushenghua.github.io/archives/375726b.html</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-10T07:45:28.309Z</updated>
+    <updated>2018-04-20T05:25:03.655Z</updated>
     
     <content type="html"><![CDATA[<p>为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。</p>
 <h3 id="版本命名规范"><a href="#版本命名规范" class="headerlink" title="版本命名规范"></a>版本命名规范</h3><p>软件版本号由四部分组成，第一个1为主版本号，第二个1为子版本号，第三个1为阶段版本号，第四部分为日期版本号加希腊字母版本号，希腊字母版本号共有5种，分别为：base、alpha、beta、RC、release。例如：1.1.1.051021_beta。</p>
@@ -263,7 +263,7 @@
     <link href="http://fushenghua.github.io/archives/235d5e38.html"/>
     <id>http://fushenghua.github.io/archives/235d5e38.html</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T03:29:57.066Z</updated>
+    <updated>2018-04-20T05:25:03.646Z</updated>
     
     <content type="html"><![CDATA[<p>ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 <code>inflate()</code> 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调用了 <code>setVisibility(int)</code> 或 <code>inflate()</code>。</p>
 <p>我们先来看看构造方法：</p>
@@ -311,7 +311,7 @@
     <link href="http://fushenghua.github.io/archives/db6d97a8.html"/>
     <id>http://fushenghua.github.io/archives/db6d97a8.html</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2016-08-27T10:00:48.000Z</updated>
+    <updated>2018-04-20T05:25:03.634Z</updated>
     
     <content type="html"><![CDATA[<p>让我们的apk文件尽可能更小，移除那些未使用的代码和资源文件。本章节介绍了如何做到让APK更小，性能更好，下载转化率会更高，以及如何指定在构建APK过程中保留或移除项目中的代码和资源，在我们还没有分析APK大小之前，项目中存在一些资源放置处理不当，没有统一的规范，依赖管理不合理，资源重叠，dex方法数过多、文件过大等问题，导致整个APK文件也比较大，对于下载转化率必然有一定的影响。</p>
 <p>[TOC]</p>
@@ -539,7 +539,7 @@
     <link href="http://fushenghua.github.io/archives/c66eed35.html"/>
     <id>http://fushenghua.github.io/archives/c66eed35.html</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-10T07:47:19.986Z</updated>
+    <updated>2018-04-20T05:25:03.653Z</updated>
     
     <content type="html"><![CDATA[<p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p>
 <blockquote>
@@ -598,7 +598,7 @@
     <link href="http://fushenghua.github.io/archives/8e05eece.html"/>
     <id>http://fushenghua.github.io/archives/8e05eece.html</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T04:53:12.348Z</updated>
+    <updated>2018-04-20T05:25:03.640Z</updated>
     
     <content type="html"><![CDATA[<p>最近又要把公司<code>Stash</code>上的项目在别部门一个私有仓库,平移到自己部门项目组的仓库，要求迁移的时候要保留已有的分支和以前的提交记录，类似的需求经常遇到，刚好做个记录。</p>
 <p>1). 从原地址克隆一份裸版本库(纯仓库形式)，比如原本托管于 GitHub。</p>
@@ -637,7 +637,7 @@
     <link href="http://fushenghua.github.io/archives/2abed2d6.html"/>
     <id>http://fushenghua.github.io/archives/2abed2d6.html</id>
     <published>2016-04-09T03:23:32.000Z</published>
-    <updated>2018-04-11T05:10:24.051Z</updated>
+    <updated>2018-04-20T05:25:03.625Z</updated>
     
     <content type="html"><![CDATA[<p>在前几篇文章中都是讲的基础，大家应该会觉得非常熟悉，但往往我们可能对于基础某些细节认识不够彻底或贯穿不全，我一直认为基础都是比较难的，那么本章节终于到进阶啦，主要讲的是View 的相关知识，在前面<a href="http://blog.csdn.net/vfush/article/details/51534916" target="_blank" rel="external">《Android 面试题总结之Android 基础 (六)》
 </a>中已经对View有了一定的了解，由于内容较多且也是<strong>面试必考题</strong>，所以将分两篇继续深入的理解View。</p>
@@ -854,7 +854,7 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     <link href="http://fushenghua.github.io/archives/6412bd09.html"/>
     <id>http://fushenghua.github.io/archives/6412bd09.html</id>
     <published>2015-09-11T03:23:32.000Z</published>
-    <updated>2018-04-19T02:10:11.288Z</updated>
+    <updated>2018-04-20T05:25:03.622Z</updated>
     
     <content type="html"><![CDATA[<h4 id="现在apk越来越大，原因有如下几个："><a href="#现在apk越来越大，原因有如下几个：" class="headerlink" title="现在apk越来越大，原因有如下几个："></a>现在apk越来越大，原因有如下几个：</h4><ul>
 <li>1.多dpi支持([l|m|tv|h|x|xx|xxx]dpi)</li>
@@ -905,7 +905,7 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     <link href="http://fushenghua.github.io/archives/89bbc27f.html"/>
     <id>http://fushenghua.github.io/archives/89bbc27f.html</id>
     <published>2015-09-11T03:23:32.000Z</published>
-    <updated>2018-04-11T05:29:36.527Z</updated>
+    <updated>2018-04-20T05:25:03.619Z</updated>
     
     <content type="html"><![CDATA[<pre><code>实在是不喜欢使用Windows了，时间长了就变得卡顿，还是喜欢Linux的文件系统不会像Windows的文件系统一样产生碎片化严重、
 </code></pre><p>用Linux开发Android 感觉太好了，Android Studio 美观，编译速度也快，终端好用。这里我使用的是Ubuntu 安装Android Studio<br>非常方便。</p>
@@ -949,7 +949,7 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     <link href="http://fushenghua.github.io/archives/c8dd37ec.html"/>
     <id>http://fushenghua.github.io/archives/c8dd37ec.html</id>
     <published>2015-08-12T03:23:32.000Z</published>
-    <updated>2018-04-11T05:29:33.620Z</updated>
+    <updated>2018-04-20T05:25:03.615Z</updated>
     
     <content type="html"><![CDATA[<p>Gradle其他好处就不多说，在android应用发布的时候，如果要统计多个渠道，gradle 批量打包的好处就显示出来了,发现确实比Ant打包会方便很多,就说下本篇Gradle作用吧</p>
 <p>主要功能：<br>多渠道自动打包<br>beta /debug/relese /多版本打包<br>dex突破65535的限制<br>打包自动命名，提交测试时方便识别，不用每次打包测试 ，重命名啦！<br>自动移除程序LOG_DEBUG调试<br>自动移除无用资源文件，为APK瘦身<br>混淆代码<br>更多强大功能探索中……</p>
@@ -978,7 +978,7 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     <link href="http://fushenghua.github.io/archives/158db06e.html"/>
     <id>http://fushenghua.github.io/archives/158db06e.html</id>
     <published>2015-07-13T04:23:32.000Z</published>
-    <updated>2018-04-11T05:29:30.740Z</updated>
+    <updated>2018-04-20T05:25:03.612Z</updated>
     
     <content type="html"><![CDATA[<p>Handler在Android开发中非常重要，最常见的使用场景就是在子线程需要更新UI，用Handler来投递消息到主线程执行UI更新操作。因为 Android系统的View是非线程安全的，所以需要在主线程更新UI。总的来说Handler就是用来做线程间通信，在不同线程之间传递消息。</p>
 <p>注：这篇文章所讲到的Handler是在主线程创建的，主线程在开始的时候已经创建了默认的消息循环。后面的文章会讲如何创建自己的消息循环。<br>从图中可以看出，四种颜色分别代表了四个对象，并且大致描述了几个对象之间的关系，以及消息的流转过程，首先Handler通过sendMessage将消息投递给MessageQueue，Looper通过消息循环（loop）不断的从MessageQueue中取出消息，然后消息被Handler的dispatchMessage分发到handleMessage方法消费掉。<br>消息循环中涉及的重要对象</p>

@@ -4,11 +4,11 @@
 
     
   <url>
-    <loc>http://fushenghua.github.io/archives/8e05eece.html</loc>
-    <lastmod>2018-04-20T04:53:12.348Z</lastmod>
+    <loc>http://fushenghua.github.io/archives/375726b.html</loc>
+    <lastmod>2018-04-20T05:25:03.655Z</lastmod>
     <data>
         <display>
-        <title>git仓库迁移</title>
+        <title>版本管理发布流程</title>
         <pubTime>2016-06-07T00:55:29.000Z</pubTime>
         
          
@@ -22,8 +22,44 @@
 
     
   <url>
+    <loc>http://fushenghua.github.io/archives/c66eed35.html</loc>
+    <lastmod>2018-04-20T05:25:03.653Z</lastmod>
+    <data>
+        <display>
+        <title>优化Gradle 依赖使用方式</title>
+        <pubTime>2016-06-07T00:55:29.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="基础技能" url="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://fushenghua.github.io/archives/ed6915f6.html</loc>
+    <lastmod>2018-04-20T05:25:03.649Z</lastmod>
+    <data>
+        <display>
+        <title>在Pypi上发布自己的Python包</title>
+        <pubTime>2018-04-09T07:39:39.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="python" url="http://fushenghua.github.io/categories/python/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://fushenghua.github.io/archives/235d5e38.html</loc>
-    <lastmod>2018-04-20T03:29:57.066Z</lastmod>
+    <lastmod>2018-04-20T05:25:03.646Z</lastmod>
     <data>
         <display>
         <title>ViewStub原理分析</title>
@@ -40,8 +76,98 @@
 
     
   <url>
+    <loc>http://fushenghua.github.io/archives/3e3728fd.html</loc>
+    <lastmod>2018-04-20T05:25:03.643Z</lastmod>
+    <data>
+        <display>
+        <title>为什么说枚举更占内存，枚举原理是什么？</title>
+        <pubTime>2018-04-09T07:39:39.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="android" url="http://fushenghua.github.io/categories/android/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://fushenghua.github.io/archives/8e05eece.html</loc>
+    <lastmod>2018-04-20T05:25:03.640Z</lastmod>
+    <data>
+        <display>
+        <title>git仓库迁移</title>
+        <pubTime>2016-06-07T00:55:29.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="基础技能" url="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://fushenghua.github.io/archives/a72a1e10.html</loc>
+    <lastmod>2018-04-20T05:25:03.638Z</lastmod>
+    <data>
+        <display>
+        <title>app安全之Apk完整性校验</title>
+        <pubTime>2016-06-07T00:55:29.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="安全" url="http://fushenghua.github.io/categories/%E5%AE%89%E5%85%A8/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://fushenghua.github.io/archives/db6d97a8.html</loc>
+    <lastmod>2018-04-20T05:25:03.634Z</lastmod>
+    <data>
+        <display>
+        <title>APK 瘦身，减少APK体积的大小</title>
+        <pubTime>2016-06-07T00:55:29.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="性能优化" url="http://fushenghua.github.io/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
+    <loc>http://fushenghua.github.io/archives/2abed2d6.html</loc>
+    <lastmod>2018-04-20T05:25:03.625Z</lastmod>
+    <data>
+        <display>
+        <title>Android 之美 Android 进阶（一）</title>
+        <pubTime>2016-04-09T03:23:32.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="android" url="http://fushenghua.github.io/categories/android/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://fushenghua.github.io/archives/6412bd09.html</loc>
-    <lastmod>2018-04-19T02:10:11.288Z</lastmod>
+    <lastmod>2018-04-20T05:25:03.622Z</lastmod>
     <data>
         <display>
         <title>给我们的apk应用瘦身计划</title>
@@ -60,46 +186,8 @@
 
     
   <url>
-    <loc>http://fushenghua.github.io/archives/ed6915f6.html</loc>
-    <lastmod>2018-04-14T06:59:49.015Z</lastmod>
-    <data>
-        <display>
-        <title>在Pypi上发布自己的Python包</title>
-        <pubTime>2018-04-09T07:39:39.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="python" url="http://fushenghua.github.io/categories/python/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-    
-    
-  <url>
-    <loc>http://fushenghua.github.io/archives/a72a1e10.html</loc>
-    <lastmod>2018-04-12T03:02:07.792Z</lastmod>
-    <data>
-        <display>
-        <title>app安全之Apk完整性校验</title>
-        <pubTime>2016-06-07T00:55:29.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="安全" url="http://fushenghua.github.io/categories/%E5%AE%89%E5%85%A8/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
     <loc>http://fushenghua.github.io/archives/89bbc27f.html</loc>
-    <lastmod>2018-04-11T05:29:36.527Z</lastmod>
+    <lastmod>2018-04-20T05:25:03.619Z</lastmod>
     <data>
         <display>
         <title>Linux下安装Android Studio</title>
@@ -119,7 +207,7 @@
     
   <url>
     <loc>http://fushenghua.github.io/archives/c8dd37ec.html</loc>
-    <lastmod>2018-04-11T05:29:33.620Z</lastmod>
+    <lastmod>2018-04-20T05:25:03.615Z</lastmod>
     <data>
         <display>
         <title>用Android Studio Gradle 构建、打包、发布项目</title>
@@ -137,7 +225,7 @@
     
   <url>
     <loc>http://fushenghua.github.io/archives/158db06e.html</loc>
-    <lastmod>2018-04-11T05:29:30.740Z</lastmod>
+    <lastmod>2018-04-20T05:25:03.612Z</lastmod>
     <data>
         <display>
         <title>深入理解Handler原理</title>
@@ -156,93 +244,5 @@
 
     
     
-  <url>
-    <loc>http://fushenghua.github.io/archives/3e3728fd.html</loc>
-    <lastmod>2018-04-11T05:10:30.518Z</lastmod>
-    <data>
-        <display>
-        <title>为什么说枚举更占内存，枚举原理是什么？</title>
-        <pubTime>2018-04-09T07:39:39.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="android" url="http://fushenghua.github.io/categories/android/"/>
-          
-        </display>
-    </data>
-    </url>
-
     
-  <url>
-    <loc>http://fushenghua.github.io/archives/2abed2d6.html</loc>
-    <lastmod>2018-04-11T05:10:24.051Z</lastmod>
-    <data>
-        <display>
-        <title>Android 之美 Android 进阶（一）</title>
-        <pubTime>2016-04-09T03:23:32.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="android" url="http://fushenghua.github.io/categories/android/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://fushenghua.github.io/archives/c66eed35.html</loc>
-    <lastmod>2018-04-10T07:47:19.986Z</lastmod>
-    <data>
-        <display>
-        <title>优化Gradle 依赖使用方式</title>
-        <pubTime>2016-06-07T00:55:29.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="基础技能" url="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://fushenghua.github.io/archives/375726b.html</loc>
-    <lastmod>2018-04-10T07:45:28.309Z</lastmod>
-    <data>
-        <display>
-        <title>版本管理发布流程</title>
-        <pubTime>2016-06-07T00:55:29.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="基础技能" url="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://fushenghua.github.io/archives/db6d97a8.html</loc>
-    <lastmod>2016-08-27T10:00:48.000Z</lastmod>
-    <data>
-        <display>
-        <title>APK 瘦身，减少APK体积的大小</title>
-        <pubTime>2016-06-07T00:55:29.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="性能优化" url="http://fushenghua.github.io/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
-          
-        </display>
-    </data>
-    </url>
-
 </urlset>

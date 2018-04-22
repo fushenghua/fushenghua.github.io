@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://fushenghua.github.io/"/>
-  <updated>2018-04-22T08:11:02.389Z</updated>
+  <updated>2018-04-20T05:25:03.649Z</updated>
   <id>http://fushenghua.github.io/</id>
   
   <author>
@@ -16,13 +16,244 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title></title>
-    <link href="http://fushenghua.github.io/archives/0.html"/>
-    <id>http://fushenghua.github.io/archives/0.html</id>
-    <published>2018-04-22T08:10:06.385Z</published>
-    <updated>2018-04-22T08:11:02.389Z</updated>
+    <title>在Pypi上发布自己的Python包</title>
+    <link href="http://fushenghua.github.io/archives/ed6915f6.html"/>
+    <id>http://fushenghua.github.io/archives/ed6915f6.html</id>
+    <published>2018-04-09T07:39:39.000Z</published>
+    <updated>2018-04-20T05:25:03.649Z</updated>
     
-    <content type="html"><![CDATA[<h1 id="计算机网络体系分类："><a href="#计算机网络体系分类：" class="headerlink" title="计算机网络体系分类："></a>计算机网络体系分类：</h1><p>计算机网络整个体系有两个大的分类：一个是国际组织制定的OSI七层模型，一种是实际使用中的TCP/IP四层模型。</p>
+    <content type="html"><![CDATA[<p>使用Python编程的都知道，Python的包安装非常的方便，一般都是可以<strong>pip</strong>来安装搞定：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">sudo pip <span class="keyword">install</span></div></pre></td></tr></table></figure>
+<p>pip的安装请移步：<a href="https://pip.pypa.io/en/stable/installing/" target="_blank" rel="external">https://pip.pypa.io/en/stable/installing/</a></p>
+<p>在<a href="https://github.com/fushenghua/gitbook-plugin-summary" target="_blank" rel="external">gitbook-plugin-summary</a> 需要，发布了一个自己的pypi Python包，这里我大致分享如何发布自己的Pypi包一般过程。</p>
+<p>打包工作主要依赖python的一个叫setuptools的包来完成，在进行下面操作前请使用pip安装它：</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo pip <span class="keyword">install</span> setuptools</div></pre></td></tr></table></figure>
+<h2 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h2><ul>
+<li>注册</li>
+</ul>
+<p><a href="https://pypi.python.org/pypi" target="_blank" rel="external">https://pypi.python.org/pypi</a>注册自己的用户, 点击“Register”，填写自己的用户名，密码，邮件地址后，就成功了，我是直接用Google 账户。</p>
+<p><img src="/images/15236887893053.jpg" alt=""></p>
+<p>记住自己的用户名和密码，后面上传的时候要输入的</p>
+<h3 id="准备setup-py-setup-conf文件，它是放在你包的根目录的，这一步至关重要，包括要发布的包名字，版本，license，描述，特性（classifier-等等，下面是我自己包的一个setup-py文件的内容，基本上只需要在这个上面修改就行了，具体如下："><a href="#准备setup-py-setup-conf文件，它是放在你包的根目录的，这一步至关重要，包括要发布的包名字，版本，license，描述，特性（classifier-等等，下面是我自己包的一个setup-py文件的内容，基本上只需要在这个上面修改就行了，具体如下：" class="headerlink" title="准备setup.py/setup.conf文件，它是放在你包的根目录的，这一步至关重要，包括要发布的包名字，版本，license，描述，特性（classifier)等等，下面是我自己包的一个setup.py文件的内容，基本上只需要在这个上面修改就行了，具体如下："></a>准备setup.py/setup.conf文件，它是放在你包的根目录的，这一步至关重要，包括要发布的包名字，版本，license，描述，特性（classifier)等等，下面是我自己包的一个setup.py文件的内容，基本上只需要在这个上面修改就行了，具体如下：</h3><figure class="highlight arduino"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">!/usr/bin/env python <span class="meta"># coding=utf-8</span></div><div class="line"></div><div class="line">from setuptools <span class="keyword">import</span> <span class="built_in">setup</span>, find_packages</div><div class="line"></div><div class="line"><span class="built_in">setup</span>(</div><div class="line">    name=<span class="string">''</span>,</div><div class="line">    version=,</div><div class="line">    description=( <span class="string">''</span> ),</div><div class="line">    long_description=<span class="built_in">open</span>(<span class="string">'README.rst'</span>).<span class="built_in">read</span>(),</div><div class="line">    author=<span class="string">''</span>,</div><div class="line">    author_email=<span class="string">''</span>,</div><div class="line">    maintainer=<span class="string">''</span>,</div><div class="line">    maintainer_email=<span class="string">''</span>,</div><div class="line">    license=<span class="string">'BSD License'</span>,</div><div class="line">    packages=find_packages(),</div><div class="line">    platforms=[<span class="string">"all"</span>],</div><div class="line">    url=<span class="string">''</span>,</div><div class="line">    classifiers=[ <span class="string">'Development Status :: 4 - Beta'</span>, <span class="string">'Operating System :: OS Independent'</span>, <span class="string">'Intended Audience :: Developers'</span>, <span class="string">'License :: OSI Approved :: BSD License'</span>, <span class="string">'Programming Language :: Python'</span>, <span class="string">'Programming Language :: Python :: Implementation'</span>, <span class="string">'Programming Language :: Python :: 2'</span>, <span class="string">'Programming Language :: Python :: 2.7'</span>, <span class="string">'Programming Language :: Python :: 3'</span>, <span class="string">'Programming Language :: Python :: 3.4'</span>, <span class="string">'Programming Language :: Python :: 3.5'</span>, <span class="string">'Programming Language :: Python :: 3.6'</span>, <span class="string">'Topic :: Software Development :: Libraries'</span> ],</div><div class="line">)</div></pre></td></tr></table></figure>
+<p>需要注意的上面的字段：</p>
+<ul>
+<li><strong>version</strong> - 这个简单，就是包的发布的版本，可以直接写在这，也可以从其他地方引用过来。</li>
+<li><strong>long_description</strong> - 必须是rst（reStructuredText )格式的，因为这个里面的内容是显示在pypi包首页上，具体rst的语法可以参考：<a href="http://rest-sphinx-memo.readthedocs.io/en/latest/ReST.html" target="_blank" rel="external">http://rest-sphinx-memo.readthedocs.io/en/latest/ReST.html</a></li>
+</ul>
+<p>　　　我的long_description是同目录下的README.rst的内容，同时这个README也是我的github项目首页。</p>
+<ul>
+<li><strong>packages</strong> - 申明你的包里面要包含的目录，比如  [‘mypackage’, ‘mypackage_test’]  可以是这种使用我的示例，让setuptools自动决定要包含哪些包</li>
+<li><strong>install_requires</strong> - 申明依赖包，安装包时pip会自动安装：格式如下（我上面的setup.py没有这个参数，因为我不依赖第三方包:)）：</li>
+</ul>
+<figure class="highlight ini"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attr">install_requires</span>=[ <span class="string">'Twisted&gt;=13.1.0'</span>, <span class="string">'w3lib&gt;=1.17.0'</span>, <span class="string">'queuelib'</span>, <span class="string">'lxml'</span>, <span class="string">'pyOpenSSL'</span>, <span class="string">'cssselect&gt;=0.9'</span>, <span class="string">'six&gt;=1.5.2'</span>, <span class="string">'parsel&gt;=1.1'</span>, <span class="string">'PyDispatcher&gt;=2.0.5'</span>, <span class="string">'service_identity'</span>,]</div></pre></td></tr></table></figure>
+<h3 id="准备requirements-txt-和-test-requirements-txt，这个申明包的依赖包和跑自动化测试的测试依赖包，具体格式示例如下："><a href="#准备requirements-txt-和-test-requirements-txt，这个申明包的依赖包和跑自动化测试的测试依赖包，具体格式示例如下：" class="headerlink" title="准备requirements.txt 和 test-requirements.txt，这个申明包的依赖包和跑自动化测试的测试依赖包，具体格式示例如下："></a>准备requirements.txt 和 test-requirements.txt，这个申明包的依赖包和跑自动化测试的测试依赖包，具体格式示例如下：</h3><figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">mock&gt;=<span class="number">2.0</span><span class="number">.0</span></div><div class="line">flake8&gt;=<span class="number">3.2</span><span class="number">.1</span> eventlet&gt;=<span class="number">0.19</span><span class="number">.0</span></div><div class="line">nose2&gt;=<span class="number">0.6</span><span class="number">.5</span> cov_core&gt;=<span class="number">1.15</span><span class="number">.0</span></div><div class="line">virtualenv&gt;=<span class="number">15.1</span><span class="number">.0</span></div></pre></td></tr></table></figure>
+<p>以上是我的test-requirements.txt的内容，requirements.txt的格式个上面一样。</p>
+<p><strong>准备这个两个文件不是必须的。</strong></p>
+<p>但是，有了它们，用户可以自己手动安装依赖包</p>
+<figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">`<span class="javascript">pip&lt;span&gt; <span class="xml"><span class="tag">&lt;/<span class="name">span</span>&gt;</span></span></span>``<span class="javascript">install</span>` `<span class="javascript">-r requirements.txt</span>`</div></pre></td></tr></table></figure>
+<p>有了它们，结合tox等工具，可以非常方便的加入自动化测试。　</p>
+<h3 id="准备一个项目的README-rst文件-前面也提到了它的格式要求，第一次发包，可以直接copy别人的格式，这东西熟能生巧，多写就会了。"><a href="#准备一个项目的README-rst文件-前面也提到了它的格式要求，第一次发包，可以直接copy别人的格式，这东西熟能生巧，多写就会了。" class="headerlink" title="准备一个项目的README.rst文件,前面也提到了它的格式要求，第一次发包，可以直接copy别人的格式，这东西熟能生巧，多写就会了。"></a>准备一个项目的README.rst文件,前面也提到了它的格式要求，第一次发包，可以直接copy别人的格式，这东西熟能生巧，多写就会了。</h3><p>README的截图就不放了，以免广告嫌疑。有兴趣可以到参考<a href="http://rest-sphinx-memo.readthedocs.io/en/latest/ReST.html" target="_blank" rel="external">http://rest-sphinx-memo.readthedocs.io/en/latest/ReST.html</a></p>
+<h3 id="准备好上面的步骤，一个包就基本完整了，剩下的就是打包了-cd到包的根目录-："><a href="#准备好上面的步骤，一个包就基本完整了，剩下的就是打包了-cd到包的根目录-：" class="headerlink" title="准备好上面的步骤，一个包就基本完整了，剩下的就是打包了(cd到包的根目录)："></a>准备好上面的步骤，一个包就基本完整了，剩下的就是打包了(cd到包的根目录)：</h3><p>可以使用下面命令打包一个源代码的包:</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python setup<span class="selector-class">.py</span> sdist build</div></pre></td></tr></table></figure>
+<p>这样在当前目录的dist文件夹下，就会多出一个以tar.gz结尾的包了：</p>
+<p>也可以打包一个wheels格式的包，使用下面的命令搞定：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python setup<span class="selector-class">.py</span> bdist_wheel --universal</div></pre></td></tr></table></figure>
+<p>这样会在dist文件夹下生成一个whl文件，</p>
+<h3 id="上传生成的包，可以使用setuptools-或者twine上传-推荐使用twine上次，因为使用setuptools上传时，你的用户名和密码是明文或者未加密传输，安全起见还是使用twine吧"><a href="#上传生成的包，可以使用setuptools-或者twine上传-推荐使用twine上次，因为使用setuptools上传时，你的用户名和密码是明文或者未加密传输，安全起见还是使用twine吧" class="headerlink" title="上传生成的包，可以使用setuptools,或者twine上传,推荐使用twine上次，因为使用setuptools上传时，你的用户名和密码是明文或者未加密传输，安全起见还是使用twine吧"></a>上传生成的包，可以使用setuptools,或者twine上传,推荐使用twine上次，因为使用setuptools上传时，你的用户名和密码是明文或者未加密传输，安全起见还是使用twine吧</h3><h1 id="上传source-包"><a href="#上传source-包" class="headerlink" title="上传source 包"></a>上传source 包</h1><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python setup<span class="selector-class">.py</span> sdist upload</div></pre></td></tr></table></figure>
+<h1 id="上传pre-compiled包"><a href="#上传pre-compiled包" class="headerlink" title="上传pre-compiled包"></a>上传pre-compiled包</h1><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python setup<span class="selector-class">.py</span> bdist_wheel upload</div></pre></td></tr></table></figure>
+<p>使用twine上传,先安装twine</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">sudo pip <span class="keyword">install</span> twine</div><div class="line"></div><div class="line">twine upload dist/*</div></pre></td></tr></table></figure>
+<p>上次前都会提示你前面注册的用户名和密码。一切搞定，你的包现在可以通过pip在任何地方安装了。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;使用Python编程的都知道，Python的包安装非常的方便，一般都是可以&lt;strong&gt;pip&lt;/strong&gt;来安装搞定：&lt;/p&gt;
+&lt;figure class=&quot;highlight cmake&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;d
+    
+    </summary>
+    
+      <category term="python" scheme="http://fushenghua.github.io/categories/python/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>为什么说枚举更占内存，枚举原理是什么？</title>
+    <link href="http://fushenghua.github.io/archives/3e3728fd.html"/>
+    <id>http://fushenghua.github.io/archives/3e3728fd.html</id>
+    <published>2018-04-09T07:39:39.000Z</published>
+    <updated>2018-04-20T05:25:03.643Z</updated>
+    
+    <content type="html"><![CDATA[<p>从以前学习java 开始就听说枚举很占内存，然后老版Android开发指南文章也指出，枚举通常需要比静态常量多两倍的内存。你应该严格避免在android上使用枚举。那么究竟为什么说枚举更占内存呢？本文就是通过这种方法来分析枚举为什么占内存的，而不是说拒绝枚举。</p>
+<blockquote>
+<p>在阅读过程中有任何问题，请及时联系。如需转载请注明 <a href="http://blog.csdn.net/vfush" target="_blank" rel="external">fuchenxuan de Blog</a>  </p>
+</blockquote>
+<h2 id="关于-Enum"><a href="#关于-Enum" class="headerlink" title="关于 Enum"></a>关于 Enum</h2><p><code>Enum</code> 一般用来表示一组相同类型可列举的常量。如性别、日期、月份、颜色等。对这些属性用常量的好处是显而易见的，不仅可以保证单例，且比较时候可以用 <code>”==”</code> 来替换 <code>equals</code> 。</p>
+<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>看看枚举的基本使用</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">enum</span> Color &#123;   </div><div class="line">  </div><div class="line">  RED , BLUE,GREEN,BLACK ;   </div><div class="line">  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h2><p>通常会使用<code>javap -c Color.class</code> 反编译<code>class</code> 文件，查看生成的字节码，如下：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">Compiled from "Color.java"</div><div class="line">public final class org.fast.clean.Color extends java.lang.Enum&lt;org.fast.clean.Color&gt; &#123;</div><div class="line">  public static final org.fast.clean.Color RED;</div><div class="line"></div><div class="line">  public static final org.fast.clean.Color BLUE;</div><div class="line"></div><div class="line">  public static final org.fast.clean.Color GREEN;</div><div class="line"></div><div class="line">  public static final org.fast.clean.Color BLACK;</div><div class="line"></div><div class="line">  public static org.fast.clean.Color[] values();</div><div class="line">    Code:</div><div class="line">       0: getstatic     #1                  // Field $VALUES:[Lorg/fast/clean/Color;</div><div class="line">       3: invokevirtual #2                  // Method "[Lorg/fast/clean/Color;".clone:()Ljava/lang/Object;</div><div class="line">       6: checkcast     #3                  // class "[Lorg/fast/clean/Color;"</div><div class="line">       9: areturn</div><div class="line"></div><div class="line">  public static org.fast.clean.Color valueOf(java.lang.String);</div><div class="line">    Code:</div><div class="line">     ....</div><div class="line">            9: areturn</div><div class="line"></div><div class="line">  static &#123;&#125;;</div><div class="line">    Code:</div><div class="line">       0: new           #4                  // class org/fast/clean/Color</div><div class="line">       3: dup</div><div class="line">       4: ldc           #7                  // String RED</div><div class="line">       6: iconst_0</div><div class="line">       7: invokespecial #8                  // Method "&lt;init&gt;":(Ljava/lang/</div><div class="line">       ....</div><div class="line">      10: putstatic     #9                  // Field RED:Lorg/fast/clean/Color;</div><div class="line">      13: new           #4                  // class org/fast/clean/Color</div><div class="line">      16: dup</div><div class="line">      17: ldc           #10                 // String BLUE</div><div class="line">          83: return</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>org.fast.clean.Color</code> 类被编译成继承自继承自<code>java.lang.Enum</code>的<code>final</code>类，其中的成员变量也是final常量，它们都不能被修改的。</p>
+<p>下面使用<a href="http://www.javadecompilers.com/jad" target="_blank" rel="external">jad </a>反编译生成jad源码文件， 文件显示每个方法的字节码的实际作用，与源码做出对比。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Color</span> <span class="keyword">extends</span> <span class="title">Enum</span></span></div><div class="line">&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Color[] values()</div><div class="line">    &#123;</div><div class="line">        <span class="keyword">return</span> (Color[])$VALUES.clone();</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Color <span class="title">valueOf</span><span class="params">(String s)</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">return</span> (Color)Enum.valueOf(org/fast/clean/Color, s);</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Color</span><span class="params">(String s, <span class="keyword">int</span> i)</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">super</span>(s, i);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Color RED;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Color BLUE;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Color GREEN;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Color BLACK;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Color $VALUES[];</div><div class="line">    <span class="keyword">static</span> </div><div class="line">    &#123;</div><div class="line">        RED = <span class="keyword">new</span> Color(<span class="string">"RED"</span>, <span class="number">0</span>);</div><div class="line">        BLUE = <span class="keyword">new</span> Color(<span class="string">"BLUE"</span>, <span class="number">1</span>);</div><div class="line">        GREEN = <span class="keyword">new</span> Color(<span class="string">"GREEN"</span>, <span class="number">2</span>);</div><div class="line">        BLACK = <span class="keyword">new</span> Color(<span class="string">"BLACK"</span>, <span class="number">3</span>);</div><div class="line">        $VALUES = (<span class="keyword">new</span> Color[] &#123;</div><div class="line">            RED, BLUE, GREEN, BLACK</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>通过比较字节码和源代码的区别，我们可以知道为什么枚举确实比简单的静态变量占用的内存要更多。</p>
+<h2 id="Android-简单替代枚举的方法"><a href="#Android-简单替代枚举的方法" class="headerlink" title="Android 简单替代枚举的方法"></a>Android 简单替代枚举的方法</h2><p>严格来讲，这个使用方法是有很多缺陷的，但是使用下面的方法就能满足需求的话，那么用<code>Java Enum</code>是会带来各种更大的开销。</p>
+<ul>
+<li><strong>方法一：使用接口变量</strong></li>
+</ul>
+<p>接口变量默认都是<code>public static final</code>的，个人理解接口只是对一类事物的属性和行为更高层次的抽象。对修改关闭，对扩展(不同的实现<code>implements</code>)开放，接口是对开闭原则的一种体现。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ErrorCode</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">int</span> ERROR_MANUAL_EXP = <span class="number">100</span>;</div><div class="line"></div><div class="line">    <span class="keyword">int</span> ERROR_MANUAL_BACK = <span class="number">101</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>使用<code>javap Color.class</code> 反编译<code>class</code> 文件，查看生成的字节码，如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Compiled from <span class="string">"ErrorCode.java"</span></div><div class="line"><span class="class"><span class="keyword">interface</span> <span class="title">org</span>.<span class="title">fast</span>.<span class="title">clean</span>.<span class="title">ErrorCode</span> </span>&#123;</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> ERROR_MANUAL_EXP;</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> ERROR_MANUAL_BACK;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看出就是一个<code>public static final</code>的静态变量。</p>
+<ul>
+<li><strong>方法二：使用support-annotations 注解库</strong></li>
+</ul>
+<p>从<code>Android Support Library19.1</code>版本开始引入了一个新的注解库，使用 <code>com.android.support:support-annotations</code> ，这个官方的注解支持库中包含了许多很好的注解，可以帮助我们在编译的时候就找到错误。<code>IntDef</code> 和 <code>StringDef</code> 是包含在库中的两个关于常量的注解，我们可以用来代替枚举其中包括了很多有用的元注解，可以用来修饰代码，如<code>@NonNull</code>，<code>@StringRes</code>，<code>@IntDef</code>，<code>@StringDef</code>等等</p>
+<p>下面我们使用<code>@IntDef</code>来替代枚举,方法如下</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> RED = <span class="number">0</span>;</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> BLUE = <span class="number">1</span>;</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> GREEN = <span class="number">2</span>;</div><div class="line"></div><div class="line">  <span class="meta">@IntDef</span>(&#123;RED, BLUE, GREEN&#125;)</div><div class="line">  <span class="meta">@Retention</span>(RetentionPolicy.SOURCE)</div><div class="line">  <span class="keyword">public</span> <span class="meta">@interface</span> Colors &#123;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>gradle 依赖：</p>
+<blockquote>
+<p>dependencies { compile ‘com.android.support:support-annotations:24.2.0’ } </p>
+</blockquote>
+<p>等等还有其他方法。</p>
+<h2 id="枚举单例"><a href="#枚举单例" class="headerlink" title="枚举单例"></a>枚举单例</h2><p>枚举在单例的使用也是很平常的<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="keyword">enum</span> SingleTon &#123;</div><div class="line">       INSTANCE;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   <span class="comment">//单例对象的获取：</span></div><div class="line">   SingleTon instance = SingleTon.INSTANCE;</div></pre></td></tr></table></figure></p>
+<p>通过查看<code>java.lang.Enum</code>源码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">    * prevent default deserialization</div><div class="line">    */</div><div class="line">   <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObject</span><span class="params">(ObjectInputStream in)</span> <span class="keyword">throws</span> IOException,</span></div><div class="line">       ClassNotFoundException &#123;</div><div class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> InvalidObjectException(<span class="string">"can't deserialize enum"</span>);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObjectNoData</span><span class="params">()</span> <span class="keyword">throws</span> ObjectStreamException </span>&#123;</div><div class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> InvalidObjectException(<span class="string">"can't deserialize enum"</span>);</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>对于单例是否安全，主要考虑以下两方面：序列化和反序列方面、线程安全方面。</p>
+<ul>
+<li><p>对于序列化和反序列化，因为每一个枚举类型和枚举变量在JVM中都是唯一的，即Java在序列化和反序列化枚举时做了特殊的规定，枚举的<code>writeObject</code>、<code>readObject</code>、<code>readObjectNoData</code>、<code>writeReplace</code>和<code>readResolve</code>等方法是被编译器禁用的，因此也不存在实现序列化接口后调用<code>readObject</code>会破坏单例的问题。</p>
+</li>
+<li><p>对于线程安全方面，类似于普通的饿汉模式，通过在第一次调用时的静态初始化创建的对象是线程安全的。</p>
+</li>
+</ul>
+<p>所以使用枚举也是一种比较好的单例模式，通过反编译我们知道，缺点就是不能够继承，因为<code>final</code>了。</p>
+<p>通过上面的分析枚举，我们只是讨论为什么说枚举更占内存，枚举原理是什么，而不是让我们拒绝使用枚举，因为就几个枚举，让应用内存开销大，那就实在是太可怕了。。。更重要的是通过比较字节码和源代码，我们可以发现很多的问题，一个很重要的作用就是了解很多编译器内部的工作机制。</p>
+<p> 更多java 学习总结，请点击下方图片哦。</p>
+<blockquote>
+<p>水平有限，若有错漏，欢迎指正，批评，如需转载，请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a>，谢谢！<br><a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external"><img src="http://img.blog.csdn.net/20160608162227307" alt="这里写图片描述"></a></p>
+</blockquote>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;从以前学习java 开始就听说枚举很占内存，然后老版Android开发指南文章也指出，枚举通常需要比静态常量多两倍的内存。你应该严格避免在android上使用枚举。那么究竟为什么说枚举更占内存呢？本文就是通过这种方法来分析枚举为什么占内存的，而不是说拒绝枚举。&lt;/p&gt;
+&lt;b
+    
+    </summary>
+    
+      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>git仓库迁移</title>
+    <link href="http://fushenghua.github.io/archives/8e05eece.html"/>
+    <id>http://fushenghua.github.io/archives/8e05eece.html</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-20T05:25:03.640Z</updated>
+    
+    <content type="html"><![CDATA[<p>最近又要把公司<code>Stash</code>上的项目在别部门一个私有仓库,平移到自己部门项目组的仓库，要求迁移的时候要保留已有的分支和以前的提交记录，类似的需求经常遇到，刚好做个记录。</p>
+<p>1). 从原地址克隆一份裸版本库(纯仓库形式)，比如原本托管于 GitHub。</p>
+<p><img src="/images/git--bare.png" alt="git--bare"></p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git <span class="keyword">clone</span> <span class="title">--bare</span> git://github.com/username/project.git</div></pre></td></tr></table></figure>
+<blockquote>
+<p>–bare 创建的克隆版本库都不包含工作区，直接就是版本库的内容，这样的版本库称为裸版本库。</p>
+</blockquote>
+<p>2). 然后到新的 Git 服务器上创建一个新项目，比如 GitCafe。</p>
+<p>3). 以镜像推送的方式上传代码到 GitCafe 服务器上。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">cd</span> <span class="selector-tag">project</span><span class="selector-class">.git</span></div><div class="line"><span class="selector-tag">git</span> <span class="selector-tag">push</span> <span class="selector-tag">--mirror</span> <span class="selector-tag">git</span>@<span class="keyword">stash</span>.<span class="keyword">com</span>/<span class="keyword">username</span>/<span class="keyword">newproject</span>.<span class="keyword">git</span></div></pre></td></tr></table></figure>
+<p><img src="/images/cd-push.png" alt="cd-push"></p>
+<blockquote>
+<p>– mirror 克隆出来的裸版本对上游版本库进行了注册，这样可以在裸版本库中使用git fetch命令和上游版本库进行持续同步。</p>
+</blockquote>
+<p>4). 到新服务器 Stash 上找到 Clone 地址，直接 Clone 到本地就可以了。</p>
+<p><img src="/images/git-clone.png" alt="git-clone"></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">git</span> <span class="selector-tag">clone</span> <span class="selector-tag">git</span>@<span class="keyword">Stash</span>.<span class="keyword">com</span>/<span class="keyword">username</span>/<span class="keyword">newproject</span>.<span class="keyword">git</span></div></pre></td></tr></table></figure>
+<p>这种方式可以保留原版本库中的所有内容(<code>tag</code>,<code>branch</code>等记录)</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;最近又要把公司&lt;code&gt;Stash&lt;/code&gt;上的项目在别部门一个私有仓库,平移到自己部门项目组的仓库，要求迁移的时候要保留已有的分支和以前的提交记录，类似的需求经常遇到，刚好做个记录。&lt;/p&gt;
+&lt;p&gt;1). 从原地址克隆一份裸版本库(纯仓库形式)，比如原本托管于 Gi
+    
+    </summary>
+    
+      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>优化Gradle 依赖使用方式</title>
+    <link href="http://fushenghua.github.io/archives/c66eed35.html"/>
+    <id>http://fushenghua.github.io/archives/c66eed35.html</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-20T05:25:03.653Z</updated>
+    
+    <content type="html"><![CDATA[<p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p>
+<blockquote>
+<p><a href="http://stash.lab.tclclouds.com/projects/CLEAN/repos/cleaner_module/commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318" target="_blank" rel="external">commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318</a></p>
+</blockquote>
+<p>现在仍有些问题,比如 <strong>SpaceBase</strong> 依赖了 <strong>VirusEngine</strong> 等问题。</p>
+<h3 id="全新的依赖方式"><a href="#全新的依赖方式" class="headerlink" title="全新的依赖方式"></a>全新的依赖方式</h3><h4 id="需要那个开那个"><a href="#需要那个开那个" class="headerlink" title="需要那个开那个"></a>需要那个开那个</h4><p>修改项目中 <code>module.properties</code> 的配置, <code>true</code> 代表以<code>Project</code> 方式引入,反之则是<code>aar</code>方式,<strong>该配置已被忽略,只对当前工程配置有效。</strong></p>
+<p>如果你确实想提交修改,请使用 <code>git add -f module.properties</code> 命令强制添加。</p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="params">...</span></div><div class="line">isBoostengineDebug=<span class="literal">false</span></div><div class="line">isAppmgrDebug=<span class="literal">false</span></div><div class="line">isCpuDebug=<span class="literal">false</span></div><div class="line">isNotifyboxDebug=<span class="literal">false</span></div><div class="line">isHardwareDebug=<span class="literal">false</span></div><div class="line">isAntivirusDebug=<span class="literal">false</span></div><div class="line">isJunkDebug=<span class="literal">false</span></div><div class="line">isAllDebug=<span class="literal">false</span><span class="comment">// 全部 Debug，即编译Project模式</span></div></pre></td></tr></table></figure>
+<h4 id="添加新的模块依赖"><a href="#添加新的模块依赖" class="headerlink" title="添加新的模块依赖"></a>添加新的模块依赖</h4><p>如果你需要添加新的模块依赖,请按照以下方法,在 <code>module.gradle</code> 脚本中新增 <code>compile_*</code> 方法,如下:</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">def</span> compile_junk(<span class="keyword">Project</span> projectModule)&#123;</div><div class="line">    projectModule.<span class="keyword">dependencies</span>&#123;</div><div class="line">        <span class="keyword">if</span> (isAllDebug.toBoolean() || isJunkDebug.toBoolean()) &#123;</div><div class="line">            <span class="keyword">compile</span> <span class="keyword">project</span>(<span class="string">':junk'</span>)</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">compile</span>(name: <span class="string">'junk'</span>, ext: <span class="string">'aar'</span>)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后通过闭包形式传递出去,在 <code>module.gradle</code> 脚本中有<code>ext</code> 扩展属性 ，添加如下：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class">ext </span>&#123;</div><div class="line">  compile_junk = this.<span class="variable">&amp;compile_junk</span>  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最终通过以下方式使用</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compile_junk(<span class="name">getProject</span>())</div></pre></td></tr></table></figure>
+<h3 id="模块公用的Libs库"><a href="#模块公用的Libs库" class="headerlink" title="模块公用的Libs库"></a>模块公用的Libs库</h3><p>在工程目录的顶级 <code>libs</code> 文件夹中存放着各个模块的 <code>aar</code> ,如果需要更新,可以通过脚本进行<br>全量更新,或者各模块部分更新。</p>
+<h3 id="更新AAR"><a href="#更新AAR" class="headerlink" title="更新AAR"></a>更新AAR</h3><p>在<code>cleaner</code> 工程目录下，在你每次<strong>运行</strong>程序时 <code>update-aar.gradle</code>会自动更新<strong>已开启</strong>模块(如<code>isJunkDebug=true</code>)的<code>aar</code> 到 公用<code>libs</code>库中，你所需要做的就是 <code>commit</code>，这样能保证各位小伙伴使用的都是较新的<code>aar</code>。</p>
+<p>同样的你也可以手动触发<code>Task</code>来更新<code>aar</code>，相应<code>Task</code> 如下：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">task</span> updateAAR &lt;&lt; &#123;</div><div class="line">    eachLibsAAR()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="版本发布"><a href="#版本发布" class="headerlink" title="版本发布"></a>版本发布</h3><p>如果需要全部通过 <code>Project</code> 形式构建<strong>版本发布</strong>,只需添加动态参数 <code>isAllDebug=true</code> ，比如：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAllDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
+<p>同样的可以添加更多的模块参数,来表示某些模块通过 <code>Project</code> 形式构建，比如：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAppmgrDebug=<span class="literal">true</span> -PisJunkDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
+<blockquote>
+<p>注意: 默认都是以引入<code>aar</code> 形式构建(除<strong>SpaceBase</strong>),所以如果不添加参数,需要及时更新<code>aar</code></p>
+</blockquote>
+<h3 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h3><h4 id="2017-4-21-优化Gradle编译速度，最快3s。"><a href="#2017-4-21-优化Gradle编译速度，最快3s。" class="headerlink" title="2017/4/21 优化Gradle编译速度，最快3s。"></a>2017/4/21 优化Gradle编译速度，最快3s。</h4><blockquote>
+<p>1、修改<strong><code>isAllDebug</code></strong> 作用域，由原存放在<code>module.properties</code> 修改存放在<code>gradle.properties</code>中。<br>2、可选模块<strong>include</strong>，只有在<code>module.properties</code>配置文件中开关为<strong>true</strong> 的模块，才会被Android Studio 所<strong>include</strong>。<br>3、新增<code>task</code> 耗时监听，方便查看耗时<code>task</code>，在<em>Gradle Console</em> 中输出。<br>4、区分测试开发输出，新增<strong><code>dev</code></strong> <code>productFlavors</code>,同时关闭一些不用的<code>productFlavors</code>，其中<strong><code>dev</code></strong> 用于测试Jenkins 输出apk <code>flavors</code>，<strong><code>buildVersion</code></strong> 用于研发本地输出apk，<strong>minSdkVersion=21</strong>，关闭<strong>fabric</strong> 在<strong><code>buildVersion</code></strong> 中上报初始化，同时也优化了其他模块的依赖。<br>5、本地默认只有<strong><code>buildVersion</code></strong><code>flavors</code>，只有在<code>isAllDebug=true</code>的情况，才会开启其他的<code>flavors</code>。以便获得更好的编译体验。<strong>还有修改完gradle配置文件后记得点build sync<img src="/images/toolbar-sync-gradle.png" alt="Alt text">进行同步一下。</strong></p>
+</blockquote>
+<h4 id="2017-5-27-添加自动合并多语言task"><a href="#2017-5-27-添加自动合并多语言task" class="headerlink" title="2017/5/27  添加自动合并多语言task"></a>2017/5/27  添加自动合并多语言task</h4><blockquote>
+<p>1 、使用<code>Python</code>脚本自动化合入多语言的<code>task</code>，所以在使用前需要有<code>Python</code>环境，相应代码块如下：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">task mergeLanguage(<span class="built_in">type</span>: Exec) &#123;</div><div class="line">    workingDir <span class="string">'./'</span></div><div class="line">    <span class="built_in">command</span>Line <span class="string">"python"</span>, <span class="string">"merge_strs.py"</span>,</div><div class="line"><span class="string">"/home/silver/ssd/AndroidStudioProjects/cleaner_module/spaceplus_android/junk/src/main/res/"</span>,</div><div class="line">            <span class="string">"/home/silver/桌面/清理缓存0502-多语言/"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中第一个参数是需要添入多语言模块文件目录，第二个参数是存放多语言文件目录。修改参数 执行<strong><code>mergeLanguage</code></strong> <code>task</code>即可合并多语言。<br><img src="/images/2017-05-27 19:26:37屏幕截图.png" alt="Alt text"></p>
+<h4 id="2017-5-31-Auto-Update-Librarys-AAR"><a href="#2017-5-31-Auto-Update-Librarys-AAR" class="headerlink" title="2017/5/31  Auto Update Librarys AAR"></a>2017/5/31  Auto Update Librarys AAR</h4><blockquote>
+<p>1 、<strong><code>quartz-robot</code></strong>会在<strong>每周一至周五(8,12,16,20h)</strong>准时自动更新<code>aar</code>到git repos。</p>
+</blockquote>
+<h4 id="2017-5-1-更新说明"><a href="#2017-5-1-更新说明" class="headerlink" title="2017/5/1  更新说明"></a>2017/5/1  更新说明</h4><p>以上是模块化后解决过渡时期编译速度慢,方便开发调试等各种便利的方案,各位研发大拿体验<br>下,感受如丝般顺滑,如有问题及时沟通。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 &lt;strong&gt;commit&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;a href=&quot;http://stash.lab.
+    
+    </summary>
+    
+      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>计算机网络体系分类</title>
+    <link href="http://fushenghua.github.io/archives/394d1a7f.html"/>
+    <id>http://fushenghua.github.io/archives/394d1a7f.html</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-22T08:11:59.286Z</updated>
+    
+    <content type="html"><![CDATA[<p>计算机网络整个体系有两个大的分类：一个是国际组织制定的OSI七层模型，一种是实际使用中的TCP/IP四层模型。</p>
 <table>
 <thead>
 <tr>
@@ -243,240 +474,19 @@
     
     <summary type="html">
     
-      &lt;h1 id=&quot;计算机网络体系分类：&quot;&gt;&lt;a href=&quot;#计算机网络体系分类：&quot; class=&quot;headerlink&quot; title=&quot;计算机网络体系分类：&quot;&gt;&lt;/a&gt;计算机网络体系分类：&lt;/h1&gt;&lt;p&gt;计算机网络整个体系有两个大的分类：一个是国际组织制定的OSI七层模型，一种是
+      &lt;p&gt;计算机网络整个体系有两个大的分类：一个是国际组织制定的OSI七层模型，一种是实际使用中的TCP/IP四层模型。&lt;/p&gt;
+&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;OSI七层模型&lt;/th&gt;
+&lt;th&gt;TCP/IP四层模型&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbo
     
     </summary>
     
-    
-  </entry>
-  
-  <entry>
-    <title>在Pypi上发布自己的Python包</title>
-    <link href="http://fushenghua.github.io/archives/ed6915f6.html"/>
-    <id>http://fushenghua.github.io/archives/ed6915f6.html</id>
-    <published>2018-04-09T07:39:39.000Z</published>
-    <updated>2018-04-20T05:25:03.649Z</updated>
-    
-    <content type="html"><![CDATA[<p>使用Python编程的都知道，Python的包安装非常的方便，一般都是可以<strong>pip</strong>来安装搞定：</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">sudo pip <span class="keyword">install</span></div></pre></td></tr></table></figure>
-<p>pip的安装请移步：<a href="https://pip.pypa.io/en/stable/installing/" target="_blank" rel="external">https://pip.pypa.io/en/stable/installing/</a></p>
-<p>在<a href="https://github.com/fushenghua/gitbook-plugin-summary" target="_blank" rel="external">gitbook-plugin-summary</a> 需要，发布了一个自己的pypi Python包，这里我大致分享如何发布自己的Pypi包一般过程。</p>
-<p>打包工作主要依赖python的一个叫setuptools的包来完成，在进行下面操作前请使用pip安装它：</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">sudo pip <span class="keyword">install</span> setuptools</div></pre></td></tr></table></figure>
-<h2 id="开始"><a href="#开始" class="headerlink" title="开始"></a>开始</h2><ul>
-<li>注册</li>
-</ul>
-<p><a href="https://pypi.python.org/pypi" target="_blank" rel="external">https://pypi.python.org/pypi</a>注册自己的用户, 点击“Register”，填写自己的用户名，密码，邮件地址后，就成功了，我是直接用Google 账户。</p>
-<p><img src="/images/15236887893053.jpg" alt=""></p>
-<p>记住自己的用户名和密码，后面上传的时候要输入的</p>
-<h3 id="准备setup-py-setup-conf文件，它是放在你包的根目录的，这一步至关重要，包括要发布的包名字，版本，license，描述，特性（classifier-等等，下面是我自己包的一个setup-py文件的内容，基本上只需要在这个上面修改就行了，具体如下："><a href="#准备setup-py-setup-conf文件，它是放在你包的根目录的，这一步至关重要，包括要发布的包名字，版本，license，描述，特性（classifier-等等，下面是我自己包的一个setup-py文件的内容，基本上只需要在这个上面修改就行了，具体如下：" class="headerlink" title="准备setup.py/setup.conf文件，它是放在你包的根目录的，这一步至关重要，包括要发布的包名字，版本，license，描述，特性（classifier)等等，下面是我自己包的一个setup.py文件的内容，基本上只需要在这个上面修改就行了，具体如下："></a>准备setup.py/setup.conf文件，它是放在你包的根目录的，这一步至关重要，包括要发布的包名字，版本，license，描述，特性（classifier)等等，下面是我自己包的一个setup.py文件的内容，基本上只需要在这个上面修改就行了，具体如下：</h3><figure class="highlight arduino"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">!/usr/bin/env python <span class="meta"># coding=utf-8</span></div><div class="line"></div><div class="line">from setuptools <span class="keyword">import</span> <span class="built_in">setup</span>, find_packages</div><div class="line"></div><div class="line"><span class="built_in">setup</span>(</div><div class="line">    name=<span class="string">''</span>,</div><div class="line">    version=,</div><div class="line">    description=( <span class="string">''</span> ),</div><div class="line">    long_description=<span class="built_in">open</span>(<span class="string">'README.rst'</span>).<span class="built_in">read</span>(),</div><div class="line">    author=<span class="string">''</span>,</div><div class="line">    author_email=<span class="string">''</span>,</div><div class="line">    maintainer=<span class="string">''</span>,</div><div class="line">    maintainer_email=<span class="string">''</span>,</div><div class="line">    license=<span class="string">'BSD License'</span>,</div><div class="line">    packages=find_packages(),</div><div class="line">    platforms=[<span class="string">"all"</span>],</div><div class="line">    url=<span class="string">''</span>,</div><div class="line">    classifiers=[ <span class="string">'Development Status :: 4 - Beta'</span>, <span class="string">'Operating System :: OS Independent'</span>, <span class="string">'Intended Audience :: Developers'</span>, <span class="string">'License :: OSI Approved :: BSD License'</span>, <span class="string">'Programming Language :: Python'</span>, <span class="string">'Programming Language :: Python :: Implementation'</span>, <span class="string">'Programming Language :: Python :: 2'</span>, <span class="string">'Programming Language :: Python :: 2.7'</span>, <span class="string">'Programming Language :: Python :: 3'</span>, <span class="string">'Programming Language :: Python :: 3.4'</span>, <span class="string">'Programming Language :: Python :: 3.5'</span>, <span class="string">'Programming Language :: Python :: 3.6'</span>, <span class="string">'Topic :: Software Development :: Libraries'</span> ],</div><div class="line">)</div></pre></td></tr></table></figure>
-<p>需要注意的上面的字段：</p>
-<ul>
-<li><strong>version</strong> - 这个简单，就是包的发布的版本，可以直接写在这，也可以从其他地方引用过来。</li>
-<li><strong>long_description</strong> - 必须是rst（reStructuredText )格式的，因为这个里面的内容是显示在pypi包首页上，具体rst的语法可以参考：<a href="http://rest-sphinx-memo.readthedocs.io/en/latest/ReST.html" target="_blank" rel="external">http://rest-sphinx-memo.readthedocs.io/en/latest/ReST.html</a></li>
-</ul>
-<p>　　　我的long_description是同目录下的README.rst的内容，同时这个README也是我的github项目首页。</p>
-<ul>
-<li><strong>packages</strong> - 申明你的包里面要包含的目录，比如  [‘mypackage’, ‘mypackage_test’]  可以是这种使用我的示例，让setuptools自动决定要包含哪些包</li>
-<li><strong>install_requires</strong> - 申明依赖包，安装包时pip会自动安装：格式如下（我上面的setup.py没有这个参数，因为我不依赖第三方包:)）：</li>
-</ul>
-<figure class="highlight ini"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="attr">install_requires</span>=[ <span class="string">'Twisted&gt;=13.1.0'</span>, <span class="string">'w3lib&gt;=1.17.0'</span>, <span class="string">'queuelib'</span>, <span class="string">'lxml'</span>, <span class="string">'pyOpenSSL'</span>, <span class="string">'cssselect&gt;=0.9'</span>, <span class="string">'six&gt;=1.5.2'</span>, <span class="string">'parsel&gt;=1.1'</span>, <span class="string">'PyDispatcher&gt;=2.0.5'</span>, <span class="string">'service_identity'</span>,]</div></pre></td></tr></table></figure>
-<h3 id="准备requirements-txt-和-test-requirements-txt，这个申明包的依赖包和跑自动化测试的测试依赖包，具体格式示例如下："><a href="#准备requirements-txt-和-test-requirements-txt，这个申明包的依赖包和跑自动化测试的测试依赖包，具体格式示例如下：" class="headerlink" title="准备requirements.txt 和 test-requirements.txt，这个申明包的依赖包和跑自动化测试的测试依赖包，具体格式示例如下："></a>准备requirements.txt 和 test-requirements.txt，这个申明包的依赖包和跑自动化测试的测试依赖包，具体格式示例如下：</h3><figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">mock&gt;=<span class="number">2.0</span><span class="number">.0</span></div><div class="line">flake8&gt;=<span class="number">3.2</span><span class="number">.1</span> eventlet&gt;=<span class="number">0.19</span><span class="number">.0</span></div><div class="line">nose2&gt;=<span class="number">0.6</span><span class="number">.5</span> cov_core&gt;=<span class="number">1.15</span><span class="number">.0</span></div><div class="line">virtualenv&gt;=<span class="number">15.1</span><span class="number">.0</span></div></pre></td></tr></table></figure>
-<p>以上是我的test-requirements.txt的内容，requirements.txt的格式个上面一样。</p>
-<p><strong>准备这个两个文件不是必须的。</strong></p>
-<p>但是，有了它们，用户可以自己手动安装依赖包</p>
-<figure class="highlight coffeescript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">`<span class="javascript">pip&lt;span&gt; <span class="xml"><span class="tag">&lt;/<span class="name">span</span>&gt;</span></span></span>``<span class="javascript">install</span>` `<span class="javascript">-r requirements.txt</span>`</div></pre></td></tr></table></figure>
-<p>有了它们，结合tox等工具，可以非常方便的加入自动化测试。　</p>
-<h3 id="准备一个项目的README-rst文件-前面也提到了它的格式要求，第一次发包，可以直接copy别人的格式，这东西熟能生巧，多写就会了。"><a href="#准备一个项目的README-rst文件-前面也提到了它的格式要求，第一次发包，可以直接copy别人的格式，这东西熟能生巧，多写就会了。" class="headerlink" title="准备一个项目的README.rst文件,前面也提到了它的格式要求，第一次发包，可以直接copy别人的格式，这东西熟能生巧，多写就会了。"></a>准备一个项目的README.rst文件,前面也提到了它的格式要求，第一次发包，可以直接copy别人的格式，这东西熟能生巧，多写就会了。</h3><p>README的截图就不放了，以免广告嫌疑。有兴趣可以到参考<a href="http://rest-sphinx-memo.readthedocs.io/en/latest/ReST.html" target="_blank" rel="external">http://rest-sphinx-memo.readthedocs.io/en/latest/ReST.html</a></p>
-<h3 id="准备好上面的步骤，一个包就基本完整了，剩下的就是打包了-cd到包的根目录-："><a href="#准备好上面的步骤，一个包就基本完整了，剩下的就是打包了-cd到包的根目录-：" class="headerlink" title="准备好上面的步骤，一个包就基本完整了，剩下的就是打包了(cd到包的根目录)："></a>准备好上面的步骤，一个包就基本完整了，剩下的就是打包了(cd到包的根目录)：</h3><p>可以使用下面命令打包一个源代码的包:</p>
-<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python setup<span class="selector-class">.py</span> sdist build</div></pre></td></tr></table></figure>
-<p>这样在当前目录的dist文件夹下，就会多出一个以tar.gz结尾的包了：</p>
-<p>也可以打包一个wheels格式的包，使用下面的命令搞定：</p>
-<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python setup<span class="selector-class">.py</span> bdist_wheel --universal</div></pre></td></tr></table></figure>
-<p>这样会在dist文件夹下生成一个whl文件，</p>
-<h3 id="上传生成的包，可以使用setuptools-或者twine上传-推荐使用twine上次，因为使用setuptools上传时，你的用户名和密码是明文或者未加密传输，安全起见还是使用twine吧"><a href="#上传生成的包，可以使用setuptools-或者twine上传-推荐使用twine上次，因为使用setuptools上传时，你的用户名和密码是明文或者未加密传输，安全起见还是使用twine吧" class="headerlink" title="上传生成的包，可以使用setuptools,或者twine上传,推荐使用twine上次，因为使用setuptools上传时，你的用户名和密码是明文或者未加密传输，安全起见还是使用twine吧"></a>上传生成的包，可以使用setuptools,或者twine上传,推荐使用twine上次，因为使用setuptools上传时，你的用户名和密码是明文或者未加密传输，安全起见还是使用twine吧</h3><h1 id="上传source-包"><a href="#上传source-包" class="headerlink" title="上传source 包"></a>上传source 包</h1><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python setup<span class="selector-class">.py</span> sdist upload</div></pre></td></tr></table></figure>
-<h1 id="上传pre-compiled包"><a href="#上传pre-compiled包" class="headerlink" title="上传pre-compiled包"></a>上传pre-compiled包</h1><figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">python setup<span class="selector-class">.py</span> bdist_wheel upload</div></pre></td></tr></table></figure>
-<p>使用twine上传,先安装twine</p>
-<figure class="highlight cmake"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">sudo pip <span class="keyword">install</span> twine</div><div class="line"></div><div class="line">twine upload dist/*</div></pre></td></tr></table></figure>
-<p>上次前都会提示你前面注册的用户名和密码。一切搞定，你的包现在可以通过pip在任何地方安装了。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;使用Python编程的都知道，Python的包安装非常的方便，一般都是可以&lt;strong&gt;pip&lt;/strong&gt;来安装搞定：&lt;/p&gt;
-&lt;figure class=&quot;highlight cmake&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;d
-    
-    </summary>
-    
-      <category term="python" scheme="http://fushenghua.github.io/categories/python/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>为什么说枚举更占内存，枚举原理是什么？</title>
-    <link href="http://fushenghua.github.io/archives/3e3728fd.html"/>
-    <id>http://fushenghua.github.io/archives/3e3728fd.html</id>
-    <published>2018-04-09T07:39:39.000Z</published>
-    <updated>2018-04-20T05:25:03.643Z</updated>
-    
-    <content type="html"><![CDATA[<p>从以前学习java 开始就听说枚举很占内存，然后老版Android开发指南文章也指出，枚举通常需要比静态常量多两倍的内存。你应该严格避免在android上使用枚举。那么究竟为什么说枚举更占内存呢？本文就是通过这种方法来分析枚举为什么占内存的，而不是说拒绝枚举。</p>
-<blockquote>
-<p>在阅读过程中有任何问题，请及时联系。如需转载请注明 <a href="http://blog.csdn.net/vfush" target="_blank" rel="external">fuchenxuan de Blog</a>  </p>
-</blockquote>
-<h2 id="关于-Enum"><a href="#关于-Enum" class="headerlink" title="关于 Enum"></a>关于 Enum</h2><p><code>Enum</code> 一般用来表示一组相同类型可列举的常量。如性别、日期、月份、颜色等。对这些属性用常量的好处是显而易见的，不仅可以保证单例，且比较时候可以用 <code>”==”</code> 来替换 <code>equals</code> 。</p>
-<h2 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h2><p>看看枚举的基本使用</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">enum</span> Color &#123;   </div><div class="line">  </div><div class="line">  RED , BLUE,GREEN,BLACK ;   </div><div class="line">  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h2><p>通常会使用<code>javap -c Color.class</code> 反编译<code>class</code> 文件，查看生成的字节码，如下：</p>
-<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">Compiled from "Color.java"</div><div class="line">public final class org.fast.clean.Color extends java.lang.Enum&lt;org.fast.clean.Color&gt; &#123;</div><div class="line">  public static final org.fast.clean.Color RED;</div><div class="line"></div><div class="line">  public static final org.fast.clean.Color BLUE;</div><div class="line"></div><div class="line">  public static final org.fast.clean.Color GREEN;</div><div class="line"></div><div class="line">  public static final org.fast.clean.Color BLACK;</div><div class="line"></div><div class="line">  public static org.fast.clean.Color[] values();</div><div class="line">    Code:</div><div class="line">       0: getstatic     #1                  // Field $VALUES:[Lorg/fast/clean/Color;</div><div class="line">       3: invokevirtual #2                  // Method "[Lorg/fast/clean/Color;".clone:()Ljava/lang/Object;</div><div class="line">       6: checkcast     #3                  // class "[Lorg/fast/clean/Color;"</div><div class="line">       9: areturn</div><div class="line"></div><div class="line">  public static org.fast.clean.Color valueOf(java.lang.String);</div><div class="line">    Code:</div><div class="line">     ....</div><div class="line">            9: areturn</div><div class="line"></div><div class="line">  static &#123;&#125;;</div><div class="line">    Code:</div><div class="line">       0: new           #4                  // class org/fast/clean/Color</div><div class="line">       3: dup</div><div class="line">       4: ldc           #7                  // String RED</div><div class="line">       6: iconst_0</div><div class="line">       7: invokespecial #8                  // Method "&lt;init&gt;":(Ljava/lang/</div><div class="line">       ....</div><div class="line">      10: putstatic     #9                  // Field RED:Lorg/fast/clean/Color;</div><div class="line">      13: new           #4                  // class org/fast/clean/Color</div><div class="line">      16: dup</div><div class="line">      17: ldc           #10                 // String BLUE</div><div class="line">          83: return</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p><code>org.fast.clean.Color</code> 类被编译成继承自继承自<code>java.lang.Enum</code>的<code>final</code>类，其中的成员变量也是final常量，它们都不能被修改的。</p>
-<p>下面使用<a href="http://www.javadecompilers.com/jad" target="_blank" rel="external">jad </a>反编译生成jad源码文件， 文件显示每个方法的字节码的实际作用，与源码做出对比。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">Color</span> <span class="keyword">extends</span> <span class="title">Enum</span></span></div><div class="line">&#123;</div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> Color[] values()</div><div class="line">    &#123;</div><div class="line">        <span class="keyword">return</span> (Color[])$VALUES.clone();</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Color <span class="title">valueOf</span><span class="params">(String s)</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">return</span> (Color)Enum.valueOf(org/fast/clean/Color, s);</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="title">Color</span><span class="params">(String s, <span class="keyword">int</span> i)</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">super</span>(s, i);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Color RED;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Color BLUE;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Color GREEN;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Color BLACK;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Color $VALUES[];</div><div class="line">    <span class="keyword">static</span> </div><div class="line">    &#123;</div><div class="line">        RED = <span class="keyword">new</span> Color(<span class="string">"RED"</span>, <span class="number">0</span>);</div><div class="line">        BLUE = <span class="keyword">new</span> Color(<span class="string">"BLUE"</span>, <span class="number">1</span>);</div><div class="line">        GREEN = <span class="keyword">new</span> Color(<span class="string">"GREEN"</span>, <span class="number">2</span>);</div><div class="line">        BLACK = <span class="keyword">new</span> Color(<span class="string">"BLACK"</span>, <span class="number">3</span>);</div><div class="line">        $VALUES = (<span class="keyword">new</span> Color[] &#123;</div><div class="line">            RED, BLUE, GREEN, BLACK</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>通过比较字节码和源代码的区别，我们可以知道为什么枚举确实比简单的静态变量占用的内存要更多。</p>
-<h2 id="Android-简单替代枚举的方法"><a href="#Android-简单替代枚举的方法" class="headerlink" title="Android 简单替代枚举的方法"></a>Android 简单替代枚举的方法</h2><p>严格来讲，这个使用方法是有很多缺陷的，但是使用下面的方法就能满足需求的话，那么用<code>Java Enum</code>是会带来各种更大的开销。</p>
-<ul>
-<li><strong>方法一：使用接口变量</strong></li>
-</ul>
-<p>接口变量默认都是<code>public static final</code>的，个人理解接口只是对一类事物的属性和行为更高层次的抽象。对修改关闭，对扩展(不同的实现<code>implements</code>)开放，接口是对开闭原则的一种体现。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ErrorCode</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">int</span> ERROR_MANUAL_EXP = <span class="number">100</span>;</div><div class="line"></div><div class="line">    <span class="keyword">int</span> ERROR_MANUAL_BACK = <span class="number">101</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>使用<code>javap Color.class</code> 反编译<code>class</code> 文件，查看生成的字节码，如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Compiled from <span class="string">"ErrorCode.java"</span></div><div class="line"><span class="class"><span class="keyword">interface</span> <span class="title">org</span>.<span class="title">fast</span>.<span class="title">clean</span>.<span class="title">ErrorCode</span> </span>&#123;</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> ERROR_MANUAL_EXP;</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> ERROR_MANUAL_BACK;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>可以看出就是一个<code>public static final</code>的静态变量。</p>
-<ul>
-<li><strong>方法二：使用support-annotations 注解库</strong></li>
-</ul>
-<p>从<code>Android Support Library19.1</code>版本开始引入了一个新的注解库，使用 <code>com.android.support:support-annotations</code> ，这个官方的注解支持库中包含了许多很好的注解，可以帮助我们在编译的时候就找到错误。<code>IntDef</code> 和 <code>StringDef</code> 是包含在库中的两个关于常量的注解，我们可以用来代替枚举其中包括了很多有用的元注解，可以用来修饰代码，如<code>@NonNull</code>，<code>@StringRes</code>，<code>@IntDef</code>，<code>@StringDef</code>等等</p>
-<p>下面我们使用<code>@IntDef</code>来替代枚举,方法如下</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> RED = <span class="number">0</span>;</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> BLUE = <span class="number">1</span>;</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> GREEN = <span class="number">2</span>;</div><div class="line"></div><div class="line">  <span class="meta">@IntDef</span>(&#123;RED, BLUE, GREEN&#125;)</div><div class="line">  <span class="meta">@Retention</span>(RetentionPolicy.SOURCE)</div><div class="line">  <span class="keyword">public</span> <span class="meta">@interface</span> Colors &#123;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
-<p>gradle 依赖：</p>
-<blockquote>
-<p>dependencies { compile ‘com.android.support:support-annotations:24.2.0’ } </p>
-</blockquote>
-<p>等等还有其他方法。</p>
-<h2 id="枚举单例"><a href="#枚举单例" class="headerlink" title="枚举单例"></a>枚举单例</h2><p>枚举在单例的使用也是很平常的<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="keyword">enum</span> SingleTon &#123;</div><div class="line">       INSTANCE;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   <span class="comment">//单例对象的获取：</span></div><div class="line">   SingleTon instance = SingleTon.INSTANCE;</div></pre></td></tr></table></figure></p>
-<p>通过查看<code>java.lang.Enum</code>源码如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">    * prevent default deserialization</div><div class="line">    */</div><div class="line">   <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObject</span><span class="params">(ObjectInputStream in)</span> <span class="keyword">throws</span> IOException,</span></div><div class="line">       ClassNotFoundException &#123;</div><div class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> InvalidObjectException(<span class="string">"can't deserialize enum"</span>);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObjectNoData</span><span class="params">()</span> <span class="keyword">throws</span> ObjectStreamException </span>&#123;</div><div class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> InvalidObjectException(<span class="string">"can't deserialize enum"</span>);</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-<p>对于单例是否安全，主要考虑以下两方面：序列化和反序列方面、线程安全方面。</p>
-<ul>
-<li><p>对于序列化和反序列化，因为每一个枚举类型和枚举变量在JVM中都是唯一的，即Java在序列化和反序列化枚举时做了特殊的规定，枚举的<code>writeObject</code>、<code>readObject</code>、<code>readObjectNoData</code>、<code>writeReplace</code>和<code>readResolve</code>等方法是被编译器禁用的，因此也不存在实现序列化接口后调用<code>readObject</code>会破坏单例的问题。</p>
-</li>
-<li><p>对于线程安全方面，类似于普通的饿汉模式，通过在第一次调用时的静态初始化创建的对象是线程安全的。</p>
-</li>
-</ul>
-<p>所以使用枚举也是一种比较好的单例模式，通过反编译我们知道，缺点就是不能够继承，因为<code>final</code>了。</p>
-<p>通过上面的分析枚举，我们只是讨论为什么说枚举更占内存，枚举原理是什么，而不是让我们拒绝使用枚举，因为就几个枚举，让应用内存开销大，那就实在是太可怕了。。。更重要的是通过比较字节码和源代码，我们可以发现很多的问题，一个很重要的作用就是了解很多编译器内部的工作机制。</p>
-<p> 更多java 学习总结，请点击下方图片哦。</p>
-<blockquote>
-<p>水平有限，若有错漏，欢迎指正，批评，如需转载，请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a>，谢谢！<br><a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external"><img src="http://img.blog.csdn.net/20160608162227307" alt="这里写图片描述"></a></p>
-</blockquote>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;从以前学习java 开始就听说枚举很占内存，然后老版Android开发指南文章也指出，枚举通常需要比静态常量多两倍的内存。你应该严格避免在android上使用枚举。那么究竟为什么说枚举更占内存呢？本文就是通过这种方法来分析枚举为什么占内存的，而不是说拒绝枚举。&lt;/p&gt;
-&lt;b
-    
-    </summary>
-    
-      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>优化Gradle 依赖使用方式</title>
-    <link href="http://fushenghua.github.io/archives/c66eed35.html"/>
-    <id>http://fushenghua.github.io/archives/c66eed35.html</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.653Z</updated>
-    
-    <content type="html"><![CDATA[<p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p>
-<blockquote>
-<p><a href="http://stash.lab.tclclouds.com/projects/CLEAN/repos/cleaner_module/commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318" target="_blank" rel="external">commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318</a></p>
-</blockquote>
-<p>现在仍有些问题,比如 <strong>SpaceBase</strong> 依赖了 <strong>VirusEngine</strong> 等问题。</p>
-<h3 id="全新的依赖方式"><a href="#全新的依赖方式" class="headerlink" title="全新的依赖方式"></a>全新的依赖方式</h3><h4 id="需要那个开那个"><a href="#需要那个开那个" class="headerlink" title="需要那个开那个"></a>需要那个开那个</h4><p>修改项目中 <code>module.properties</code> 的配置, <code>true</code> 代表以<code>Project</code> 方式引入,反之则是<code>aar</code>方式,<strong>该配置已被忽略,只对当前工程配置有效。</strong></p>
-<p>如果你确实想提交修改,请使用 <code>git add -f module.properties</code> 命令强制添加。</p>
-<figure class="highlight lasso"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="params">...</span></div><div class="line">isBoostengineDebug=<span class="literal">false</span></div><div class="line">isAppmgrDebug=<span class="literal">false</span></div><div class="line">isCpuDebug=<span class="literal">false</span></div><div class="line">isNotifyboxDebug=<span class="literal">false</span></div><div class="line">isHardwareDebug=<span class="literal">false</span></div><div class="line">isAntivirusDebug=<span class="literal">false</span></div><div class="line">isJunkDebug=<span class="literal">false</span></div><div class="line">isAllDebug=<span class="literal">false</span><span class="comment">// 全部 Debug，即编译Project模式</span></div></pre></td></tr></table></figure>
-<h4 id="添加新的模块依赖"><a href="#添加新的模块依赖" class="headerlink" title="添加新的模块依赖"></a>添加新的模块依赖</h4><p>如果你需要添加新的模块依赖,请按照以下方法,在 <code>module.gradle</code> 脚本中新增 <code>compile_*</code> 方法,如下:</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">def</span> compile_junk(<span class="keyword">Project</span> projectModule)&#123;</div><div class="line">    projectModule.<span class="keyword">dependencies</span>&#123;</div><div class="line">        <span class="keyword">if</span> (isAllDebug.toBoolean() || isJunkDebug.toBoolean()) &#123;</div><div class="line">            <span class="keyword">compile</span> <span class="keyword">project</span>(<span class="string">':junk'</span>)</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">compile</span>(name: <span class="string">'junk'</span>, ext: <span class="string">'aar'</span>)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>然后通过闭包形式传递出去,在 <code>module.gradle</code> 脚本中有<code>ext</code> 扩展属性 ，添加如下：</p>
-<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class">ext </span>&#123;</div><div class="line">  compile_junk = this.<span class="variable">&amp;compile_junk</span>  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>最终通过以下方式使用</p>
-<figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compile_junk(<span class="name">getProject</span>())</div></pre></td></tr></table></figure>
-<h3 id="模块公用的Libs库"><a href="#模块公用的Libs库" class="headerlink" title="模块公用的Libs库"></a>模块公用的Libs库</h3><p>在工程目录的顶级 <code>libs</code> 文件夹中存放着各个模块的 <code>aar</code> ,如果需要更新,可以通过脚本进行<br>全量更新,或者各模块部分更新。</p>
-<h3 id="更新AAR"><a href="#更新AAR" class="headerlink" title="更新AAR"></a>更新AAR</h3><p>在<code>cleaner</code> 工程目录下，在你每次<strong>运行</strong>程序时 <code>update-aar.gradle</code>会自动更新<strong>已开启</strong>模块(如<code>isJunkDebug=true</code>)的<code>aar</code> 到 公用<code>libs</code>库中，你所需要做的就是 <code>commit</code>，这样能保证各位小伙伴使用的都是较新的<code>aar</code>。</p>
-<p>同样的你也可以手动触发<code>Task</code>来更新<code>aar</code>，相应<code>Task</code> 如下：</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">task</span> updateAAR &lt;&lt; &#123;</div><div class="line">    eachLibsAAR()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="版本发布"><a href="#版本发布" class="headerlink" title="版本发布"></a>版本发布</h3><p>如果需要全部通过 <code>Project</code> 形式构建<strong>版本发布</strong>,只需添加动态参数 <code>isAllDebug=true</code> ，比如：</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAllDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
-<p>同样的可以添加更多的模块参数,来表示某些模块通过 <code>Project</code> 形式构建，比如：</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAppmgrDebug=<span class="literal">true</span> -PisJunkDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
-<blockquote>
-<p>注意: 默认都是以引入<code>aar</code> 形式构建(除<strong>SpaceBase</strong>),所以如果不添加参数,需要及时更新<code>aar</code></p>
-</blockquote>
-<h3 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h3><h4 id="2017-4-21-优化Gradle编译速度，最快3s。"><a href="#2017-4-21-优化Gradle编译速度，最快3s。" class="headerlink" title="2017/4/21 优化Gradle编译速度，最快3s。"></a>2017/4/21 优化Gradle编译速度，最快3s。</h4><blockquote>
-<p>1、修改<strong><code>isAllDebug</code></strong> 作用域，由原存放在<code>module.properties</code> 修改存放在<code>gradle.properties</code>中。<br>2、可选模块<strong>include</strong>，只有在<code>module.properties</code>配置文件中开关为<strong>true</strong> 的模块，才会被Android Studio 所<strong>include</strong>。<br>3、新增<code>task</code> 耗时监听，方便查看耗时<code>task</code>，在<em>Gradle Console</em> 中输出。<br>4、区分测试开发输出，新增<strong><code>dev</code></strong> <code>productFlavors</code>,同时关闭一些不用的<code>productFlavors</code>，其中<strong><code>dev</code></strong> 用于测试Jenkins 输出apk <code>flavors</code>，<strong><code>buildVersion</code></strong> 用于研发本地输出apk，<strong>minSdkVersion=21</strong>，关闭<strong>fabric</strong> 在<strong><code>buildVersion</code></strong> 中上报初始化，同时也优化了其他模块的依赖。<br>5、本地默认只有<strong><code>buildVersion</code></strong><code>flavors</code>，只有在<code>isAllDebug=true</code>的情况，才会开启其他的<code>flavors</code>。以便获得更好的编译体验。<strong>还有修改完gradle配置文件后记得点build sync<img src="/images/toolbar-sync-gradle.png" alt="Alt text">进行同步一下。</strong></p>
-</blockquote>
-<h4 id="2017-5-27-添加自动合并多语言task"><a href="#2017-5-27-添加自动合并多语言task" class="headerlink" title="2017/5/27  添加自动合并多语言task"></a>2017/5/27  添加自动合并多语言task</h4><blockquote>
-<p>1 、使用<code>Python</code>脚本自动化合入多语言的<code>task</code>，所以在使用前需要有<code>Python</code>环境，相应代码块如下：</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">task mergeLanguage(<span class="built_in">type</span>: Exec) &#123;</div><div class="line">    workingDir <span class="string">'./'</span></div><div class="line">    <span class="built_in">command</span>Line <span class="string">"python"</span>, <span class="string">"merge_strs.py"</span>,</div><div class="line"><span class="string">"/home/silver/ssd/AndroidStudioProjects/cleaner_module/spaceplus_android/junk/src/main/res/"</span>,</div><div class="line">            <span class="string">"/home/silver/桌面/清理缓存0502-多语言/"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>其中第一个参数是需要添入多语言模块文件目录，第二个参数是存放多语言文件目录。修改参数 执行<strong><code>mergeLanguage</code></strong> <code>task</code>即可合并多语言。<br><img src="/images/2017-05-27 19:26:37屏幕截图.png" alt="Alt text"></p>
-<h4 id="2017-5-31-Auto-Update-Librarys-AAR"><a href="#2017-5-31-Auto-Update-Librarys-AAR" class="headerlink" title="2017/5/31  Auto Update Librarys AAR"></a>2017/5/31  Auto Update Librarys AAR</h4><blockquote>
-<p>1 、<strong><code>quartz-robot</code></strong>会在<strong>每周一至周五(8,12,16,20h)</strong>准时自动更新<code>aar</code>到git repos。</p>
-</blockquote>
-<h4 id="2017-5-1-更新说明"><a href="#2017-5-1-更新说明" class="headerlink" title="2017/5/1  更新说明"></a>2017/5/1  更新说明</h4><p>以上是模块化后解决过渡时期编译速度慢,方便开发调试等各种便利的方案,各位研发大拿体验<br>下,感受如丝般顺滑,如有问题及时沟通。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 &lt;strong&gt;commit&lt;/strong&gt;：&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;http://stash.lab.
-    
-    </summary>
-    
-      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>git仓库迁移</title>
-    <link href="http://fushenghua.github.io/archives/8e05eece.html"/>
-    <id>http://fushenghua.github.io/archives/8e05eece.html</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.640Z</updated>
-    
-    <content type="html"><![CDATA[<p>最近又要把公司<code>Stash</code>上的项目在别部门一个私有仓库,平移到自己部门项目组的仓库，要求迁移的时候要保留已有的分支和以前的提交记录，类似的需求经常遇到，刚好做个记录。</p>
-<p>1). 从原地址克隆一份裸版本库(纯仓库形式)，比如原本托管于 GitHub。</p>
-<p><img src="/images/git--bare.png" alt="git--bare"></p>
-<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git <span class="keyword">clone</span> <span class="title">--bare</span> git://github.com/username/project.git</div></pre></td></tr></table></figure>
-<blockquote>
-<p>–bare 创建的克隆版本库都不包含工作区，直接就是版本库的内容，这样的版本库称为裸版本库。</p>
-</blockquote>
-<p>2). 然后到新的 Git 服务器上创建一个新项目，比如 GitCafe。</p>
-<p>3). 以镜像推送的方式上传代码到 GitCafe 服务器上。</p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">cd</span> <span class="selector-tag">project</span><span class="selector-class">.git</span></div><div class="line"><span class="selector-tag">git</span> <span class="selector-tag">push</span> <span class="selector-tag">--mirror</span> <span class="selector-tag">git</span>@<span class="keyword">stash</span>.<span class="keyword">com</span>/<span class="keyword">username</span>/<span class="keyword">newproject</span>.<span class="keyword">git</span></div></pre></td></tr></table></figure>
-<p><img src="/images/cd-push.png" alt="cd-push"></p>
-<blockquote>
-<p>– mirror 克隆出来的裸版本对上游版本库进行了注册，这样可以在裸版本库中使用git fetch命令和上游版本库进行持续同步。</p>
-</blockquote>
-<p>4). 到新服务器 Stash 上找到 Clone 地址，直接 Clone 到本地就可以了。</p>
-<p><img src="/images/git-clone.png" alt="git-clone"></p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">git</span> <span class="selector-tag">clone</span> <span class="selector-tag">git</span>@<span class="keyword">Stash</span>.<span class="keyword">com</span>/<span class="keyword">username</span>/<span class="keyword">newproject</span>.<span class="keyword">git</span></div></pre></td></tr></table></figure>
-<p>这种方式可以保留原版本库中的所有内容(<code>tag</code>,<code>branch</code>等记录)</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;最近又要把公司&lt;code&gt;Stash&lt;/code&gt;上的项目在别部门一个私有仓库,平移到自己部门项目组的仓库，要求迁移的时候要保留已有的分支和以前的提交记录，类似的需求经常遇到，刚好做个记录。&lt;/p&gt;
-&lt;p&gt;1). 从原地址克隆一份裸版本库(纯仓库形式)，比如原本托管于 Gi
-    
-    </summary>
-    
-      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+      <category term="网络" scheme="http://fushenghua.github.io/categories/%E7%BD%91%E7%BB%9C/"/>
     
     
   </entry>

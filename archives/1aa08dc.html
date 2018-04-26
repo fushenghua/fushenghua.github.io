@@ -18,20 +18,10 @@
 
  在JVM加载类的同时，会在方法区中为这个类存放很多信息(详见《[Java 虚拟机体系结构](http://hxraid.iteye.com/blog/676235) 》)。其中就有一个数据结构叫方法表。它以数组的形式记录了当前类及其所有超类的可见方法字节码在内存中的直接地址 。下图是上面源代码中Father和Sun类在方法区中的方法表：
 </code></pre><p><img src="http://hxraid.iteye.com/upload/picture/pic/65417/ab4e5838-83f6-34a4-9dfc-a1b93e1ff02c.jpg" alt=""></p>
-<pre><code>上图中的方法表有两个特点：(1) 子类方法表中继承了父类的方法，比如Father extends Object。 (2) 相同的方法(相同的方法签名：方法名和参数列表)在所有类的方法表中的索引相同。比如Father方法表中的f1()和Son方法表中的f1()都位于各自方法表的第11项中。
-
-对于上面的源代码，编译器首先会把main方法编译成下面的字节码指令：
-</code></pre><p>多态调用的字节码指令代码 </p>
+<p>上图中的方法表有两个特点：<br>(1) 子类方法表中继承了父类的方法，比如Father extends Object。<br>(2) 相同的方法(相同的方法签名：方法名和参数列表)在所有类的方法表中的索引相同。比如Father方法表中的f1()和Son方法表中的f1()都位于各自方法表的第11项中。<br>对于上面的源代码，编译器首先会把main方法编译成下面的字节码指令：<br>多态调用的字节码指令代码 </p>
 <figure class="highlight lsl"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="number">1.</span> <span class="number">0</span>  new hr.test.Son [<span class="number">13</span>] <span class="comment">//在堆中开辟一个Son对象的内存空间，并将对象引用压入操作数栈  </span></div><div class="line"><span class="number">2.</span> <span class="number">3</span>  dup    </div><div class="line"><span class="number">3.</span> <span class="number">4</span>  invokespecial #<span class="number">7</span> [<span class="number">15</span>] <span class="comment">// 调用初始化方法来初始化堆中的Son对象   </span></div><div class="line"><span class="number">4.</span> <span class="number">7</span>  astore_1 <span class="comment">//弹出操作数栈的Son对象引用压入局部变量1中  </span></div><div class="line"><span class="number">5.</span> <span class="number">8</span>  aload_1 <span class="comment">//取出局部变量1中的对象引用压入操作数栈  </span></div><div class="line"><span class="number">6.</span> <span class="number">9</span>  invokevirtual #<span class="number">15</span> <span class="comment">//调用f1()方法  </span></div><div class="line"><span class="number">7.</span> <span class="number">12</span>  return</div></pre></td></tr></table></figure>
-<pre><code> 其中invokevirtual指令的详细调用过程是这样的：
-
- (1) invokevirtual指令中的#15指的是AutoCall类的常量池中第15个常量表的索引项。这个常量表(**CONSTATN_Methodref_info** ) 记录的是方法f1信息的符号引用(包括f1所在的类名，方法名和返回类型)。JVM会首先根据这个符号引用找到调用方法f1的类的全限定名: hr.test.Father。这是因为调用方法f1的类的对象father声明为Father类型。
-
- (2) 在Father类型的方法表中查找方法f1，如果找到，则将方法f1在方法表中的索引项11(如上图)记录到AutoCall类的常量池中第15个常量表中(**常量池解析 **)。这里有一点要注意：如果Father类型方法表中没有方法f1，那么即使Son类型中方法表有，编译的时候也通过不了。因为调用方法f1的类的对象father的声明为Father类型。
-
- (3) 在调用invokevirtual指令前有一个aload_1指令，它会将开始创建在堆中的Son对象的引用压入操作数栈。然后invokevirtual指令会根据这个Son对象的引用首先找到堆中的Son对象，然后进一步找到Son对象所属类型的方法表。过程如下图所示：
-
-              ![](/images/4f775e04-3dd2-34bb-bb44-086d5743ee4c.jpg)
+<p> 其中invokevirtual指令的详细调用过程是这样的：<br> (1) invokevirtual指令中的#15指的是AutoCall类的常量池中第15个常量表的索引项。这个常量表(<strong>CONSTATN_Methodref_info</strong> ) 记录的是方法f1信息的符号引用(包括f1所在的类名，方法名和返回类型)。JVM会首先根据这个符号引用找到调用方法f1的类的全限定名: hr.test.Father。这是因为调用方法f1的类的对象father声明为Father类型。<br>(2) 在Father类型的方法表中查找方法f1，如果找到，则将方法f1在方法表中的索引项11(如上图)记录到AutoCall类的常量池中第15个常量表中(<strong>常量池解析 </strong>)。这里有一点要注意：如果Father类型方法表中没有方法f1，那么即使Son类型中方法表有，编译的时候也通过不了。因为调用方法f1的类的对象father的声明为Father类型。<br>(3) 在调用invokevirtual指令前有一个aload_1指令，它会将开始创建在堆中的Son对象的引用压入操作数栈。然后invokevirtual指令会根据这个Son对象的引用首先找到堆中的Son对象，然后进一步找到Son对象所属类型的方法表。过程如下图所示：</p>
+<pre><code>              ![](/images/4f775e04-3dd2-34bb-bb44-086d5743ee4c.jpg)
 
 (4) 这是通过第(2)步中解析完成的#15常量表中的方法表的索引项11，可以定位到Son类型方法表中的方法f1()，然后通过直接地址找到该方法字节码所在的内存空间。
 

@@ -153,7 +153,7 @@
     <link href="http://fushenghua.github.io/archives/a9cc5307.html"/>
     <id>http://fushenghua.github.io/archives/a9cc5307.html</id>
     <published>2017-03-07T00:55:29.000Z</published>
-    <updated>2018-05-03T01:32:13.758Z</updated>
+    <updated>2018-05-05T15:30:34.911Z</updated>
     
     <content type="html"><![CDATA[<p>Android Runtime (ART) 是 Android 上的应用和部分系统服务使用的托管式运行时。ART 及其前身 Dalvik 最初是专为 Android 项目打造的。作为运行时的 ART 可执行 Dalvik 可执行文件并遵循 Dex 字节码规范。</p>
 <p>ART 和 Dalvik 是运行 Dex 字节码的兼容运行时，因此针对 Dalvik 开发的应用也能在 ART 环境中运作。不过，Dalvik 采用的一些技术并不适用于 ART。有关最重要问题的信息，请参阅在 Android Runtime (ART) 上验证应用行为。</p>

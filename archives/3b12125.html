@@ -1,0 +1,124 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta http-equiv="content-type" content="text/html; charset=utf-8"><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" name="viewport"><meta content="yes" name="apple-mobile-web-app-capable"><meta content="black-translucent" name="apple-mobile-web-app-status-bar-style"><meta content="telephone=no" name="format-detection"><meta name="description" content="不断提高自己认知，不断的为自己想要的努力"><title>Android 8.0 中的 ART 功能改进 | fuchenxuan’ blog</title><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/normalize/4.2.0/normalize.min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/pure-min.css"><link rel="stylesheet" type="text/css" href="//cdn.bootcss.com/pure/0.6.0/grids-responsive-min.css"><link rel="stylesheet" type="text/css" href="/css/style.css?v=0.0.0"><link rel="stylesheet" href="//cdn.bootcss.com/font-awesome/4.6.3/css/font-awesome.min.css"><script type="text/javascript" src="/weixin.js"></script><script type="text/javascript" src="//cdn.bootcss.com/jquery/3.0.0/jquery.min.js"></script><link rel="Shortcut Icon" type="image/x-icon" href="/favicon.ico"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><link rel="apple-touch-icon-precomposed" href="/apple-touch-icon.png"><link rel="alternate" type="application/atom+xml" href="/atom.xml"></head><body><div class="body_container"><div id="header"><div class="site-name"><h1 class="hidden">Android 8.0 中的 ART 功能改进</h1><a id="logo" href="/.">fuchenxuan’ blog</a><p class="description">不断提高自己认知，不断的为自己想要的努力</p></div><div id="nav-menu"><a href="/." class="current"><i class="fa fa-home"> 首页</i></a><a href="/archives/" class="current"><i class="fa fa-archive"> 归档</i></a><a href="/about/"><i class="fa fa-user"> 关于</i></a><a href="/message/"><i class="fa fa-comments"> 留言</i></a><a href="/atom.xml"><i class="fa fa-rss"> 订阅</i></a></div></div><div id="layout" class="pure-g"><div class="pure-u-1 pure-u-md-3-4"><div class="content_container"><div class="post"><h1 class="post-title">Android 8.0 中的 ART 功能改进</h1><div class="post-meta">Apr 2, 2018<span> | </span><span class="category"><a href="/categories/android/">android</a></span><script src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js" async></script><span id="busuanzi_container_page_pv"> | <span id="busuanzi_value_page_pv"></span><span> Hits</span></span></div><a data-disqus-identifier="archives/3b12125.html" href="/archives/3b12125.html#disqus_thread" class="disqus-comment-count"></a><div class="post-content"><p>在 Android 8.0 版本中，Android Runtime (ART) 有了极大改进。下面的列表总结了设备制造商可以在 ART 中获得的增强功能。</p>
+<h2 id="并发压缩式垃圾回收器"><a href="#并发压缩式垃圾回收器" class="headerlink" title="并发压缩式垃圾回收器"></a>并发压缩式垃圾回收器</h2><p>正如 Google 在 Google I/O 大会上所宣布的那样，ART 在 Android 8.0 中提供了新的并发压缩式垃圾回收器 (GC)。该回收器会在每次执行 GC 时以及应用正在运行时对堆进行压缩，且仅在处理线程根时短暂停顿一次。该回收器具有以下优势：</p>
+<ul>
+<li>GC 始终会对堆进行压缩：堆的大小平均比 Android 7.0 中的小 32%。</li>
+<li>得益于压缩，系统现可实现线程局部碰撞指针对象分配：分配速度比 Android 7.0 中的快 70%。</li>
+<li>H2 基准的停顿次数比 Android 7.0 GC 的少 85%。</li>
+<li>停顿次数不再随堆的大小而变化，应用在使用较大的堆时也无需担心造成卡顿。</li>
+<li>GC 实现细节 - 读取屏障：<ul>
+<li>读取屏障是在读取每个对象字段时所做的少量工作。</li>
+<li>它们在编译器中经过了优化，但可能会减慢某些用例的速度。</li>
+</ul>
+</li>
+</ul>
+<h2 id="循环优化"><a href="#循环优化" class="headerlink" title="循环优化"></a>循环优化</h2><p>在 Android 8.0 版本中，ART 采取了多种循环优化措施，具体如下：</p>
+<ul>
+<li>消除边界检查<ul>
+<li>静态：在编译时证明范围位于边界内</li>
+<li>动态：运行时测试确保循环始终位于边界内（否则不进行优化）</li>
+</ul>
+</li>
+<li>消除归纳变量<ul>
+<li>移除无用归纳</li>
+<li>用封闭式表达式替换仅在循环后使用的归纳</li>
+</ul>
+</li>
+<li>消除循环主体内的无用代码，移除整个死循环</li>
+<li>强度降低</li>
+<li>循环转换：逆转、交换、拆分、展开、单模等</li>
+<li>SIMDization（也称为矢量化）</li>
+</ul>
+<p>循环优化器位于 ART 编译器中一个独立的优化环节中。大多数循环优化与其他方面的优化和简化类似。由于大多数 CFG 实用工具（请参阅 nodes.h）侧重于编译而不是重写 CFG，因此通过更复杂（与平时相比）的方式进行一些重写 CFG 的优化时，会面临挑战。</p>
+<h2 id="类层次结构分析"><a href="#类层次结构分析" class="headerlink" title="类层次结构分析"></a>类层次结构分析</h2><p>在 Android 8.0 中，ART 会使用类层次结构分析 (CHA)，这是一种编译器优化，可基于通过分析类层次结构所生成的信息，将虚拟调用去虚拟化为直接调用。虚拟调用代价高昂，因为它们围绕 vtable 查找来实现，且会占用几个依赖负载。另外，虚拟调用也不能内嵌。</p>
+<p>以下是对相关增强功能的总结：</p>
+<ul>
+<li>动态单一实现方法状态更新 - 在类关联时间结束时，如果 vtable 已被填充，ART 会按条目对超类的 vtable 进行比较。</li>
+<li>编译器优化 - 编译器会利用某种方法的单一实现信息。如果方法 A.foo 设置了单一实现标记，则编译器会将虚拟调用去虚拟化为直接调用，并借此进一步尝试内嵌直接调用。</li>
+<li>已编译代码无效 - 另外，在类关联时间结束时，如果单一实现信息进行了更新，且方法 A.foo 之前拥有单一实现，但该状态现已变为无效，则依赖方法 A.foo 拥有单一实现这一假设的所有已编译代码都需要变为无效代码。</li>
+<li>去优化 - 对于堆栈上已编译的有效代码，系统会启动去优化功能，以强制使已编译无效代码进入解释器模式，从而确保正确性。系统会采用结合了同步和异步去优化的全新去优化机制。</li>
+</ul>
+<h2 id="oat-文件中的内嵌缓存"><a href="#oat-文件中的内嵌缓存" class="headerlink" title=".oat 文件中的内嵌缓存"></a>.oat 文件中的内嵌缓存</h2><p>ART 现在采用内嵌缓存，并对有足够数据可用的调用站点进行优化。内嵌缓存功能会将额外的运行时信息记录到配置文件中，并利用这类信息将动态优化添加到预先编译中。</p>
+<h2 id="Dexlayout"><a href="#Dexlayout" class="headerlink" title="Dexlayout"></a>Dexlayout</h2><p>Dexlayout 是在 Android 8.0 中引入的一个库，用于分析 dex 文件，并根据配置文件对其进行重新排序。Dexlayout 旨在使用运行时配置信息对 dex 文件的各个部分进行重新排序（在设备的空闲维护编译期间）。通过将经常一起访问的部分 dex 文件集中在一起，程序可以因改进文件位置而拥有更好的内存访问模式，从而节省 RAM 并缩短启动时间。</p>
+<p>由于配置文件信息目前仅在运行应用后可用，因此系统会在空闲维护期间将 dexlayout 集成到 dex2oat 的设备编译中。</p>
+<h2 id="Dex-缓存移除"><a href="#Dex-缓存移除" class="headerlink" title="Dex 缓存移除"></a>Dex 缓存移除</h2><p>在 Android 7.0 及更早版本中，DexCache 对象拥有四个大型数组，与 DexFile 中特定元素的数量成正比，即：</p>
+<ul>
+<li>字符串（每个 DexFile::StringId 一个引用），</li>
+<li>类型（每个 DexFile::TypeId 一个引用），</li>
+<li>方法（每个 DexFile::MethodId 一个原生指针），</li>
+<li>字段（每个 DexFile::FieldId 一个原生指针）。</li>
+</ul>
+<p>这些数组用于快速检索我们以前解析的对象。在 Android 8.0 中，除方法数组外，所有数组都已移除。</p>
+<h2 id="解释器性能"><a href="#解释器性能" class="headerlink" title="解释器性能"></a>解释器性能</h2><p>通过引入 Mterp（一种解释器，具有以汇编语言编写的核心提取/解码/解释机制），Android 7.0 版本中的解释器性能得以显著提升。Mterp 模仿了快速 Dalvik 解释器，并支持 arm、arm64、x86、x86_64、mips 和 mips64。对于计算代码而言，ART 的 Mterp 大致相当于 Dalvik 的快速解释器。不过，有时候，它的速度可能会显著变慢，甚至急剧变慢：</p>
+<ol>
+<li>调用性能。</li>
+<li>字符串操作和 Dalvik 中其他被视为内嵌函数的高频用户方法。</li>
+<li>堆栈内存使用量较高。</li>
+</ol>
+<p>Android 8.0 解决了这些问题。</p>
+<h2 id="详细了解内嵌"><a href="#详细了解内嵌" class="headerlink" title="详细了解内嵌"></a>详细了解内嵌</h2><p>从 Android 6.0 开始，ART 可以内嵌同一个 dex 文件中的任何调用，但只能内嵌来自其他 dex 文件的叶方法。此项限制具有以下两个原因：</p>
+<ol>
+<li>从其他 dex 文件进行内嵌需要使用该 dex 文件的 dex 缓存，这与同一 dex 文件内嵌（只能重复使用调用程序的 dex 缓存）有所不同。已编译代码中需要具有 dex 缓存，以便执行一系列指令，例如静态调用、字符串加载或类加载。</li>
+<li>堆栈映射只对当前 dex 文件中的方法索引进行编码。</li>
+</ol>
+<p>为了应对这些限制，Android 8.0 做出了以下改进：</p>
+<ol>
+<li>从已编译代码中移除 dex 缓存访问（另请参阅“Dex 缓存移除”部分）</li>
+<li>扩展堆栈映射编码。</li>
+</ol>
+<h2 id="同步方面的改进"><a href="#同步方面的改进" class="headerlink" title="同步方面的改进"></a>同步方面的改进</h2><p>ART 团队调整了 MonitorEnter/MonitorExit 代码路径，并减少了我们对 ARMv8 上传统内存屏障的依赖，尽可能将其替换为较新的（获取/释放）指令。</p>
+<h2 id="更快速的原生方法"><a href="#更快速的原生方法" class="headerlink" title="更快速的原生方法"></a>更快速的原生方法</h2><p>使用 <a href="https://android.googlesource.com/platform/libcore/+/master/dalvik/src/main/java/dalvik/annotation/optimization/FastNative.java" target="_blank" rel="external"><code>@FastNative</code></a> 和 <a href="https://android.googlesource.com/platform/libcore/+/master/dalvik/src/main/java/dalvik/annotation/optimization/CriticalNative.java" target="_blank" rel="external"><code>@CriticalNative</code></a> 注解可实现对 Java 原生接口 (JNI) 更快速的原生调用。这种内置的 ART 运行时优化加快了 JNI 转换，并取代了现在已弃用的 !<em>bang JNI 标记。</em>注解对非原生方法没有任何影响，并且仅适用于 <code>bootclasspath</code> 上的平台 Java 语言代码（无 Play 商店更新）。</p>
+<p><code>@FastNative</code> 注解支持非静态方法。如果某种方法将 <code>jobject</code> 作为参数或返回值进行访问，请使用此注解。</p>
+<p>利用 <code>@CriticalNative</code> 注解，可更快速地运行原生方法，但存在以下限制：</p>
+<ul>
+<li>方法必须是静态的 - 没有参数、返回值或隐式 <code>this</code> 的对象。</li>
+<li>仅将基元类型传递给原生方法。</li>
+<li>原生方法在其函数定义中不使用 <code>JNIEnv</code> 和 <code>jclass</code> 参数。</li>
+<li>该方法必须是使用 <code>RegisterNatives</code> 注册的，而不是依靠动态 JNI 链接。</li>
+</ul>
+<p><code>@FastNative</code> 和 <code>@CriticalNative</code> 注解在执行原生方法时会停用垃圾回收。请勿使用运行时间较长的方法，包括通常很快但一般不受控制的方法。</p>
+<p>停顿垃圾回收可能会导致死锁。如果锁尚未得到本地释放（即尚未返回受管理代码），请勿在原生快速调用期间获取锁。此要求不适用于常规的 JNI 调用，因为 ART 将正执行的原生代码视为已暂停的状态。</p>
+<p><code>@FastNative</code> 可以使原生方法的性能提升高达 3 倍，<code>@CriticalNative</code> 则可以提升高达 5 倍。例如，在 Nexus 6P 设备上测量的 JNI 转换如下：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Java 原生接口 (JNI) 调用</th>
+<th>执行时间（以纳秒计）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td>常规 JNI</td>
+<td>115</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><em>!bang JNI</em></td>
+<td>60</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>&lt;span style=&quot;box-sizing: inherit;&quot;&gt;@FastNative&lt;/span&gt;</code></td>
+<td>35</td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><code>&lt;span style=&quot;box-sizing: inherit;&quot;&gt;@CriticalNative&lt;/span&gt;</code></td>
+<td>25</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div><div class="tags"></div><div class="post-nav"><a href="/archives/ed6915f6.html" class="pre">在Pypi上发布自己的Python包</a><a href="/archives/a9cc5307.html" class="next">ART 和 Dalvik的区别</a></div><div id="disqus_thread"><script>var disqus_shortname = 'fushenghua';
+var disqus_identifier = 'archives/3b12125.html';
+var disqus_title = 'Android 8.0 中的 ART 功能改进';
+var disqus_url = 'http://fushenghua.github.io/archives/3b12125.html';
+(function() {
+  var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+  dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+  (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+})();</script><script id="dsq-count-scr" src="//fushenghua.disqus.com/count.js" async></script></div></div></div></div><div class="pure-u-1-4 hidden_mid_and_down"><div id="sidebar"><div class="widget"><form action="//www.google.com/search" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="text" name="q" maxlength="20" placeholder="Search"/><input type="hidden" name="sitesearch" value="http://fushenghua.github.io"/></form></div><div class="widget"><form action="//www.baidu.com/baidu" method="get" accept-charset="utf-8" target="_blank" class="search-form"><input type="search" name="word" maxlength="20" placeholder="Search"/><input type="hidden" name="si" value="http://fushenghua.github.io"/><input name="tn" type="hidden" value="bds"/><input name="cl" type="hidden" value="3"/><input name="ct" type="hidden" value="2097152"/><input name="s" type="hidden" value="on"/></form></div><div class="widget"><div class="widget-title"><i class="fa fa-folder-o"> 分类</i></div><ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/android/">android</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/java/">java</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/linux/">linux</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/python/">python</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/基础技能/">基础技能</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/安全/">安全</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/性能优化/">性能优化</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/源码/">源码</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/网络/">网络</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-star-o"> 标签</i></div><div class="tagcloud"><a href="/tags/android/" style="font-size: 15px;">android</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/优化/" style="font-size: 15px;">优化</a></div></div><div class="widget"><div class="widget-title"><i class="fa fa-file-o"> 最新文章</i></div><ul class="post-list"><li class="post-list-item"><a class="post-list-link" href="/archives/3e3728fd.html">为什么说枚举更占内存，枚举原理是什么？</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/ed6915f6.html">在Pypi上发布自己的Python包</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/3b12125.html">Android 8.0 中的 ART 功能改进</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/a9cc5307.html">ART 和 Dalvik的区别</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/375726b.html">版本管理发布流程</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/db6d97a8.html">APK 瘦身，减少APK体积的大小</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/a72a1e10.html">app安全之Apk完整性校验</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/8e05eece.html">git仓库迁移</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/235d5e38.html">ViewStub原理分析</a></li><li class="post-list-item"><a class="post-list-link" href="/archives/c66eed35.html">优化Gradle 依赖使用方式</a></li></ul></div><div class="widget"><div class="widget-title"><i class="fa fa-comment-o"> 最近评论</i></div><script type="text/javascript" src="//fushenghua.disqus.com/recent_comments_widget.js?num_items=5&amp;hide_avatars=1&amp;avatar_size=32&amp;excerpt_length=20&amp;hide_mods=1"></script></div><div class="widget"><div class="widget-title"><i class="fa fa-external-link"> 友情链接</i></div></div></div></div><div class="pure-u-1 pure-u-md-3-4"><div id="footer">© <a href="/." rel="nofollow">fuchenxuan’ blog</a></div></div></div><a id="rocket" href="#top" class="show"></a><script type="text/javascript" src="/weixin.js"></script><script type="text/javascript" src="/js/totop.js?v=0.0.0" async></script><script type="text/javascript" src="//cdn.bootcss.com/fancybox/2.1.5/jquery.fancybox.pack.js" async></script><script type="text/javascript" src="/js/fancybox.js?v=0.0.0" async></script><link rel="stylesheet" type="text/css" href="/css/jquery.fancybox.css?v=0.0.0"><script type="text/javascript" src="/js/codeblock-resizer.js?v=0.0.0"></script><script type="text/javascript" src="/js/smartresize.js?v=0.0.0"></script></div></body></html>

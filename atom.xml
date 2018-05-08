@@ -153,7 +153,7 @@
     <link href="http://fushenghua.github.io/archives/3b12125.html"/>
     <id>http://fushenghua.github.io/archives/3b12125.html</id>
     <published>2018-04-02T00:55:29.000Z</published>
-    <updated>2018-05-07T08:38:54.798Z</updated>
+    <updated>2018-05-07T08:39:05.326Z</updated>
     
     <content type="html"><![CDATA[<p>在 Android 8.0 版本中，Android Runtime (ART) 有了极大改进。下面的列表总结了设备制造商可以在 ART 中获得的增强功能。</p>
 <h2 id="并发压缩式垃圾回收器"><a href="#并发压缩式垃圾回收器" class="headerlink" title="并发压缩式垃圾回收器"></a>并发压缩式垃圾回收器</h2><p>正如 Google 在 Google I/O 大会上所宣布的那样，ART 在 Android 8.0 中提供了新的并发压缩式垃圾回收器 (GC)。该回收器会在每次执行 GC 时以及应用正在运行时对堆进行压缩，且仅在处理线程根时短暂停顿一次。该回收器具有以下优势：</p>

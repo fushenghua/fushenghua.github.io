@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://fushenghua.github.io/"/>
-  <updated>2018-05-10T03:27:01.437Z</updated>
+  <updated>2018-04-20T05:25:03.649Z</updated>
   <id>http://fushenghua.github.io/</id>
   
   <author>
@@ -14,141 +14,6 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title></title>
-    <link href="http://fushenghua.github.io/archives/0.html"/>
-    <id>http://fushenghua.github.io/archives/0.html</id>
-    <published>2018-05-10T03:14:54.973Z</published>
-    <updated>2018-05-10T03:27:01.437Z</updated>
-    
-    <content type="html"><![CDATA[<h3 id="什么是CopyOnWrite容器"><a href="#什么是CopyOnWrite容器" class="headerlink" title="什么是CopyOnWrite容器"></a>什么是CopyOnWrite容器</h3><p>CopyOnWrite容器即写时复制的容器。通俗的理解是当我们往一个容器添加元素的时候，不直接往当前容器添加，而是先将当前容器进行Copy，复制出一个新的容器，然后新的容器里添加元素，添加完元素之后，再将原容器的引用指向新的容器。这样做的好处是我们可以对CopyOnWrite容器进行并发的读，而不需要加锁，因为当前容器不会添加任何元素。所以CopyOnWrite容器也是一种读写分离的思想，读和写不同的容器。</p>
-<p>CopyOnWriteArrayList API的定义如下：</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CopyOnWriteArrayList</span>&lt;<span class="title">E</span>&gt;</span></div><div class="line"><span class="keyword">extends</span> <span class="title">Object</span></div><div class="line"><span class="keyword">implements</span> <span class="title">List</span>&lt;<span class="title">E</span>&gt;, <span class="title">RandomAccess</span>, <span class="title">Cloneable</span>, <span class="title">Serializable</span></div></pre></td></tr></table></figure>
-<p>它也属于Java集合框架的一部分，是<strong>ArrayList</strong>的线程安全的变体，跟ArrayList的不同在于：CopyOnWriteArrayList针对数组的修改操作（add、set等）是基于<strong>内部拷贝的一份数据而进行</strong>的。换句话说，即使在一个线程进行遍历操作时有其他线程可能进行插入或删除操作，我们也可以“线程安全”得遍历CopyOnWriteArrayList。</p>
-<h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><p>适合使用在读操作远远大于写操作的场景里</p>
-<h4 id="插入（删除）数据的同时进行遍历"><a href="#插入（删除）数据的同时进行遍历" class="headerlink" title="插入（删除）数据的同时进行遍历"></a>插入（删除）数据的同时进行遍历</h4><p>CopyOnWriteArrayList的实现原理是，在一个线程开始遍历（创建Iterator对象）时，内部会创建一个“快照”数组，遍历基于这个快照Iterator进行，在遍历过程中这个快照数组不会改变，也就不会抛出<code>ConcurrentModificationException</code>。如果在遍历的过程中有其他线程尝试改变数组的内容，就会拷贝一份新的数据进行变更，而后面再来访问这个数组的线程，看到的就是变更过的数组。<br>如下：</p>
-<figure class="highlight dart"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.<span class="built_in">Iterator</span>;</div><div class="line"><span class="keyword">import</span> java.util.LinkedList;</div><div class="line"><span class="keyword">import</span> java.util.<span class="built_in">List</span>;</div><div class="line"><span class="keyword">import</span> java.util.concurrent.CopyOnWriteArrayList;</div><div class="line"></div><div class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.assertj.core.api.Assertions.*;</div><div class="line"></div><div class="line">public <span class="class"><span class="keyword">class</span> <span class="title">CopyOnWriteArrayListExample</span> </span>&#123;</div><div class="line"></div><div class="line">    public <span class="keyword">static</span> <span class="keyword">void</span> main(<span class="built_in">String</span>[] args) &#123;</div><div class="line">        CopyOnWriteArrayList&lt;Integer&gt; numbers = <span class="keyword">new</span> CopyOnWriteArrayList&lt;&gt;(<span class="keyword">new</span> Integer[]&#123;<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">78</span>&#125;);</div><div class="line"></div><div class="line">        <span class="built_in">Iterator</span>&lt;Integer&gt; iterator = numbers.iterator();</div><div class="line">        numbers.add(<span class="number">100</span>);</div><div class="line">        <span class="built_in">List</span>&lt;Integer&gt; result = <span class="keyword">new</span> LinkedList&lt;&gt;();</div><div class="line">        iterator.forEachRemaining(result::add);</div><div class="line">        assertThat(result).containsOnly(<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">78</span>);</div><div class="line"></div><div class="line">        <span class="built_in">Iterator</span>&lt;Integer&gt; iterator2 = numbers.iterator();</div><div class="line">        numbers.remove(<span class="number">3</span>);</div><div class="line">        <span class="built_in">List</span>&lt;Integer&gt; result2 = <span class="keyword">new</span> LinkedList&lt;&gt;();</div><div class="line">        iterator2.forEachRemaining(result2::add);</div><div class="line">        assertThat(result2).containsOnly(<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">78</span>, <span class="number">100</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="CopyOnWriteArrayList的实现原理"><a href="#CopyOnWriteArrayList的实现原理" class="headerlink" title="CopyOnWriteArrayList的实现原理"></a>CopyOnWriteArrayList的实现原理</h3><p>在使用CopyOnWriteArrayList之前，我们先阅读其源码了解下它是如何实现的。以下代码是向ArrayList里添加元素，可以发现在添加的时候是<strong>需要加锁</strong>的，否则多线程写的时候会Copy出N个副本出来。</p>
-<figure class="highlight cs"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> boolean <span class="title">add</span>(<span class="params">T e</span>) </span>&#123;</div><div class="line">    final ReentrantLock <span class="keyword">lock</span> = <span class="keyword">this</span>.<span class="keyword">lock</span>;</div><div class="line">    <span class="keyword">lock</span>.<span class="keyword">lock</span>();</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line"> </div><div class="line">        Object[] elements = getArray();</div><div class="line"> </div><div class="line">        <span class="keyword">int</span> len = elements.length;</div><div class="line">        <span class="comment">// 复制出新数组</span></div><div class="line"> </div><div class="line">        Object[] newElements = Arrays.copyOf(elements, len + <span class="number">1</span>);</div><div class="line">        <span class="comment">// 把新元素添加到新数组里</span></div><div class="line"> </div><div class="line">        newElements[len] = e;</div><div class="line">        <span class="comment">// 把原数组引用指向新数组</span></div><div class="line"> </div><div class="line">        setArray(newElements);</div><div class="line"> </div><div class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</div><div class="line"> </div><div class="line">    &#125; <span class="keyword">finally</span> &#123;</div><div class="line"> </div><div class="line">        <span class="keyword">lock</span>.unlock();</div><div class="line"> </div><div class="line">    &#125;</div><div class="line"> </div><div class="line">&#125;</div><div class="line"> </div><div class="line"><span class="function">final <span class="keyword">void</span> <span class="title">setArray</span>(<span class="params">Object[] a</span>) </span>&#123;</div><div class="line">    array = a;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>读的时候不需要加锁，如果读的时候有多个线程正在向ArrayList添加数据，读还是会读到旧的数据，因为写的时候不会锁住旧的ArrayList。</p>
-<figure class="highlight arduino"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> E <span class="built_in">get</span>(<span class="keyword">int</span> index) &#123;</div><div class="line">    <span class="built_in">return</span> <span class="built_in">get</span>(getArray(), index);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
-<li><p><strong>CopyOnWriteArrayList</strong>适合使用在读操作远远大于写操作的场景里，比如缓存。发生修改时候做copy，新老版本分离，保证读的高性能，适用于以读为主的情况。</p>
-</li>
-<li><p><strong>内存占用问题</strong>：因为CopyOnWrite的写时复制机制，所以在进行写操作的时候，内存里会同时驻扎两个对象的内存，旧的对象和新写入的对象（注意:在复制的时候只是复制容器里的引用，只是在写的时候会创建新对象添加到新容器里，而旧容器的对象还在使用，所以有两份对象内存）。如果这些对象占用的内存比较大，比如说200M左右，那么再写入100M数据进去，内存就会占用300M，那么这个时候很有可能造成频繁的Yong GC和Full GC。之前我们系统中使用了一个服务由于每晚使用CopyOnWrite机制更新大对象，造成了每晚15秒的Full GC，应用响应时间也随之变长。</p>
-</li>
-<li><strong>数据一致性问题</strong>：CopyOnWrite容器只能保证数据的最终一致性，不能保证数据的实时一致性。所以如果你希望写入的的数据，马上能读到，请不要使用CopyOnWrite容器。</li>
-</ul>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;h3 id=&quot;什么是CopyOnWrite容器&quot;&gt;&lt;a href=&quot;#什么是CopyOnWrite容器&quot; class=&quot;headerlink&quot; title=&quot;什么是CopyOnWrite容器&quot;&gt;&lt;/a&gt;什么是CopyOnWrite容器&lt;/h3&gt;&lt;p&gt;CopyOnWrite容器即
-    
-    </summary>
-    
-    
-  </entry>
-  
-  <entry>
-    <title></title>
-    <link href="http://fushenghua.github.io/archives/0.html"/>
-    <id>http://fushenghua.github.io/archives/0.html</id>
-    <published>2018-05-09T02:21:49.463Z</published>
-    <updated>2018-05-09T02:24:26.136Z</updated>
-    
-    <content type="html"><![CDATA[<p>Android 运行时 (ART) 包含一个具备代码分析功能的即时 (JIT) 编译器，该编译器可以在 Android 应用运行时持续提高其性能。JIT 编译器补充了 ART 当前的预先 (AOT) 编译器的功能，有助于提高运行时性能，节省存储空间，以及加快应用及系统更新速度。相较于 AOT 编译器，JIT 编译器的优势也更为明显，因为它不会在应用自动更新期间或重新编译应用（在无线下载 (OTA) 更新期间）时拖慢系统速度。</p>
-<p>尽管 JIT 和 AOT 使用相同的编译器，它们所进行的一系列优化也较为相似，但它们生成的代码可能会有所不同。JIT 会利用运行时类型信息，可以更高效地进行内联，并可让堆栈替换 (OSR) 编译成为可能，而这一切都会使其生成的代码略有不同。</p>
-<h2 id="JIT-架构"><a href="#JIT-架构" class="headerlink" title="JIT 架构"></a>JIT 架构</h2><p><img src="/images/jit-arch.png" alt="JIT 架构"></p>
-<p><strong>图 1.</strong> JIT 架构。</p>
-<h2 id="JIT-编译"><a href="#JIT-编译" class="headerlink" title="JIT 编译"></a>JIT 编译</h2><p>JIT 编译涉及以下活动：</p>
-<p><img src="/images/jit-profile-comp.png" alt="配置文件引导的编译"></p>
-<p><strong>图 2.</strong> 配置文件引导的编译。</p>
-<ol>
-<li><p>用户运行应用，而这随后就会触发 ART 加载 <code>.dex</code> 文件。</p>
-<ul>
-<li>如果有 <code>.oat</code> 文件（即 <code>.dex</code> 文件的 AOT 二进制文件），则 ART 会直接使用该文件。虽然 <code>.oat</code> 文件会定期生成，但文件中不一定会包含经过编译的代码（即 AOT 二进制文件）。</li>
-<li><p>如果没有 <code>.oat</code> 文件，则 ART 会通过 JIT 或解释器执行 <code>.dex</code> 文件。</p>
-<p><code>.oat</code></p>
-<p><code>.dex</code></p>
-</li>
-</ul>
-</li>
-<li><p>针对任何未根据 <code>speed</code> 编译过滤器编译的应用启用 JIT（也就是说，要尽可能多地编译应用中的代码）。</p>
-</li>
-<li>将 JIT 配置文件数据转存到只限应用访问的系统目录内的文件中。</li>
-<li><p>AOT 编译 (<code>dex2oat</code>) 守护进程通过解析该文件来推进其编译。</p>
-<p> <img src="/images/jit-daemon.png" alt="JIT 守护进程"></p>
-<p> <strong>图 3.</strong> JIT 守护进程活动。</p>
-</li>
-</ol>
-<p>举例来说，Google Play 服务就是一种由其他应用使用的类似于共享库的服务。</p>
-<h2 id="JIT-工作流程"><a href="#JIT-工作流程" class="headerlink" title="JIT 工作流程"></a>JIT 工作流程</h2><p><img src="/images/jit-workflow.png" alt="JIT 架构"></p>
-<p><strong>图 4.</strong> JIT 数据流。</p>
-<ul>
-<li>分析信息会存储在代码缓存中，并会在内存紧张时作为垃圾被回收。<ul>
-<li>无法保证在应用处于后台运行状态时所捕获的快照能够包含完整的数据（即 JIT 编译的所有内容）。</li>
-<li>该过程不会尝试确保记录所有内容（因为这将影响运行时性能）。</li>
-</ul>
-</li>
-<li>方法可能有三种不同的状态：<ul>
-<li>已经过解释（dex 代码）</li>
-<li>已经过 JIT 编译</li>
-<li>已经过 AOT 编译如果同时存在 JIT 和 AOT 代码（例如，由于反复进行逆优化），经过 JIT 编译的代码将是首选代码。</li>
-</ul>
-</li>
-<li>在不影响前台应用性能的情况下运行 JIT 所需的内存取决于相关应用。大型应用比小型应用需要更多内存。一般来说，大型应用所需的内存稳定维持在 4 MB 左右。</li>
-</ul>
-<h2 id="开启-JIT-日志记录"><a href="#开启-JIT-日志记录" class="headerlink" title="开启 JIT 日志记录"></a>开启 JIT 日志记录</h2><p>要开启 JIT 日志记录，请运行以下命令：</p>
-<p><code>adb root</code><br><code>adb shell stop</code><br><code>adb shell setprop dalvik.vm.extra-opts -verbose:jit</code><br><code>adb shell start</code></p>
-<h2 id="停用-JIT"><a href="#停用-JIT" class="headerlink" title="停用 JIT"></a>停用 JIT</h2><p>要停用 JIT，请运行以下命令：</p>
-<p><code>adb root</code><br><code>adb shell stop</code><br><code>adb shell setprop dalvik.vm.usejit false</code><br><code>adb shell start</code></p>
-<h2 id="强制编译"><a href="#强制编译" class="headerlink" title="强制编译"></a>强制编译</h2><p>要强制编译，请运行以下命令：</p>
-<p>adb shell cmd package compile</p>
-<p>强制编译特定软件包的常见用例：</p>
-<ul>
-<li><p>基于配置文件：</p>
-<p>  adb shell cmd package compile -m speed-profile -f my-package</p>
-</li>
-</ul>
-<ul>
-<li><p>全面：</p>
-<p>  adb shell cmd package compile -m speed -f my-package</p>
-</li>
-</ul>
-<p>强制编译所有软件包的常见用例：</p>
-<ul>
-<li><p>基于配置文件：</p>
-<p>  adb shell cmd package compile -m speed-profile -f -a</p>
-</li>
-</ul>
-<ul>
-<li><p>全面：</p>
-<p>  adb shell cmd package compile -m speed -f -a</p>
-</li>
-</ul>
-<h2 id="清除配置文件数据"><a href="#清除配置文件数据" class="headerlink" title="清除配置文件数据"></a>清除配置文件数据</h2><p>要清除配置文件数据并移除经过编译的代码，请运行以下命令：</p>
-<ul>
-<li><p>针对一个软件包：</p>
-<p>  adb shell cmd package compile –reset my-package</p>
-</li>
-</ul>
-<ul>
-<li><p>针对所有软件包：</p>
-<p>  adb shell cmd package compile –reset -a</p>
-</li>
-</ul>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;Android 运行时 (ART) 包含一个具备代码分析功能的即时 (JIT) 编译器，该编译器可以在 Android 应用运行时持续提高其性能。JIT 编译器补充了 ART 当前的预先 (AOT) 编译器的功能，有助于提高运行时性能，节省存储空间，以及加快应用及系统更新速
-    
-    </summary>
-    
-    
-  </entry>
   
   <entry>
     <title>在Pypi上发布自己的Python包</title>
@@ -420,6 +285,107 @@
   </entry>
   
   <entry>
+    <title>实现 ART 即时 (JIT) 编译器</title>
+    <link href="http://fushenghua.github.io/archives/3dbdbf17.html"/>
+    <id>http://fushenghua.github.io/archives/3dbdbf17.html</id>
+    <published>2018-04-02T00:55:29.000Z</published>
+    <updated>2018-05-10T03:30:21.887Z</updated>
+    
+    <content type="html"><![CDATA[<p>Android 运行时 (ART) 包含一个具备代码分析功能的即时 (JIT) 编译器，该编译器可以在 Android 应用运行时持续提高其性能。JIT 编译器补充了 ART 当前的预先 (AOT) 编译器的功能，有助于提高运行时性能，节省存储空间，以及加快应用及系统更新速度。相较于 AOT 编译器，JIT 编译器的优势也更为明显，因为它不会在应用自动更新期间或重新编译应用（在无线下载 (OTA) 更新期间）时拖慢系统速度。</p>
+<p>尽管 JIT 和 AOT 使用相同的编译器，它们所进行的一系列优化也较为相似，但它们生成的代码可能会有所不同。JIT 会利用运行时类型信息，可以更高效地进行内联，并可让堆栈替换 (OSR) 编译成为可能，而这一切都会使其生成的代码略有不同。</p>
+<h2 id="JIT-架构"><a href="#JIT-架构" class="headerlink" title="JIT 架构"></a>JIT 架构</h2><p><img src="/images/jit-arch.png" alt="JIT 架构"></p>
+<p><strong>图 1.</strong> JIT 架构。</p>
+<h2 id="JIT-编译"><a href="#JIT-编译" class="headerlink" title="JIT 编译"></a>JIT 编译</h2><p>JIT 编译涉及以下活动：</p>
+<p><img src="/images/jit-profile-comp.png" alt="配置文件引导的编译"></p>
+<p><strong>图 2.</strong> 配置文件引导的编译。</p>
+<ol>
+<li><p>用户运行应用，而这随后就会触发 ART 加载 <code>.dex</code> 文件。</p>
+<ul>
+<li>如果有 <code>.oat</code> 文件（即 <code>.dex</code> 文件的 AOT 二进制文件），则 ART 会直接使用该文件。虽然 <code>.oat</code> 文件会定期生成，但文件中不一定会包含经过编译的代码（即 AOT 二进制文件）。</li>
+<li><p>如果没有 <code>.oat</code> 文件，则 ART 会通过 JIT 或解释器执行 <code>.dex</code> 文件。</p>
+<p><code>.oat</code></p>
+<p><code>.dex</code></p>
+</li>
+</ul>
+</li>
+<li><p>针对任何未根据 <code>speed</code> 编译过滤器编译的应用启用 JIT（也就是说，要尽可能多地编译应用中的代码）。</p>
+</li>
+<li>将 JIT 配置文件数据转存到只限应用访问的系统目录内的文件中。</li>
+<li><p>AOT 编译 (<code>dex2oat</code>) 守护进程通过解析该文件来推进其编译。</p>
+<p> <img src="/images/jit-daemon.png" alt="JIT 守护进程"></p>
+<p> <strong>图 3.</strong> JIT 守护进程活动。</p>
+</li>
+</ol>
+<p>举例来说，Google Play 服务就是一种由其他应用使用的类似于共享库的服务。</p>
+<h2 id="JIT-工作流程"><a href="#JIT-工作流程" class="headerlink" title="JIT 工作流程"></a>JIT 工作流程</h2><p><img src="/images/jit-workflow.png" alt="JIT 架构"></p>
+<p><strong>图 4.</strong> JIT 数据流。</p>
+<ul>
+<li>分析信息会存储在代码缓存中，并会在内存紧张时作为垃圾被回收。<ul>
+<li>无法保证在应用处于后台运行状态时所捕获的快照能够包含完整的数据（即 JIT 编译的所有内容）。</li>
+<li>该过程不会尝试确保记录所有内容（因为这将影响运行时性能）。</li>
+</ul>
+</li>
+<li>方法可能有三种不同的状态：<ul>
+<li>已经过解释（dex 代码）</li>
+<li>已经过 JIT 编译</li>
+<li>已经过 AOT 编译如果同时存在 JIT 和 AOT 代码（例如，由于反复进行逆优化），经过 JIT 编译的代码将是首选代码。</li>
+</ul>
+</li>
+<li>在不影响前台应用性能的情况下运行 JIT 所需的内存取决于相关应用。大型应用比小型应用需要更多内存。一般来说，大型应用所需的内存稳定维持在 4 MB 左右。</li>
+</ul>
+<h2 id="开启-JIT-日志记录"><a href="#开启-JIT-日志记录" class="headerlink" title="开启 JIT 日志记录"></a>开启 JIT 日志记录</h2><p>要开启 JIT 日志记录，请运行以下命令：</p>
+<p><code>adb root</code><br><code>adb shell stop</code><br><code>adb shell setprop dalvik.vm.extra-opts -verbose:jit</code><br><code>adb shell start</code></p>
+<h2 id="停用-JIT"><a href="#停用-JIT" class="headerlink" title="停用 JIT"></a>停用 JIT</h2><p>要停用 JIT，请运行以下命令：</p>
+<p><code>adb root</code><br><code>adb shell stop</code><br><code>adb shell setprop dalvik.vm.usejit false</code><br><code>adb shell start</code></p>
+<h2 id="强制编译"><a href="#强制编译" class="headerlink" title="强制编译"></a>强制编译</h2><p>要强制编译，请运行以下命令：</p>
+<p>adb shell cmd package compile</p>
+<p>强制编译特定软件包的常见用例：</p>
+<ul>
+<li><p>基于配置文件：</p>
+<p>  adb shell cmd package compile -m speed-profile -f my-package</p>
+</li>
+</ul>
+<ul>
+<li><p>全面：</p>
+<p>  adb shell cmd package compile -m speed -f my-package</p>
+</li>
+</ul>
+<p>强制编译所有软件包的常见用例：</p>
+<ul>
+<li><p>基于配置文件：</p>
+<p>  adb shell cmd package compile -m speed-profile -f -a</p>
+</li>
+</ul>
+<ul>
+<li><p>全面：</p>
+<p>  adb shell cmd package compile -m speed -f -a</p>
+</li>
+</ul>
+<h2 id="清除配置文件数据"><a href="#清除配置文件数据" class="headerlink" title="清除配置文件数据"></a>清除配置文件数据</h2><p>要清除配置文件数据并移除经过编译的代码，请运行以下命令：</p>
+<ul>
+<li><p>针对一个软件包：</p>
+<p>  adb shell cmd package compile –reset my-package</p>
+</li>
+</ul>
+<ul>
+<li><p>针对所有软件包：</p>
+<p>  adb shell cmd package compile –reset -a</p>
+</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Android 运行时 (ART) 包含一个具备代码分析功能的即时 (JIT) 编译器，该编译器可以在 Android 应用运行时持续提高其性能。JIT 编译器补充了 ART 当前的预先 (AOT) 编译器的功能，有助于提高运行时性能，节省存储空间，以及加快应用及系统更新速
+    
+    </summary>
+    
+      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>ART 和 Dalvik的区别</title>
     <link href="http://fushenghua.github.io/archives/a9cc5307.html"/>
     <id>http://fushenghua.github.io/archives/a9cc5307.html</id>
@@ -464,203 +430,6 @@
     </summary>
     
       <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>版本管理发布流程</title>
-    <link href="http://fushenghua.github.io/archives/375726b.html"/>
-    <id>http://fushenghua.github.io/archives/375726b.html</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.655Z</updated>
-    
-    <content type="html"><![CDATA[<p>为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。</p>
-<h3 id="版本命名规范"><a href="#版本命名规范" class="headerlink" title="版本命名规范"></a>版本命名规范</h3><p>软件版本号由四部分组成，第一个1为主版本号，第二个1为子版本号，第三个1为阶段版本号，第四部分为日期版本号加希腊字母版本号，希腊字母版本号共有5种，分别为：base、alpha、beta、RC、release。例如：1.1.1.051021_beta。</p>
-<h4 id="版本号修改规则"><a href="#版本号修改规则" class="headerlink" title="版本号修改规则"></a>版本号修改规则</h4><p>⑴ 主版本号(1)<br>当功能模块有较大的变动，比如增加多个模块或者整体架构发生变化。此版本号由项目决定是否修改。<br>⑵ 子版本号(1)<br>相对于主版本号而言，子版本号升级对应的是软件功能有一定的增加或变化，比如增加了对权限控制、增加自定义视图等功能。此版本号由项目决定是否修改。<br>⑶ 阶段版本号(1)<br>一般是 Bug 修复或是一些小的变动，要经常发布修订版，时间间隔不限，修复一个严重的bug即可发布一个修订版。此版本号由项目经理决定是否修改。<br>⑷ 日期版本号(051021)<br>用于记录修改项目的当前日期，每天对项目的修改都需要更改日期版本号。此版本号由开发人员决定是否修改。<br>⑸ 希腊字母版本号(beta)<br>此版本号用于标注当前版本的软件处于哪个开发阶段，当软件进入到另一个阶段时需要修改此版本号。此版本号由项目决定是否修改。</p>
-<h4 id="软件版本阶段说明"><a href="#软件版本阶段说明" class="headerlink" title="软件版本阶段说明"></a>软件版本阶段说明</h4><p>⑴ Base：<br>此版本表示该软件仅仅是一个假页面链接，通常包括所有的功能和页面布局，但是页面中的功能都没有做完整的实现，只是做为整体网站的一个基础架构。<br>⑵ α（Alpha）版：内测版。<br>软件的初级版本，表示该软件在此阶段以实现软件功能为主，通常只在软件开发者 内部交流，或者专业测试人员测试用，一般而言，该版本软件的Bug较多，需要继续修改，是测试版本。测试人员提交Bug经开发人员修改确认之后，发布到测试网址让测试人员测试，此时可将软件版本标注为alpha版。<br>⑶ β（Beta）版：公测版。<br>该版本相对于α版已有了很大的改进，消除了严重的错误，但还是存在着一些缺陷，需要经过多次测试来进一步消除，此版本主要的修改对像是软件的UI，供专业爱好者大规模测试用。<br>⑷ RC 版：<br>是 Release Candidate 的缩写，意思是发布倒计时，候选版本，该版本已经相当成熟了，完成全部功能并清除大部分的BUG，基本上不存在导致错误的BUG，与即将发行的正式版相差无几。<br>⑷ Release 版：<br>该版本意味“最终版本”，在前面版本的一系列测试版之后，终归会有一个正式版本，是最终交付用户使用的一个版本。该版本有时也称为标准版。一般情况下，Release不会以单词形式出现在软件封面上，取而代之的是符号(R)。</p>
-<h4 id="版本号修改举例说明"><a href="#版本号修改举例说明" class="headerlink" title="版本号修改举例说明"></a>版本号修改举例说明</h4><p>比如版本号为：1.0.0.0321_alpha ，此时为内部测试阶段<br>⑴ 开发人员修复了测试人员提交的bug并经测试人员测试验证关闭bug之后，发布到外网时，此时就进入了软件的下一个阶段，版本号可改为：1.0.0.0321_beta ，如当前日期跟上一个版本号的日期不一样，版本号可改为：1.0.0.0322_beta。<br>⑵ 如果修复了一些重大Bug 并按照流程发布到外网时就可发布一个修订版，如1.0.1.0322_beta，日期为发布的当前日期。<br>⑶ 如果对软件进行了一些功能上的改进或增强，进行了一些局部变动的时候要修改次版本号，如：1.1.0.0322_beta（上一级有变动时，下级要归零）。<br>⑷ 当功能模块有较大变动，增加模块或整体架构发生变化时要修改主版本号，如新增加了退款功能，则版本号要改为：2.0.0.0322_beta 。<br>⑸ 紧急情况：如果bug比较紧急可跳过一般流程，由开发人员尽快修复bug，测试确认之后直接发布该版本的beta版。</p>
-<h4 id="APK-文件命名"><a href="#APK-文件命名" class="headerlink" title="APK 文件命名"></a>APK 文件命名</h4><p>appName_版本号，即中间用“下划线”分割。</p>
-<h2 id="持续集成流程"><a href="#持续集成流程" class="headerlink" title="持续集成流程"></a>持续集成流程</h2><p>引用自百科的话来说，持续集成是一种软件开发实践，即团队开发成员经常集成它们的工作，通过每个成员每天至少集成一次，也就意味着每天可能会发生多次集成。每次集成都通过自动化的构建（包括编译，发布，自动化测试）来验证，从而尽早地发现集成错误。</p>
-<h2 id="项目自动化流程"><a href="#项目自动化流程" class="headerlink" title="项目自动化流程"></a>项目自动化流程</h2><p>在没有自动化的开发过程中，很多事就需要我们人为去做，那就增长我们的时间成本，而且难免会有疏忽的一些问题，比如某个配置文件忘改了，哪个版本出问题，代码的集成，重复构建等一些耗时且易于犯错的问题。</p>
-<p>于是我们引入一些自动化的Java构建工具：</p>
-<h3 id="Apache-Ant"><a href="#Apache-Ant" class="headerlink" title="Apache Ant"></a>Apache Ant</h3><p>Apache Ant，是一个将软件编译、测试、部署等步骤联系在一起加以自动化的一个工具，大多用于Java环境中的软件开发。由Apache软件基金会所提供。默认情况下，它的buildfile(XML文件)名为build.xml。每一个buildfile含有一个<project>和至少一个预设的<target>，这些targets包含许多task elements。每一个task element有一个用来被参考的id，此id必须是唯一的</target></project></p>
-<p>build.xml 示例：<br><figure class="highlight plain"><figcaption><span>version="1.0" ?> </span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;project name=&quot;Hello World&quot; default=&quot;execute&quot;&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;init&quot;&gt;</div><div class="line">		&lt;mkdir dir=&quot;build/classes&quot;/&gt;</div><div class="line">		&lt;mkdir dir=&quot;dist&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	&lt;target name=&quot;compile&quot; depends=&quot;init&quot;&gt;</div><div class="line">		&lt;javac srcdir=&quot;src&quot; destdir=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	</div><div class="line">	&lt;target name=&quot;compress&quot; depends=&quot;compile&quot;&gt;</div><div class="line">	        &lt;jar destfile=&quot;dist/HelloWorld.jar&quot; basedir=&quot;build/classes&quot;  /&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;execute&quot; depends=&quot;compile&quot;&gt;</div><div class="line">		&lt;java classname=&quot;HelloWorld&quot; classpath=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure></p>
-<h3 id="Apache-Maven"><a href="#Apache-Maven" class="headerlink" title="Apache Maven"></a>Apache Maven</h3><p>Apache Maven，是一个软件（特别是Java软件）项目管理及自动构建工具，由Apache软件基金会所提供。基于项目对象模型（缩写：POM）概念，Maven利用一个中央信息片断能管理一个项目的构建、报告和文档等步骤。<br>Maven也可被用于构建和管理各种项目，例如C#，Ruby，Scala和其他语言编写的项目。Maven曾是Jakarta项目的子项目，现为由Apache软件基金会主持的独立Apache项目</p>
-<p>Maven项目使用项目对象模型（Project Object Model，POM）来配置。<br>项目对象模型存储在名为 pom.xml 的文件中。<br>以下是一个简单的示例：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">  &lt;!-- model version is always 4.0.0 for Maven 2.x POMs --&gt;</div><div class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</div><div class="line">  </div><div class="line">  &lt;!-- project coordinates, i.e. a group of values which</div><div class="line">       uniquely identify this project --&gt;</div><div class="line">  </div><div class="line">  &lt;groupId&gt;com.mycompany.app&lt;/groupId&gt;</div><div class="line">  &lt;artifactId&gt;my-app&lt;/artifactId&gt;</div><div class="line">  &lt;version&gt;1.0&lt;/version&gt;</div><div class="line"></div><div class="line">  &lt;!-- library dependencies --&gt;</div><div class="line">  </div><div class="line">  &lt;dependencies&gt;</div><div class="line">    &lt;dependency&gt;</div><div class="line">    </div><div class="line">      &lt;!-- coordinates of the required library --&gt;</div><div class="line">      </div><div class="line">      &lt;groupId&gt;junit&lt;/groupId&gt;</div><div class="line">      &lt;artifactId&gt;junit&lt;/artifactId&gt;</div><div class="line">      &lt;version&gt;3.8.1&lt;/version&gt;</div><div class="line">      </div><div class="line">      &lt;!-- this dependency is only used for running and compiling tests --&gt;</div><div class="line">      </div><div class="line">      &lt;scope&gt;test&lt;/scope&gt;</div><div class="line">      </div><div class="line">    &lt;/dependency&gt;</div><div class="line">  &lt;/dependencies&gt;</div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure>
-<p>引自<a href="https://zh.wikipedia.org/wiki/Apache_Maven介绍" target="_blank" rel="external">https://zh.wikipedia.org/wiki/Apache_Maven介绍</a></p>
-<p>目前JavaEE使用Apache_Maven的比较多，而我们选择了Android Studio 内置的封装布署工具，拥有以上工具中优秀特性并且更棒的工具Gradle。</p>
-<h3 id="Gradle"><a href="#Gradle" class="headerlink" title="Gradle"></a>Gradle</h3><p>Gradle是一个基于Apache Ant和Apache Maven概念的项目自动化建构工具。它使用一种基于Groovy的特定领域语言来声明项目设置，而不是传统的XML。[2]<br>当前其支持的语言限于Java、Groovy和Scala[3]，计划未来将支持更多的语言。</p>
-<h4 id="使用-Gradle-的优势"><a href="#使用-Gradle-的优势" class="headerlink" title="使用 Gradle 的优势"></a>使用 Gradle 的优势</h4><pre><code>•    自动处理包相依关系 - 取自 Maven Repos 的概念
-•    自动处理布署问题 - 取自 Ant 的概念
-•    条件判断写法直觉 - 使用 Groovy 语言
-</code></pre><p>过去 Java 开发者常用 Maven 和 Ant 等工具进行封装布署的自动化，或是两者兼用，不过这两个包彼此有优缺点，如果频繁改变相依包版本，使用 Ant 相当麻烦，如果琐碎工作很多，Maven 功能不足，而且两者都使用 XML 描述，相当不利于设计 if、switch 等判段式，即使写了可读性也不佳，而 Gradle 改良了过去 Maven、Ant 带给开发者的问题，至今也成为 Android Studio 内置的封装布署工具。</p>
-<h2 id="代码检测流程"><a href="#代码检测流程" class="headerlink" title="代码检测流程"></a>代码检测流程</h2><p>在我们日常开发过程中，使用静态代码检查工具自动进行代码检查，对软件开发者来讲是有利的事情，因为这些工具相比人工方式，能更快捷的查找软件存在的缺陷。但是，在很多情况下，这些工具并没用被开发者所广泛采用。</p>
-<p>尽管在我们开发中编译和测试的结果给出了一些产品健康状态的基本报告，但没有提供代码质量的基本报告，也没有任何地方可以查看到我们开发代码质量，产品质量的趋势，来帮助我们发现问题提升产品质量，我们公司内部构建平台会对代码质量，产品质量做一些分析，来推进产品的前进。</p>
-<h3 id="代码覆盖率"><a href="#代码覆盖率" class="headerlink" title="代码覆盖率"></a>代码覆盖率</h3><p>在Java中有很多免费和商业的代码覆盖率工具，大多数这些工具都可以集成在我们的构建平台上。这里我们列举几个Gradle比较流行的代码覆盖率工具。</p>
-<h4 id="Cobertura"><a href="#Cobertura" class="headerlink" title="Cobertura"></a>Cobertura</h4><p><a href="http://cobertura.sourceforge.net/" target="_blank" rel="external">Cobertura</a> 是一种开源工具，它通过检测基本的代码，并观察在测试包运行时执行了哪些代码和没有执行哪些代码，来测量测试覆盖率。除了找出未测试到的代码并发现 bug 外，Cobertura 还可以通过标记无用的、执行不到的代码来优化代码。</p>
-<h4 id="Emma"><a href="#Emma" class="headerlink" title="Emma"></a>Emma</h4><p><a href="http://emma.sourceforge.net/" target="_blank" rel="external">EMMA</a> 是一个开源、面向 Java 程序测试覆盖率收集和报告工具。它通过对编译后的 Java 字节码文件进行插装，在测试执行过程中收集覆盖率信息，并通过支持多种报表格式对覆盖率结果进行展示。 EMMA 所使用的字节码插装不仅保证 EMMA 不会给源代码带来“脏代码”，还确保 EMMA 摆脱了源代码的束缚，这一特点使 EMMA 应用于功能测试成为了可能。</p>
-<h4 id="Clover"><a href="#Clover" class="headerlink" title="Clover"></a>Clover</h4><p><a href="https://www.atlassian.com/software/clover" target="_blank" rel="external">Clover</a>是一款量度单元测试代码覆盖率（Code Coverage）的软件，用于检测Java单元测试是否完整覆盖代码中所有可能的路径，能够快速、准确地检测测试是否覆盖代码中的所有路径。</p>
-<p>团队成员通过Code review来发现架构、逻辑设计方面、安全缺漏和一些潜在的bug，但随着项目业务的增长，Code review的过程难免也会疏忽很多潜在的bug等问题。</p>
-<p>在我们工作中还有一些静态代码检查工具如<a href="http://checkstyle.sourceforge.net/" target="_blank" rel="external">Checkstyle</a>、<a href="http://findbugs.sourceforge.net/" target="_blank" rel="external">Findbugs</a>、<a href="http://pmd.sourceforge.net/" target="_blank" rel="external">PMD</a>等，将他们集成在我们的构建平台上，并成为我们构建流程中的一步骤。</p>
-<h2 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h2><p>对于开发流程，在不同的项目团队中，开发流程不太一样，但大致可为：<br>每天下班前RD必须把今天工作代码全部提交到Git上。</p>
-<p>####</p>
-<ul>
-<li>使用Jenkins CI ，每天定期会从Git上拉去最新代码，自定编译构建生成APK发出邮件，二维码等到产品维护人员的邮箱，并且将应用更新至公司内测分发平台。</li>
-<li>编译构建成功，进行自动化测试、单元测试覆盖率（Cobertura、Emma或Clover等生成）、功能测试结果（如Selenium）、静态代码检查结果（Checkstyle、Findbugs、PMD等）</li>
-<li>测试人员对产品进行test，测试中若有紧急问题也可以让开发人员可以随时修改提交代码。并且立即重新构建测试安装包。</li>
-</ul>
-<h2 id="打包和发布流程"><a href="#打包和发布流程" class="headerlink" title="打包和发布流程"></a>打包和发布流程</h2><p>以上版本管理发布流程只是参考指南，而不是具体规则。你可以根据自己实际情况来选择适合自己的版本管理发布流程或微调来满足自己的需要。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。&lt;/p&gt;
-&lt;h3 id=&quot;版本命名规范&quot;&gt;&lt;a href=&quot;#版本命名
-    
-    </summary>
-    
-      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>app安全之Apk完整性校验</title>
-    <link href="http://fushenghua.github.io/archives/a72a1e10.html"/>
-    <id>http://fushenghua.github.io/archives/a72a1e10.html</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.638Z</updated>
-    
-    <content type="html"><![CDATA[<p>APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。</p>
-<h2 id="一、认识APK安全性"><a href="#一、认识APK安全性" class="headerlink" title="一、认识APK安全性"></a>一、认识APK安全性</h2><h3 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h3><p>可以通过修改客户端文件篡改客户端行为。攻击者可以让客户端显示自己制作的钓鱼网站，偷取用户信息</p>
-<h2 id="二、完整性校验原理"><a href="#二、完整性校验原理" class="headerlink" title="二、完整性校验原理"></a>二、完整性校验原理</h2><h3 id="完整性校验的几种方式"><a href="#完整性校验的几种方式" class="headerlink" title="完整性校验的几种方式"></a>完整性校验的几种方式</h3><ol>
-<li>CRC校验</li>
-<li>MD5值校验</li>
-<li>SHA1值校验</li>
-</ol>
-<h3 id="常见android完整性检测"><a href="#常见android完整性检测" class="headerlink" title="常见android完整性检测"></a>常见android完整性检测</h3><ol>
-<li>检测签名</li>
-<li>校验classes.dex</li>
-<li>校验整个apk</li>
-</ol>
-<h4 id="检测签名"><a href="#检测签名" class="headerlink" title="检测签名"></a>检测签名</h4><p>Android对每一个Apk文件都会进行签名，在Apk文件安装时，系统会对其签名信息进行比对，判断程序的完整性，从而决定该Apk文件是否可以安装，在一定程度上达到安全的目的。</p>
-<ol>
-<li>MANIFEST.MF：这是摘要文件。程序遍历Apk包中的所有文件(entry)，对非文件夹非签名文件的文件，逐个用SHA1生成摘要信息，再用Base64进行编码。如果你改变了apk包中的文件，那么在apk安装校验时，改变后的文件摘要信息与MANIFEST.MF的检验信息不同，于是程序就不能成功安装。</li>
-<li>CERT.SF：这是对摘要的签名文件。对前一步生成的MANIFEST.MF，使用SHA1-RSA算法，用开发者的私钥进行签名。在安装时只能使用公钥才能解密它。解密之后，将它与未加密的摘要信息（即，MANIFEST.MF文件）进行对比，如果相符，则表明内容没有被异常修改。</li>
-<li>CERT.RSA文件中保存了公钥、所采用的加密算法等信息。系统对签名文件进行解密，所需要的公钥就是从这个文件里取出来的。<br>这三个文件在apk META-INFO文件夹</li>
-</ol>
-<p>结论：从上面的总结可以看出，META-INFO里面的说那个文件环环相扣，从而保证Android程序的安全性。（只是防止开发者的程序不被攻击者修改，如果开发者的公私钥对对攻击者得到或者开发者开发出攻击程序，Android系统都无法检测出来。）</p>
-<p>虽然系统通过以上方式可以防止，但如果是root的手机就不安全了，建议通过服务器来校验，</p>
-<h4 id="校验classes-dex"><a href="#校验classes-dex" class="headerlink" title="校验classes.dex"></a>校验classes.dex</h4><p><strong>用crc32对classes.dex文件的完整性进行校验</strong></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"> </div><div class="line"><span class="meta">@Override</span></div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(BundlesavedInstanceState)</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line"> </div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line"> </div><div class="line">    String apkPath = getPackageCodePath();</div><div class="line"> </div><div class="line">    Long dexCrc = Long.parseLong(getString(R.string.classesdex_crc));</div><div class="line">    <span class="comment">//建议将dexCrc值放在服务器做校验</span></div><div class="line"> </div><div class="line">    <span class="keyword">try</span></div><div class="line"> </div><div class="line">    &#123;</div><div class="line"> </div><div class="line">        ZipFile zipfile = <span class="keyword">new</span> ZipFile(apkPath);</div><div class="line"> </div><div class="line">        ZipEntry dexentry = zipfile.getEntry(<span class="string">"classes.dex"</span>);</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"classes.dexcrc="</span>+dexentry.getCrc());</div><div class="line"> </div><div class="line">        <span class="keyword">if</span>(dexentry.getCrc() != dexCrc)&#123;</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"Dexhas been modified!"</span>);</div><div class="line"> </div><div class="line">        &#125;<span class="keyword">else</span>&#123;</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"Dex hasn't been modified!"</span>);</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"> </div><div class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line"> </div><div class="line">     <span class="comment">// TODO Auto-generated catch block</span></div><div class="line"> </div><div class="line">     e.printStackTrace();</div><div class="line"> </div><div class="line">    &#125;</div><div class="line"> </div><div class="line">   &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="校验整个apk"><a href="#校验整个apk" class="headerlink" title="校验整个apk"></a>校验整个apk</h4><p>用哈希值对整个apk完整性进行校验</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"> </div><div class="line"><span class="meta">@Override</span></div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(BundlesavedInstanceState)</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line"> </div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line"> </div><div class="line">   </div><div class="line"> String apkPath = getPackageCodePath();</div><div class="line"> </div><div class="line">     MessageDigest msgDigest = <span class="keyword">null</span>;</div><div class="line"> </div><div class="line">     <span class="keyword">try</span> &#123;</div><div class="line"> </div><div class="line">        msgDigest = MessageDigest.getInstance(<span class="string">"SHA-1"</span>);</div><div class="line"> </div><div class="line">        <span class="keyword">byte</span>[] bytes = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span>];</div><div class="line"> </div><div class="line">        <span class="keyword">int</span> byteCount;</div><div class="line"> </div><div class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(apkPath));</div><div class="line"> </div><div class="line">        <span class="keyword">while</span> ((byteCount = fis.read(bytes)) &gt; <span class="number">0</span>)</div><div class="line"> </div><div class="line">        &#123;</div><div class="line"> </div><div class="line">            msgDigest.update(bytes, <span class="number">0</span>, byteCount);</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"> </div><div class="line">        BigInteger bi = <span class="keyword">new</span> BigInteger(<span class="number">1</span>, msgDigest.digest());</div><div class="line"> </div><div class="line">        String sha = bi.toString(<span class="number">16</span>);</div><div class="line"> </div><div class="line">        fis.close();</div><div class="line"> </div><div class="line">        <span class="comment">//这里添加从服务器中获取哈希值然后进行对比校验</span></div><div class="line"> </div><div class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line"> </div><div class="line">            e.printStackTrace();</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"></div><div class="line"> </div><div class="line">   &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>我们将把crc值和sha1值放在服务器做处理，做个记录。</p>
-<p>更多Android 之美，请阅读<a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external">《Android 之美 从0到1 – 高手之路》</a>系列文章</p>
-<blockquote>
-<p>水平有限，若有错漏，欢迎指正，批评，如需转载，请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a>，谢谢！</p>
-<p>作者：fuchenxuan<br>出处：<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a><br>欢迎访问我的个人站点：<a href="http://fuchenxuan.cn" target="_blank" rel="external">http://fuchenxuan.cn</a><br>转载请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a></p>
-</blockquote>
-<p><a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external"><img src="http://img.blog.csdn.net/20160608234402229" alt="Android 之美 从0到1"></a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。&lt;/p&gt;
-&lt;h2 id=&quot;一、认识APK安全性&quot;&gt;&lt;a href=&quot;#一、认识APK安全性&quot; class=&quot;headerlink&quot; title=&quot;一、认识AP
-    
-    </summary>
-    
-      <category term="安全" scheme="http://fushenghua.github.io/categories/%E5%AE%89%E5%85%A8/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>git仓库迁移</title>
-    <link href="http://fushenghua.github.io/archives/8e05eece.html"/>
-    <id>http://fushenghua.github.io/archives/8e05eece.html</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.640Z</updated>
-    
-    <content type="html"><![CDATA[<p>最近又要把公司<code>Stash</code>上的项目在别部门一个私有仓库,平移到自己部门项目组的仓库，要求迁移的时候要保留已有的分支和以前的提交记录，类似的需求经常遇到，刚好做个记录。</p>
-<p>1). 从原地址克隆一份裸版本库(纯仓库形式)，比如原本托管于 GitHub。</p>
-<p><img src="/images/git--bare.png" alt="git--bare"></p>
-<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git <span class="keyword">clone</span> <span class="title">--bare</span> git://github.com/username/project.git</div></pre></td></tr></table></figure>
-<blockquote>
-<p>–bare 创建的克隆版本库都不包含工作区，直接就是版本库的内容，这样的版本库称为裸版本库。</p>
-</blockquote>
-<p>2). 然后到新的 Git 服务器上创建一个新项目，比如 GitCafe。</p>
-<p>3). 以镜像推送的方式上传代码到 GitCafe 服务器上。</p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">cd</span> <span class="selector-tag">project</span><span class="selector-class">.git</span></div><div class="line"><span class="selector-tag">git</span> <span class="selector-tag">push</span> <span class="selector-tag">--mirror</span> <span class="selector-tag">git</span>@<span class="keyword">stash</span>.<span class="keyword">com</span>/<span class="keyword">username</span>/<span class="keyword">newproject</span>.<span class="keyword">git</span></div></pre></td></tr></table></figure>
-<p><img src="/images/cd-push.png" alt="cd-push"></p>
-<blockquote>
-<p>– mirror 克隆出来的裸版本对上游版本库进行了注册，这样可以在裸版本库中使用git fetch命令和上游版本库进行持续同步。</p>
-</blockquote>
-<p>4). 到新服务器 Stash 上找到 Clone 地址，直接 Clone 到本地就可以了。</p>
-<p><img src="/images/git-clone.png" alt="git-clone"></p>
-<figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">git</span> <span class="selector-tag">clone</span> <span class="selector-tag">git</span>@<span class="keyword">Stash</span>.<span class="keyword">com</span>/<span class="keyword">username</span>/<span class="keyword">newproject</span>.<span class="keyword">git</span></div></pre></td></tr></table></figure>
-<p>这种方式可以保留原版本库中的所有内容(<code>tag</code>,<code>branch</code>等记录)</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;最近又要把公司&lt;code&gt;Stash&lt;/code&gt;上的项目在别部门一个私有仓库,平移到自己部门项目组的仓库，要求迁移的时候要保留已有的分支和以前的提交记录，类似的需求经常遇到，刚好做个记录。&lt;/p&gt;
-&lt;p&gt;1). 从原地址克隆一份裸版本库(纯仓库形式)，比如原本托管于 Gi
-    
-    </summary>
-    
-      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>ViewStub原理分析</title>
-    <link href="http://fushenghua.github.io/archives/235d5e38.html"/>
-    <id>http://fushenghua.github.io/archives/235d5e38.html</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.646Z</updated>
-    
-    <content type="html"><![CDATA[<p>ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 <code>inflate()</code> 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调用了 <code>setVisibility(int)</code> 或 <code>inflate()</code>。</p>
-<p>我们先来看看构造方法：</p>
-<p>非常简单的两步，就能做到View的懒加载，非常方便，其原因是什么呢？</p>
-<p>接下去深入源码分析一下。</p>
-<h2 id="构造方法分析"><a href="#构造方法分析" class="headerlink" title="构造方法分析"></a>构造方法分析</h2><p>首先分析一下构造方法，了解一下它是如何创建的。</p>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, @LayoutRes <span class="keyword">int</span> layoutResource)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, <span class="keyword">null</span>);</div><div class="line">    <span class="comment">// StubbedView的资源id</span></div><div class="line">    mLayoutResource = layoutResource;</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, attrs, <span class="number">0</span>);</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, attrs, defStyleAttr, <span class="number">0</span>);</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr, <span class="keyword">int</span> defStyleRes)</span> </span>&#123;</div><div class="line">    <span class="keyword">super</span>(context);</div><div class="line">    <span class="keyword">final</span> TypedArray a = context.obtainStyledAttributes(attrs,</div><div class="line">            R.styleable.ViewStub, defStyleAttr, defStyleRes);</div><div class="line">    <span class="comment">// mInflatedId 存储StubbedView的id</span></div><div class="line">    mInflatedId = a.getResourceId(R.styleable.ViewStub_inflatedId, NO_ID);</div><div class="line">    <span class="comment">// mLayoutResource 为StubbedView的resourceId</span></div><div class="line">    mLayoutResource = a.getResourceId(R.styleable.ViewStub_layout, <span class="number">0</span>);</div><div class="line">    <span class="comment">// viewStub 自己的id</span></div><div class="line">    mID = a.getResourceId(R.styleable.ViewStub_id, NO_ID);</div><div class="line">    a.recycle();</div><div class="line">    <span class="comment">// 设置为不可见 </span></div><div class="line">    setVisibility(GONE);</div><div class="line">    <span class="comment">// 不绘制本身</span></div><div class="line">    setWillNotDraw(<span class="keyword">true</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p><code>ViewStub</code>在构造方法里不仅仅获取赋值属性，比较关键的是，还 默认将ViewStub自己设置为不可见（跳过onMeasure与onLayout），不绘制。</p>
-<p>这里有一个要点：<strong>在XML里配置ViewStub的可见性是没有用的</strong>。</p>
-<h2 id="测量-与-绘制"><a href="#测量-与-绘制" class="headerlink" title="测量 与 绘制"></a>测量 与 绘制</h2><figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="variable">@Override</span></div><div class="line">protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) &#123;</div><div class="line">    <span class="comment">// 写死的宽高为0</span></div><div class="line">    setMeasuredDimension(0, 0);</div><div class="line">&#125;</div><div class="line"><span class="variable">@Override</span></div><div class="line">public void draw(Canvas canvas) &#123;</div><div class="line">    <span class="comment">//空方法，不draw任何东西</span></div><div class="line">&#125;</div><div class="line"><span class="variable">@Override</span></div><div class="line">protected void dispatchDraw(Canvas canvas) &#123;</div><div class="line">    <span class="comment">//空方法，不draw任何东西</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="inflate-方法分析"><a href="#inflate-方法分析" class="headerlink" title="inflate()方法分析"></a>inflate()方法分析</h2><p>之前在简单教程里有提到 <code>inflate</code>方法，它是<code>ViewStub</code>实现懒加载的最为关键的方法，接下去去分析一下。</p>
-<figure class="highlight zephir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 返回 StubbedView</span></div><div class="line"><span class="keyword">public</span> View inflate() &#123;</div><div class="line">    <span class="comment">// 尝试去获取 viewParent 第一次调用的时候不为null，而后则为null</span></div><div class="line">    <span class="keyword">final</span> ViewParent viewParent = getParent();</div><div class="line">    <span class="comment">// 当 viewParent 不为null的时候</span></div><div class="line">    <span class="keyword">if</span> (viewParent != <span class="keyword">null</span> &amp;&amp; viewParent <span class="keyword">instanceof</span> ViewGroup) &#123;</div><div class="line">        <span class="comment">// 我们在xml里配置的layout的资源id 如果id无效，则会报错</span></div><div class="line">        <span class="keyword">if</span> (mLayoutResource != <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">final</span> ViewGroup <span class="keyword">parent</span> = (ViewGroup) viewParent;</div><div class="line">            <span class="comment">// 实例化 LayoutInflater</span></div><div class="line">            <span class="keyword">final</span> LayoutInflater factory;</div><div class="line">            <span class="keyword">if</span> (mInflater != <span class="keyword">null</span>) &#123;</div><div class="line">                factory = mInflater;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                factory = LayoutInflater.from(mContext);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// inflate，StubbedView在这里被实例化</span></div><div class="line">            <span class="keyword">final</span> View view = factory.inflate(mLayoutResource, <span class="keyword">parent</span>,</div><div class="line">                    <span class="keyword">false</span>);</div><div class="line">            <span class="comment">// 可以看到，这里如果我们在XML里写了inflateId，则会设置给StubbedView</span></div><div class="line">            <span class="keyword">if</span> (mInflatedId != NO_ID) &#123;</div><div class="line">                view.setId(mInflatedId);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 注意：这两步步 ViewSutb 找到自己的位置，并从父View中移除了自己</span></div><div class="line">            <span class="comment">// 这会导致 以后调用inflate的时候 再也获取不到 viewParent了</span></div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> index = <span class="keyword">parent</span>.indexOfChild(this);</div><div class="line">            <span class="keyword">parent</span>.removeViewInLayout(this);</div><div class="line">            <span class="comment">// 拿出ViewStub的LayoutParamas，不为null 则会赋值给 StubbedView</span></div><div class="line">            <span class="keyword">final</span> ViewGroup.LayoutParams layoutParams = getLayoutParams();</div><div class="line">            <span class="comment">// 把 StubbedView 添加到ViewStub的父View里</span></div><div class="line">            <span class="keyword">if</span> (layoutParams != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">parent</span>.addView(view, index, layoutParams);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">parent</span>.addView(view, index);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">//使用一个弱引用来保存StubbedView</span></div><div class="line">            mInflatedViewRef = <span class="keyword">new</span> WeakReference(view);</div><div class="line">            <span class="comment">//回调listener</span></div><div class="line">            <span class="keyword">if</span> (mInflateListener != <span class="keyword">null</span>) &#123;</div><div class="line">                mInflateListener.onInflate(this, view);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 返回 StubbedView</span></div><div class="line">            <span class="keyword">return</span> view;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">// id无效，则throw一个 IllegalArgumentException</span></div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"ViewStub must have a valid layoutResource"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">// inflate被调用一次后 就没有了ViewParent，就会报这个错</span></div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"ViewStub must have a non-null ViewGroup viewParent"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>我在每行代码上都加上了详细的注释，主要的操作就是把StubbedView给Inflate出来，然后把它放到自己的位置，代码非常清晰，非常简单。</p>
-<p>总结来说，其实<code>inflate</code>方法是做了一个『偷梁换柱』的操作，把 <code>StubbedView</code>动态的添加到自己原来的位置上，也因此实现了懒加载功能。</p>
-<p>这里还需要注意的是 <strong>ViewStub 必须要有一个 Parent，即必须要有父视图！</strong><br>另外值得一提的是：ViewStub还重写了View的<code>setVisibility</code>方法，让我们来分析一下：</p>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setVisibility</span><span class="params">(<span class="keyword">int</span> visibility)</span> </span>&#123;</div><div class="line">    <span class="comment">// mInflatedViewRef 保存了 StubbedView还记得吗？ inflate过后它就不是null了 </span></div><div class="line">    <span class="keyword">if</span> (mInflatedViewRef != <span class="keyword">null</span>) &#123;</div><div class="line">        View view = mInflatedViewRef.get();</div><div class="line">        <span class="comment">// 操作 StubbedView</span></div><div class="line">        <span class="keyword">if</span> (view != <span class="keyword">null</span>) &#123;</div><div class="line">            view.setVisibility(visibility);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"setVisibility called on un-referenced view"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">// 操作ViewStub自己，构造方法里的GONE记得么？</span></div><div class="line">        <span class="keyword">super</span>.setVisibility(visibility);</div><div class="line">        <span class="comment">// 如果是 VISIBLE INVISIBLE 则会去调用 inflate方法！！！！</span></div><div class="line">        <span class="keyword">if</span> (visibility == VISIBLE || visibility == INVISIBLE) &#123;</div><div class="line">            inflate();<span class="comment">//注意这一行代码</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>可以看到<code>setVisibility</code>方法中也可能会调用<code>inflate()</code>方法，所以当我们想让StubbedView被加载进来，而我们不需要StubbedView的实例的时候，可以用<code>setVisibility（View.VISIBLE）</code>。</p>
-<p>不过需要注意的是 不要再接着调用<code>inflate</code>方法，因为此时的 ViewStub 已经被移除了！</p>
-<h2 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h2><ol>
-<li>使用ViewStub，必须指定layoutResourceId(必须是布局文件)</li>
-<li>在XML里配置ViewStub的可见性是没有用的</li>
-<li>ViewStub 主要原理藏在<code>inflate()</code>方法中，是它把真正要加载的View给加载了进来</li>
-<li><code>inflate()</code>方法只能调用一次</li>
-<li>ViewStub调用<code>inflate()</code>后就不要再用它了（让它功成身退！）</li>
-<li>要小心<code>setVisibility</code>方法，因为它可能会调用<code>inflate()</code></li>
-<li>在XML里给ViewStub设置的LayoutParamas(宽高margin等)会传递给StubbedView,所以我们如果要控制StubbedView的LayoutParamas，则需要写在ViewStub里而不是StubbedView！</li>
-<li>期待补充</li>
-</ol>
-<p>好了，主要的都分析完了，知道原理之后就可以自己动手写一个加强版的 ViewStub </p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 &lt;code&gt;inflate()&lt;/code&gt; 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调
-    
-    </summary>
-    
-      <category term="性能优化" scheme="http://fushenghua.github.io/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
     
     
   </entry>
@@ -720,6 +489,58 @@
     </summary>
     
       <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>app安全之Apk完整性校验</title>
+    <link href="http://fushenghua.github.io/archives/a72a1e10.html"/>
+    <id>http://fushenghua.github.io/archives/a72a1e10.html</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-20T05:25:03.638Z</updated>
+    
+    <content type="html"><![CDATA[<p>APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。</p>
+<h2 id="一、认识APK安全性"><a href="#一、认识APK安全性" class="headerlink" title="一、认识APK安全性"></a>一、认识APK安全性</h2><h3 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h3><p>可以通过修改客户端文件篡改客户端行为。攻击者可以让客户端显示自己制作的钓鱼网站，偷取用户信息</p>
+<h2 id="二、完整性校验原理"><a href="#二、完整性校验原理" class="headerlink" title="二、完整性校验原理"></a>二、完整性校验原理</h2><h3 id="完整性校验的几种方式"><a href="#完整性校验的几种方式" class="headerlink" title="完整性校验的几种方式"></a>完整性校验的几种方式</h3><ol>
+<li>CRC校验</li>
+<li>MD5值校验</li>
+<li>SHA1值校验</li>
+</ol>
+<h3 id="常见android完整性检测"><a href="#常见android完整性检测" class="headerlink" title="常见android完整性检测"></a>常见android完整性检测</h3><ol>
+<li>检测签名</li>
+<li>校验classes.dex</li>
+<li>校验整个apk</li>
+</ol>
+<h4 id="检测签名"><a href="#检测签名" class="headerlink" title="检测签名"></a>检测签名</h4><p>Android对每一个Apk文件都会进行签名，在Apk文件安装时，系统会对其签名信息进行比对，判断程序的完整性，从而决定该Apk文件是否可以安装，在一定程度上达到安全的目的。</p>
+<ol>
+<li>MANIFEST.MF：这是摘要文件。程序遍历Apk包中的所有文件(entry)，对非文件夹非签名文件的文件，逐个用SHA1生成摘要信息，再用Base64进行编码。如果你改变了apk包中的文件，那么在apk安装校验时，改变后的文件摘要信息与MANIFEST.MF的检验信息不同，于是程序就不能成功安装。</li>
+<li>CERT.SF：这是对摘要的签名文件。对前一步生成的MANIFEST.MF，使用SHA1-RSA算法，用开发者的私钥进行签名。在安装时只能使用公钥才能解密它。解密之后，将它与未加密的摘要信息（即，MANIFEST.MF文件）进行对比，如果相符，则表明内容没有被异常修改。</li>
+<li>CERT.RSA文件中保存了公钥、所采用的加密算法等信息。系统对签名文件进行解密，所需要的公钥就是从这个文件里取出来的。<br>这三个文件在apk META-INFO文件夹</li>
+</ol>
+<p>结论：从上面的总结可以看出，META-INFO里面的说那个文件环环相扣，从而保证Android程序的安全性。（只是防止开发者的程序不被攻击者修改，如果开发者的公私钥对对攻击者得到或者开发者开发出攻击程序，Android系统都无法检测出来。）</p>
+<p>虽然系统通过以上方式可以防止，但如果是root的手机就不安全了，建议通过服务器来校验，</p>
+<h4 id="校验classes-dex"><a href="#校验classes-dex" class="headerlink" title="校验classes.dex"></a>校验classes.dex</h4><p><strong>用crc32对classes.dex文件的完整性进行校验</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"> </div><div class="line"><span class="meta">@Override</span></div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(BundlesavedInstanceState)</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line"> </div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line"> </div><div class="line">    String apkPath = getPackageCodePath();</div><div class="line"> </div><div class="line">    Long dexCrc = Long.parseLong(getString(R.string.classesdex_crc));</div><div class="line">    <span class="comment">//建议将dexCrc值放在服务器做校验</span></div><div class="line"> </div><div class="line">    <span class="keyword">try</span></div><div class="line"> </div><div class="line">    &#123;</div><div class="line"> </div><div class="line">        ZipFile zipfile = <span class="keyword">new</span> ZipFile(apkPath);</div><div class="line"> </div><div class="line">        ZipEntry dexentry = zipfile.getEntry(<span class="string">"classes.dex"</span>);</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"classes.dexcrc="</span>+dexentry.getCrc());</div><div class="line"> </div><div class="line">        <span class="keyword">if</span>(dexentry.getCrc() != dexCrc)&#123;</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"Dexhas been modified!"</span>);</div><div class="line"> </div><div class="line">        &#125;<span class="keyword">else</span>&#123;</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"Dex hasn't been modified!"</span>);</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"> </div><div class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line"> </div><div class="line">     <span class="comment">// TODO Auto-generated catch block</span></div><div class="line"> </div><div class="line">     e.printStackTrace();</div><div class="line"> </div><div class="line">    &#125;</div><div class="line"> </div><div class="line">   &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="校验整个apk"><a href="#校验整个apk" class="headerlink" title="校验整个apk"></a>校验整个apk</h4><p>用哈希值对整个apk完整性进行校验</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"> </div><div class="line"><span class="meta">@Override</span></div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(BundlesavedInstanceState)</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line"> </div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line"> </div><div class="line">   </div><div class="line"> String apkPath = getPackageCodePath();</div><div class="line"> </div><div class="line">     MessageDigest msgDigest = <span class="keyword">null</span>;</div><div class="line"> </div><div class="line">     <span class="keyword">try</span> &#123;</div><div class="line"> </div><div class="line">        msgDigest = MessageDigest.getInstance(<span class="string">"SHA-1"</span>);</div><div class="line"> </div><div class="line">        <span class="keyword">byte</span>[] bytes = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span>];</div><div class="line"> </div><div class="line">        <span class="keyword">int</span> byteCount;</div><div class="line"> </div><div class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(apkPath));</div><div class="line"> </div><div class="line">        <span class="keyword">while</span> ((byteCount = fis.read(bytes)) &gt; <span class="number">0</span>)</div><div class="line"> </div><div class="line">        &#123;</div><div class="line"> </div><div class="line">            msgDigest.update(bytes, <span class="number">0</span>, byteCount);</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"> </div><div class="line">        BigInteger bi = <span class="keyword">new</span> BigInteger(<span class="number">1</span>, msgDigest.digest());</div><div class="line"> </div><div class="line">        String sha = bi.toString(<span class="number">16</span>);</div><div class="line"> </div><div class="line">        fis.close();</div><div class="line"> </div><div class="line">        <span class="comment">//这里添加从服务器中获取哈希值然后进行对比校验</span></div><div class="line"> </div><div class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line"> </div><div class="line">            e.printStackTrace();</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"></div><div class="line"> </div><div class="line">   &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们将把crc值和sha1值放在服务器做处理，做个记录。</p>
+<p>更多Android 之美，请阅读<a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external">《Android 之美 从0到1 – 高手之路》</a>系列文章</p>
+<blockquote>
+<p>水平有限，若有错漏，欢迎指正，批评，如需转载，请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a>，谢谢！</p>
+<p>作者：fuchenxuan<br>出处：<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a><br>欢迎访问我的个人站点：<a href="http://fuchenxuan.cn" target="_blank" rel="external">http://fuchenxuan.cn</a><br>转载请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a></p>
+</blockquote>
+<p><a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external"><img src="http://img.blog.csdn.net/20160608234402229" alt="Android 之美 从0到1"></a></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。&lt;/p&gt;
+&lt;h2 id=&quot;一、认识APK安全性&quot;&gt;&lt;a href=&quot;#一、认识APK安全性&quot; class=&quot;headerlink&quot; title=&quot;一、认识AP
+    
+    </summary>
+    
+      <category term="安全" scheme="http://fushenghua.github.io/categories/%E5%AE%89%E5%85%A8/"/>
     
     
   </entry>
@@ -1064,6 +885,151 @@
   </entry>
   
   <entry>
+    <title>版本管理发布流程</title>
+    <link href="http://fushenghua.github.io/archives/375726b.html"/>
+    <id>http://fushenghua.github.io/archives/375726b.html</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-20T05:25:03.655Z</updated>
+    
+    <content type="html"><![CDATA[<p>为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。</p>
+<h3 id="版本命名规范"><a href="#版本命名规范" class="headerlink" title="版本命名规范"></a>版本命名规范</h3><p>软件版本号由四部分组成，第一个1为主版本号，第二个1为子版本号，第三个1为阶段版本号，第四部分为日期版本号加希腊字母版本号，希腊字母版本号共有5种，分别为：base、alpha、beta、RC、release。例如：1.1.1.051021_beta。</p>
+<h4 id="版本号修改规则"><a href="#版本号修改规则" class="headerlink" title="版本号修改规则"></a>版本号修改规则</h4><p>⑴ 主版本号(1)<br>当功能模块有较大的变动，比如增加多个模块或者整体架构发生变化。此版本号由项目决定是否修改。<br>⑵ 子版本号(1)<br>相对于主版本号而言，子版本号升级对应的是软件功能有一定的增加或变化，比如增加了对权限控制、增加自定义视图等功能。此版本号由项目决定是否修改。<br>⑶ 阶段版本号(1)<br>一般是 Bug 修复或是一些小的变动，要经常发布修订版，时间间隔不限，修复一个严重的bug即可发布一个修订版。此版本号由项目经理决定是否修改。<br>⑷ 日期版本号(051021)<br>用于记录修改项目的当前日期，每天对项目的修改都需要更改日期版本号。此版本号由开发人员决定是否修改。<br>⑸ 希腊字母版本号(beta)<br>此版本号用于标注当前版本的软件处于哪个开发阶段，当软件进入到另一个阶段时需要修改此版本号。此版本号由项目决定是否修改。</p>
+<h4 id="软件版本阶段说明"><a href="#软件版本阶段说明" class="headerlink" title="软件版本阶段说明"></a>软件版本阶段说明</h4><p>⑴ Base：<br>此版本表示该软件仅仅是一个假页面链接，通常包括所有的功能和页面布局，但是页面中的功能都没有做完整的实现，只是做为整体网站的一个基础架构。<br>⑵ α（Alpha）版：内测版。<br>软件的初级版本，表示该软件在此阶段以实现软件功能为主，通常只在软件开发者 内部交流，或者专业测试人员测试用，一般而言，该版本软件的Bug较多，需要继续修改，是测试版本。测试人员提交Bug经开发人员修改确认之后，发布到测试网址让测试人员测试，此时可将软件版本标注为alpha版。<br>⑶ β（Beta）版：公测版。<br>该版本相对于α版已有了很大的改进，消除了严重的错误，但还是存在着一些缺陷，需要经过多次测试来进一步消除，此版本主要的修改对像是软件的UI，供专业爱好者大规模测试用。<br>⑷ RC 版：<br>是 Release Candidate 的缩写，意思是发布倒计时，候选版本，该版本已经相当成熟了，完成全部功能并清除大部分的BUG，基本上不存在导致错误的BUG，与即将发行的正式版相差无几。<br>⑷ Release 版：<br>该版本意味“最终版本”，在前面版本的一系列测试版之后，终归会有一个正式版本，是最终交付用户使用的一个版本。该版本有时也称为标准版。一般情况下，Release不会以单词形式出现在软件封面上，取而代之的是符号(R)。</p>
+<h4 id="版本号修改举例说明"><a href="#版本号修改举例说明" class="headerlink" title="版本号修改举例说明"></a>版本号修改举例说明</h4><p>比如版本号为：1.0.0.0321_alpha ，此时为内部测试阶段<br>⑴ 开发人员修复了测试人员提交的bug并经测试人员测试验证关闭bug之后，发布到外网时，此时就进入了软件的下一个阶段，版本号可改为：1.0.0.0321_beta ，如当前日期跟上一个版本号的日期不一样，版本号可改为：1.0.0.0322_beta。<br>⑵ 如果修复了一些重大Bug 并按照流程发布到外网时就可发布一个修订版，如1.0.1.0322_beta，日期为发布的当前日期。<br>⑶ 如果对软件进行了一些功能上的改进或增强，进行了一些局部变动的时候要修改次版本号，如：1.1.0.0322_beta（上一级有变动时，下级要归零）。<br>⑷ 当功能模块有较大变动，增加模块或整体架构发生变化时要修改主版本号，如新增加了退款功能，则版本号要改为：2.0.0.0322_beta 。<br>⑸ 紧急情况：如果bug比较紧急可跳过一般流程，由开发人员尽快修复bug，测试确认之后直接发布该版本的beta版。</p>
+<h4 id="APK-文件命名"><a href="#APK-文件命名" class="headerlink" title="APK 文件命名"></a>APK 文件命名</h4><p>appName_版本号，即中间用“下划线”分割。</p>
+<h2 id="持续集成流程"><a href="#持续集成流程" class="headerlink" title="持续集成流程"></a>持续集成流程</h2><p>引用自百科的话来说，持续集成是一种软件开发实践，即团队开发成员经常集成它们的工作，通过每个成员每天至少集成一次，也就意味着每天可能会发生多次集成。每次集成都通过自动化的构建（包括编译，发布，自动化测试）来验证，从而尽早地发现集成错误。</p>
+<h2 id="项目自动化流程"><a href="#项目自动化流程" class="headerlink" title="项目自动化流程"></a>项目自动化流程</h2><p>在没有自动化的开发过程中，很多事就需要我们人为去做，那就增长我们的时间成本，而且难免会有疏忽的一些问题，比如某个配置文件忘改了，哪个版本出问题，代码的集成，重复构建等一些耗时且易于犯错的问题。</p>
+<p>于是我们引入一些自动化的Java构建工具：</p>
+<h3 id="Apache-Ant"><a href="#Apache-Ant" class="headerlink" title="Apache Ant"></a>Apache Ant</h3><p>Apache Ant，是一个将软件编译、测试、部署等步骤联系在一起加以自动化的一个工具，大多用于Java环境中的软件开发。由Apache软件基金会所提供。默认情况下，它的buildfile(XML文件)名为build.xml。每一个buildfile含有一个<project>和至少一个预设的<target>，这些targets包含许多task elements。每一个task element有一个用来被参考的id，此id必须是唯一的</target></project></p>
+<p>build.xml 示例：<br><figure class="highlight plain"><figcaption><span>version="1.0" ?> </span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;project name=&quot;Hello World&quot; default=&quot;execute&quot;&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;init&quot;&gt;</div><div class="line">		&lt;mkdir dir=&quot;build/classes&quot;/&gt;</div><div class="line">		&lt;mkdir dir=&quot;dist&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	&lt;target name=&quot;compile&quot; depends=&quot;init&quot;&gt;</div><div class="line">		&lt;javac srcdir=&quot;src&quot; destdir=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	</div><div class="line">	&lt;target name=&quot;compress&quot; depends=&quot;compile&quot;&gt;</div><div class="line">	        &lt;jar destfile=&quot;dist/HelloWorld.jar&quot; basedir=&quot;build/classes&quot;  /&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;execute&quot; depends=&quot;compile&quot;&gt;</div><div class="line">		&lt;java classname=&quot;HelloWorld&quot; classpath=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure></p>
+<h3 id="Apache-Maven"><a href="#Apache-Maven" class="headerlink" title="Apache Maven"></a>Apache Maven</h3><p>Apache Maven，是一个软件（特别是Java软件）项目管理及自动构建工具，由Apache软件基金会所提供。基于项目对象模型（缩写：POM）概念，Maven利用一个中央信息片断能管理一个项目的构建、报告和文档等步骤。<br>Maven也可被用于构建和管理各种项目，例如C#，Ruby，Scala和其他语言编写的项目。Maven曾是Jakarta项目的子项目，现为由Apache软件基金会主持的独立Apache项目</p>
+<p>Maven项目使用项目对象模型（Project Object Model，POM）来配置。<br>项目对象模型存储在名为 pom.xml 的文件中。<br>以下是一个简单的示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">  &lt;!-- model version is always 4.0.0 for Maven 2.x POMs --&gt;</div><div class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</div><div class="line">  </div><div class="line">  &lt;!-- project coordinates, i.e. a group of values which</div><div class="line">       uniquely identify this project --&gt;</div><div class="line">  </div><div class="line">  &lt;groupId&gt;com.mycompany.app&lt;/groupId&gt;</div><div class="line">  &lt;artifactId&gt;my-app&lt;/artifactId&gt;</div><div class="line">  &lt;version&gt;1.0&lt;/version&gt;</div><div class="line"></div><div class="line">  &lt;!-- library dependencies --&gt;</div><div class="line">  </div><div class="line">  &lt;dependencies&gt;</div><div class="line">    &lt;dependency&gt;</div><div class="line">    </div><div class="line">      &lt;!-- coordinates of the required library --&gt;</div><div class="line">      </div><div class="line">      &lt;groupId&gt;junit&lt;/groupId&gt;</div><div class="line">      &lt;artifactId&gt;junit&lt;/artifactId&gt;</div><div class="line">      &lt;version&gt;3.8.1&lt;/version&gt;</div><div class="line">      </div><div class="line">      &lt;!-- this dependency is only used for running and compiling tests --&gt;</div><div class="line">      </div><div class="line">      &lt;scope&gt;test&lt;/scope&gt;</div><div class="line">      </div><div class="line">    &lt;/dependency&gt;</div><div class="line">  &lt;/dependencies&gt;</div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure>
+<p>引自<a href="https://zh.wikipedia.org/wiki/Apache_Maven介绍" target="_blank" rel="external">https://zh.wikipedia.org/wiki/Apache_Maven介绍</a></p>
+<p>目前JavaEE使用Apache_Maven的比较多，而我们选择了Android Studio 内置的封装布署工具，拥有以上工具中优秀特性并且更棒的工具Gradle。</p>
+<h3 id="Gradle"><a href="#Gradle" class="headerlink" title="Gradle"></a>Gradle</h3><p>Gradle是一个基于Apache Ant和Apache Maven概念的项目自动化建构工具。它使用一种基于Groovy的特定领域语言来声明项目设置，而不是传统的XML。[2]<br>当前其支持的语言限于Java、Groovy和Scala[3]，计划未来将支持更多的语言。</p>
+<h4 id="使用-Gradle-的优势"><a href="#使用-Gradle-的优势" class="headerlink" title="使用 Gradle 的优势"></a>使用 Gradle 的优势</h4><pre><code>•    自动处理包相依关系 - 取自 Maven Repos 的概念
+•    自动处理布署问题 - 取自 Ant 的概念
+•    条件判断写法直觉 - 使用 Groovy 语言
+</code></pre><p>过去 Java 开发者常用 Maven 和 Ant 等工具进行封装布署的自动化，或是两者兼用，不过这两个包彼此有优缺点，如果频繁改变相依包版本，使用 Ant 相当麻烦，如果琐碎工作很多，Maven 功能不足，而且两者都使用 XML 描述，相当不利于设计 if、switch 等判段式，即使写了可读性也不佳，而 Gradle 改良了过去 Maven、Ant 带给开发者的问题，至今也成为 Android Studio 内置的封装布署工具。</p>
+<h2 id="代码检测流程"><a href="#代码检测流程" class="headerlink" title="代码检测流程"></a>代码检测流程</h2><p>在我们日常开发过程中，使用静态代码检查工具自动进行代码检查，对软件开发者来讲是有利的事情，因为这些工具相比人工方式，能更快捷的查找软件存在的缺陷。但是，在很多情况下，这些工具并没用被开发者所广泛采用。</p>
+<p>尽管在我们开发中编译和测试的结果给出了一些产品健康状态的基本报告，但没有提供代码质量的基本报告，也没有任何地方可以查看到我们开发代码质量，产品质量的趋势，来帮助我们发现问题提升产品质量，我们公司内部构建平台会对代码质量，产品质量做一些分析，来推进产品的前进。</p>
+<h3 id="代码覆盖率"><a href="#代码覆盖率" class="headerlink" title="代码覆盖率"></a>代码覆盖率</h3><p>在Java中有很多免费和商业的代码覆盖率工具，大多数这些工具都可以集成在我们的构建平台上。这里我们列举几个Gradle比较流行的代码覆盖率工具。</p>
+<h4 id="Cobertura"><a href="#Cobertura" class="headerlink" title="Cobertura"></a>Cobertura</h4><p><a href="http://cobertura.sourceforge.net/" target="_blank" rel="external">Cobertura</a> 是一种开源工具，它通过检测基本的代码，并观察在测试包运行时执行了哪些代码和没有执行哪些代码，来测量测试覆盖率。除了找出未测试到的代码并发现 bug 外，Cobertura 还可以通过标记无用的、执行不到的代码来优化代码。</p>
+<h4 id="Emma"><a href="#Emma" class="headerlink" title="Emma"></a>Emma</h4><p><a href="http://emma.sourceforge.net/" target="_blank" rel="external">EMMA</a> 是一个开源、面向 Java 程序测试覆盖率收集和报告工具。它通过对编译后的 Java 字节码文件进行插装，在测试执行过程中收集覆盖率信息，并通过支持多种报表格式对覆盖率结果进行展示。 EMMA 所使用的字节码插装不仅保证 EMMA 不会给源代码带来“脏代码”，还确保 EMMA 摆脱了源代码的束缚，这一特点使 EMMA 应用于功能测试成为了可能。</p>
+<h4 id="Clover"><a href="#Clover" class="headerlink" title="Clover"></a>Clover</h4><p><a href="https://www.atlassian.com/software/clover" target="_blank" rel="external">Clover</a>是一款量度单元测试代码覆盖率（Code Coverage）的软件，用于检测Java单元测试是否完整覆盖代码中所有可能的路径，能够快速、准确地检测测试是否覆盖代码中的所有路径。</p>
+<p>团队成员通过Code review来发现架构、逻辑设计方面、安全缺漏和一些潜在的bug，但随着项目业务的增长，Code review的过程难免也会疏忽很多潜在的bug等问题。</p>
+<p>在我们工作中还有一些静态代码检查工具如<a href="http://checkstyle.sourceforge.net/" target="_blank" rel="external">Checkstyle</a>、<a href="http://findbugs.sourceforge.net/" target="_blank" rel="external">Findbugs</a>、<a href="http://pmd.sourceforge.net/" target="_blank" rel="external">PMD</a>等，将他们集成在我们的构建平台上，并成为我们构建流程中的一步骤。</p>
+<h2 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h2><p>对于开发流程，在不同的项目团队中，开发流程不太一样，但大致可为：<br>每天下班前RD必须把今天工作代码全部提交到Git上。</p>
+<p>####</p>
+<ul>
+<li>使用Jenkins CI ，每天定期会从Git上拉去最新代码，自定编译构建生成APK发出邮件，二维码等到产品维护人员的邮箱，并且将应用更新至公司内测分发平台。</li>
+<li>编译构建成功，进行自动化测试、单元测试覆盖率（Cobertura、Emma或Clover等生成）、功能测试结果（如Selenium）、静态代码检查结果（Checkstyle、Findbugs、PMD等）</li>
+<li>测试人员对产品进行test，测试中若有紧急问题也可以让开发人员可以随时修改提交代码。并且立即重新构建测试安装包。</li>
+</ul>
+<h2 id="打包和发布流程"><a href="#打包和发布流程" class="headerlink" title="打包和发布流程"></a>打包和发布流程</h2><p>以上版本管理发布流程只是参考指南，而不是具体规则。你可以根据自己实际情况来选择适合自己的版本管理发布流程或微调来满足自己的需要。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。&lt;/p&gt;
+&lt;h3 id=&quot;版本命名规范&quot;&gt;&lt;a href=&quot;#版本命名
+    
+    </summary>
+    
+      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>git仓库迁移</title>
+    <link href="http://fushenghua.github.io/archives/8e05eece.html"/>
+    <id>http://fushenghua.github.io/archives/8e05eece.html</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-20T05:25:03.640Z</updated>
+    
+    <content type="html"><![CDATA[<p>最近又要把公司<code>Stash</code>上的项目在别部门一个私有仓库,平移到自己部门项目组的仓库，要求迁移的时候要保留已有的分支和以前的提交记录，类似的需求经常遇到，刚好做个记录。</p>
+<p>1). 从原地址克隆一份裸版本库(纯仓库形式)，比如原本托管于 GitHub。</p>
+<p><img src="/images/git--bare.png" alt="git--bare"></p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">git <span class="keyword">clone</span> <span class="title">--bare</span> git://github.com/username/project.git</div></pre></td></tr></table></figure>
+<blockquote>
+<p>–bare 创建的克隆版本库都不包含工作区，直接就是版本库的内容，这样的版本库称为裸版本库。</p>
+</blockquote>
+<p>2). 然后到新的 Git 服务器上创建一个新项目，比如 GitCafe。</p>
+<p>3). 以镜像推送的方式上传代码到 GitCafe 服务器上。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">cd</span> <span class="selector-tag">project</span><span class="selector-class">.git</span></div><div class="line"><span class="selector-tag">git</span> <span class="selector-tag">push</span> <span class="selector-tag">--mirror</span> <span class="selector-tag">git</span>@<span class="keyword">stash</span>.<span class="keyword">com</span>/<span class="keyword">username</span>/<span class="keyword">newproject</span>.<span class="keyword">git</span></div></pre></td></tr></table></figure>
+<p><img src="/images/cd-push.png" alt="cd-push"></p>
+<blockquote>
+<p>– mirror 克隆出来的裸版本对上游版本库进行了注册，这样可以在裸版本库中使用git fetch命令和上游版本库进行持续同步。</p>
+</blockquote>
+<p>4). 到新服务器 Stash 上找到 Clone 地址，直接 Clone 到本地就可以了。</p>
+<p><img src="/images/git-clone.png" alt="git-clone"></p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">git</span> <span class="selector-tag">clone</span> <span class="selector-tag">git</span>@<span class="keyword">Stash</span>.<span class="keyword">com</span>/<span class="keyword">username</span>/<span class="keyword">newproject</span>.<span class="keyword">git</span></div></pre></td></tr></table></figure>
+<p>这种方式可以保留原版本库中的所有内容(<code>tag</code>,<code>branch</code>等记录)</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;最近又要把公司&lt;code&gt;Stash&lt;/code&gt;上的项目在别部门一个私有仓库,平移到自己部门项目组的仓库，要求迁移的时候要保留已有的分支和以前的提交记录，类似的需求经常遇到，刚好做个记录。&lt;/p&gt;
+&lt;p&gt;1). 从原地址克隆一份裸版本库(纯仓库形式)，比如原本托管于 Gi
+    
+    </summary>
+    
+      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>ViewStub原理分析</title>
+    <link href="http://fushenghua.github.io/archives/235d5e38.html"/>
+    <id>http://fushenghua.github.io/archives/235d5e38.html</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-20T05:25:03.646Z</updated>
+    
+    <content type="html"><![CDATA[<p>ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 <code>inflate()</code> 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调用了 <code>setVisibility(int)</code> 或 <code>inflate()</code>。</p>
+<p>我们先来看看构造方法：</p>
+<p>非常简单的两步，就能做到View的懒加载，非常方便，其原因是什么呢？</p>
+<p>接下去深入源码分析一下。</p>
+<h2 id="构造方法分析"><a href="#构造方法分析" class="headerlink" title="构造方法分析"></a>构造方法分析</h2><p>首先分析一下构造方法，了解一下它是如何创建的。</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, @LayoutRes <span class="keyword">int</span> layoutResource)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, <span class="keyword">null</span>);</div><div class="line">    <span class="comment">// StubbedView的资源id</span></div><div class="line">    mLayoutResource = layoutResource;</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, attrs, <span class="number">0</span>);</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, attrs, defStyleAttr, <span class="number">0</span>);</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr, <span class="keyword">int</span> defStyleRes)</span> </span>&#123;</div><div class="line">    <span class="keyword">super</span>(context);</div><div class="line">    <span class="keyword">final</span> TypedArray a = context.obtainStyledAttributes(attrs,</div><div class="line">            R.styleable.ViewStub, defStyleAttr, defStyleRes);</div><div class="line">    <span class="comment">// mInflatedId 存储StubbedView的id</span></div><div class="line">    mInflatedId = a.getResourceId(R.styleable.ViewStub_inflatedId, NO_ID);</div><div class="line">    <span class="comment">// mLayoutResource 为StubbedView的resourceId</span></div><div class="line">    mLayoutResource = a.getResourceId(R.styleable.ViewStub_layout, <span class="number">0</span>);</div><div class="line">    <span class="comment">// viewStub 自己的id</span></div><div class="line">    mID = a.getResourceId(R.styleable.ViewStub_id, NO_ID);</div><div class="line">    a.recycle();</div><div class="line">    <span class="comment">// 设置为不可见 </span></div><div class="line">    setVisibility(GONE);</div><div class="line">    <span class="comment">// 不绘制本身</span></div><div class="line">    setWillNotDraw(<span class="keyword">true</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>ViewStub</code>在构造方法里不仅仅获取赋值属性，比较关键的是，还 默认将ViewStub自己设置为不可见（跳过onMeasure与onLayout），不绘制。</p>
+<p>这里有一个要点：<strong>在XML里配置ViewStub的可见性是没有用的</strong>。</p>
+<h2 id="测量-与-绘制"><a href="#测量-与-绘制" class="headerlink" title="测量 与 绘制"></a>测量 与 绘制</h2><figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="variable">@Override</span></div><div class="line">protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) &#123;</div><div class="line">    <span class="comment">// 写死的宽高为0</span></div><div class="line">    setMeasuredDimension(0, 0);</div><div class="line">&#125;</div><div class="line"><span class="variable">@Override</span></div><div class="line">public void draw(Canvas canvas) &#123;</div><div class="line">    <span class="comment">//空方法，不draw任何东西</span></div><div class="line">&#125;</div><div class="line"><span class="variable">@Override</span></div><div class="line">protected void dispatchDraw(Canvas canvas) &#123;</div><div class="line">    <span class="comment">//空方法，不draw任何东西</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="inflate-方法分析"><a href="#inflate-方法分析" class="headerlink" title="inflate()方法分析"></a>inflate()方法分析</h2><p>之前在简单教程里有提到 <code>inflate</code>方法，它是<code>ViewStub</code>实现懒加载的最为关键的方法，接下去去分析一下。</p>
+<figure class="highlight zephir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 返回 StubbedView</span></div><div class="line"><span class="keyword">public</span> View inflate() &#123;</div><div class="line">    <span class="comment">// 尝试去获取 viewParent 第一次调用的时候不为null，而后则为null</span></div><div class="line">    <span class="keyword">final</span> ViewParent viewParent = getParent();</div><div class="line">    <span class="comment">// 当 viewParent 不为null的时候</span></div><div class="line">    <span class="keyword">if</span> (viewParent != <span class="keyword">null</span> &amp;&amp; viewParent <span class="keyword">instanceof</span> ViewGroup) &#123;</div><div class="line">        <span class="comment">// 我们在xml里配置的layout的资源id 如果id无效，则会报错</span></div><div class="line">        <span class="keyword">if</span> (mLayoutResource != <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">final</span> ViewGroup <span class="keyword">parent</span> = (ViewGroup) viewParent;</div><div class="line">            <span class="comment">// 实例化 LayoutInflater</span></div><div class="line">            <span class="keyword">final</span> LayoutInflater factory;</div><div class="line">            <span class="keyword">if</span> (mInflater != <span class="keyword">null</span>) &#123;</div><div class="line">                factory = mInflater;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                factory = LayoutInflater.from(mContext);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// inflate，StubbedView在这里被实例化</span></div><div class="line">            <span class="keyword">final</span> View view = factory.inflate(mLayoutResource, <span class="keyword">parent</span>,</div><div class="line">                    <span class="keyword">false</span>);</div><div class="line">            <span class="comment">// 可以看到，这里如果我们在XML里写了inflateId，则会设置给StubbedView</span></div><div class="line">            <span class="keyword">if</span> (mInflatedId != NO_ID) &#123;</div><div class="line">                view.setId(mInflatedId);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 注意：这两步步 ViewSutb 找到自己的位置，并从父View中移除了自己</span></div><div class="line">            <span class="comment">// 这会导致 以后调用inflate的时候 再也获取不到 viewParent了</span></div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> index = <span class="keyword">parent</span>.indexOfChild(this);</div><div class="line">            <span class="keyword">parent</span>.removeViewInLayout(this);</div><div class="line">            <span class="comment">// 拿出ViewStub的LayoutParamas，不为null 则会赋值给 StubbedView</span></div><div class="line">            <span class="keyword">final</span> ViewGroup.LayoutParams layoutParams = getLayoutParams();</div><div class="line">            <span class="comment">// 把 StubbedView 添加到ViewStub的父View里</span></div><div class="line">            <span class="keyword">if</span> (layoutParams != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">parent</span>.addView(view, index, layoutParams);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">parent</span>.addView(view, index);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">//使用一个弱引用来保存StubbedView</span></div><div class="line">            mInflatedViewRef = <span class="keyword">new</span> WeakReference(view);</div><div class="line">            <span class="comment">//回调listener</span></div><div class="line">            <span class="keyword">if</span> (mInflateListener != <span class="keyword">null</span>) &#123;</div><div class="line">                mInflateListener.onInflate(this, view);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 返回 StubbedView</span></div><div class="line">            <span class="keyword">return</span> view;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">// id无效，则throw一个 IllegalArgumentException</span></div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"ViewStub must have a valid layoutResource"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">// inflate被调用一次后 就没有了ViewParent，就会报这个错</span></div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"ViewStub must have a non-null ViewGroup viewParent"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我在每行代码上都加上了详细的注释，主要的操作就是把StubbedView给Inflate出来，然后把它放到自己的位置，代码非常清晰，非常简单。</p>
+<p>总结来说，其实<code>inflate</code>方法是做了一个『偷梁换柱』的操作，把 <code>StubbedView</code>动态的添加到自己原来的位置上，也因此实现了懒加载功能。</p>
+<p>这里还需要注意的是 <strong>ViewStub 必须要有一个 Parent，即必须要有父视图！</strong><br>另外值得一提的是：ViewStub还重写了View的<code>setVisibility</code>方法，让我们来分析一下：</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setVisibility</span><span class="params">(<span class="keyword">int</span> visibility)</span> </span>&#123;</div><div class="line">    <span class="comment">// mInflatedViewRef 保存了 StubbedView还记得吗？ inflate过后它就不是null了 </span></div><div class="line">    <span class="keyword">if</span> (mInflatedViewRef != <span class="keyword">null</span>) &#123;</div><div class="line">        View view = mInflatedViewRef.get();</div><div class="line">        <span class="comment">// 操作 StubbedView</span></div><div class="line">        <span class="keyword">if</span> (view != <span class="keyword">null</span>) &#123;</div><div class="line">            view.setVisibility(visibility);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"setVisibility called on un-referenced view"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">// 操作ViewStub自己，构造方法里的GONE记得么？</span></div><div class="line">        <span class="keyword">super</span>.setVisibility(visibility);</div><div class="line">        <span class="comment">// 如果是 VISIBLE INVISIBLE 则会去调用 inflate方法！！！！</span></div><div class="line">        <span class="keyword">if</span> (visibility == VISIBLE || visibility == INVISIBLE) &#123;</div><div class="line">            inflate();<span class="comment">//注意这一行代码</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看到<code>setVisibility</code>方法中也可能会调用<code>inflate()</code>方法，所以当我们想让StubbedView被加载进来，而我们不需要StubbedView的实例的时候，可以用<code>setVisibility（View.VISIBLE）</code>。</p>
+<p>不过需要注意的是 不要再接着调用<code>inflate</code>方法，因为此时的 ViewStub 已经被移除了！</p>
+<h2 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h2><ol>
+<li>使用ViewStub，必须指定layoutResourceId(必须是布局文件)</li>
+<li>在XML里配置ViewStub的可见性是没有用的</li>
+<li>ViewStub 主要原理藏在<code>inflate()</code>方法中，是它把真正要加载的View给加载了进来</li>
+<li><code>inflate()</code>方法只能调用一次</li>
+<li>ViewStub调用<code>inflate()</code>后就不要再用它了（让它功成身退！）</li>
+<li>要小心<code>setVisibility</code>方法，因为它可能会调用<code>inflate()</code></li>
+<li>在XML里给ViewStub设置的LayoutParamas(宽高margin等)会传递给StubbedView,所以我们如果要控制StubbedView的LayoutParamas，则需要写在ViewStub里而不是StubbedView！</li>
+<li>期待补充</li>
+</ol>
+<p>好了，主要的都分析完了，知道原理之后就可以自己动手写一个加强版的 ViewStub </p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 &lt;code&gt;inflate()&lt;/code&gt; 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调
+    
+    </summary>
+    
+      <category term="性能优化" scheme="http://fushenghua.github.io/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>Android 之美 Android 进阶（一）</title>
     <link href="http://fushenghua.github.io/archives/2abed2d6.html"/>
     <id>http://fushenghua.github.io/archives/2abed2d6.html</id>
@@ -1281,6 +1247,50 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
   </entry>
   
   <entry>
+    <title>Linux下安装Android Studio</title>
+    <link href="http://fushenghua.github.io/archives/89bbc27f.html"/>
+    <id>http://fushenghua.github.io/archives/89bbc27f.html</id>
+    <published>2015-09-11T03:23:32.000Z</published>
+    <updated>2018-04-20T05:25:03.619Z</updated>
+    
+    <content type="html"><![CDATA[<pre><code>实在是不喜欢使用Windows了，时间长了就变得卡顿，还是喜欢Linux的文件系统不会像Windows的文件系统一样产生碎片化严重、
+</code></pre><p>用Linux开发Android 感觉太好了，Android Studio 美观，编译速度也快，终端好用。这里我使用的是Ubuntu 安装Android Studio<br>非常方便。</p>
+<p>##1.百度网盘Android Studio 资源<br>Android集成环境 NDK JDK 总链接 : <a href="http://pan.baidu.com/s/1bnjaDKb" target="_blank" rel="external">http://pan.baidu.com/s/1bnjaDKb</a>;</p>
+<p>Android Studio Linux版 : <a href="http://pan.baidu.com/s/1eQjA6MA" target="_blank" rel="external">http://pan.baidu.com/s/1eQjA6MA</a> ;</p>
+<p>Adt Bundle windows 64位版 : <a href="http://pan.baidu.com/s/1bnvlVnL" target="_blank" rel="external">http://pan.baidu.com/s/1bnvlVnL</a>;</p>
+<p>Adt Bundle Linux 32位版 : <a href="http://pan.baidu.com/s/1jG41dI2" target="_blank" rel="external">http://pan.baidu.com/s/1jG41dI2</a>;</p>
+<p>Adt Bundle Linux 64位版  : <a href="http://pan.baidu.com/s/1dDxjHXv" target="_blank" rel="external">http://pan.baidu.com/s/1dDxjHXv</a>;</p>
+<p>NDK Linux 32位 : <a href="http://pan.baidu.com/s/1eQtJVe6" target="_blank" rel="external">http://pan.baidu.com/s/1eQtJVe6</a>;</p>
+<p>NDK Linux 64位 : <a href="http://pan.baidu.com/s/1bnvRRJL" target="_blank" rel="external">http://pan.baidu.com/s/1bnvRRJL</a>;</p>
+<p>NDK Windows 32位 : <a href="http://pan.baidu.com/s/1eQzj9iq" target="_blank" rel="external">http://pan.baidu.com/s/1eQzj9iq</a>;</p>
+<p>##2.下载安装JDK<br>第一:</p>
+<figure class="highlight plain"><figcaption><span>Ubuntu 中使用 PPA 安装 Java 8 ( 支持 Ubuntu 10.04 - Ubuntu 14.04 ):</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">sudo add-apt-repository ppa:webupd8team/java</div><div class="line"></div><div class="line">sudo apt-get update</div><div class="line"></div><div class="line">sudo apt-get install Oracle-java8-installer</div><div class="line"></div><div class="line">完成之后可以通过以下命令来查看版本：</div><div class="line"></div><div class="line">javac -version</div><div class="line"></div><div class="line">安装 Java 8 需要接受许可，如果你想自动安装，那么可以在安装之前运行：</div><div class="line"></div><div class="line">echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections</div><div class="line"></div><div class="line">设置 Java 8 环境变量：</div><div class="line"></div><div class="line">sudo apt-get install oracle-java8-set-default</div><div class="line"></div><div class="line">切换为 Java 7 ：</div><div class="line"></div><div class="line">sudo update-java-alternatives -s java-7-oracle</div><div class="line"></div><div class="line">再切换为 Java 8：</div><div class="line"></div><div class="line">sudo update-java-alternatives -s java-8-oracle</div></pre></td></tr></table></figure>
+<p>##3.测试</p>
+<p>打开一个终端，输入下面命令：</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -<span class="built_in">version</span></div></pre></td></tr></table></figure>
+<p>显示结果：</p>
+<p>java version “1.7.0_05”<br>Java(TM) SE Runtime Environment (build 1.7.0_05-b05)</p>
+<p>Java HotSpot(TM) Server VM (build 23.1-b03, mixed mode)</p>
+<p>这表示java命令已经可以运行了。</p>
+<p>##4.安装Android Studio<br>上面网盘的资源</p>
+<figure class="highlight armasm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="number">1</span>、下载<span class="keyword">android </span>studio包<span class="keyword">android-studio-bundle-133.970939-linux.tgz</span></div><div class="line">解压：$ sudo tar zxvf <span class="keyword">android-studio-bundle-133.970939-linux.tgz</span></div><div class="line">解压后文件夹名为<span class="keyword">android-studio。</span></div><div class="line">移动：$ sudo mv <span class="keyword">android-studio </span>/<span class="meta">opt</span>/</div><div class="line">打开文件夹：$ cd /<span class="meta">opt</span>/<span class="keyword">android-studio/bin/</span></div><div class="line">运行：$ sudo studio.sh</div><div class="line"><span class="symbol">oh</span> shit，提示命令不存在，怎么回事？额，恩，不是这么打的吧？！</div><div class="line">再次运行：$ sudo ./studio.sh</div><div class="line"><span class="symbol">OK</span>，打开了。固定到任务栏方便以后打开</div></pre></td></tr></table></figure>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;pre&gt;&lt;code&gt;实在是不喜欢使用Windows了，时间长了就变得卡顿，还是喜欢Linux的文件系统不会像Windows的文件系统一样产生碎片化严重、
+&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;用Linux开发Android 感觉太好了，Android Studio 美观，编译速度也快
+    
+    </summary>
+    
+      <category term="linux" scheme="http://fushenghua.github.io/categories/linux/"/>
+    
+    
+      <category term="linux" scheme="http://fushenghua.github.io/tags/linux/"/>
+    
+  </entry>
+  
+  <entry>
     <title>给我们的apk应用瘦身计划</title>
     <link href="http://fushenghua.github.io/archives/6412bd09.html"/>
     <id>http://fushenghua.github.io/archives/6412bd09.html</id>
@@ -1328,50 +1338,6 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     
     
       <category term="优化" scheme="http://fushenghua.github.io/tags/%E4%BC%98%E5%8C%96/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Linux下安装Android Studio</title>
-    <link href="http://fushenghua.github.io/archives/89bbc27f.html"/>
-    <id>http://fushenghua.github.io/archives/89bbc27f.html</id>
-    <published>2015-09-11T03:23:32.000Z</published>
-    <updated>2018-04-20T05:25:03.619Z</updated>
-    
-    <content type="html"><![CDATA[<pre><code>实在是不喜欢使用Windows了，时间长了就变得卡顿，还是喜欢Linux的文件系统不会像Windows的文件系统一样产生碎片化严重、
-</code></pre><p>用Linux开发Android 感觉太好了，Android Studio 美观，编译速度也快，终端好用。这里我使用的是Ubuntu 安装Android Studio<br>非常方便。</p>
-<p>##1.百度网盘Android Studio 资源<br>Android集成环境 NDK JDK 总链接 : <a href="http://pan.baidu.com/s/1bnjaDKb" target="_blank" rel="external">http://pan.baidu.com/s/1bnjaDKb</a>;</p>
-<p>Android Studio Linux版 : <a href="http://pan.baidu.com/s/1eQjA6MA" target="_blank" rel="external">http://pan.baidu.com/s/1eQjA6MA</a> ;</p>
-<p>Adt Bundle windows 64位版 : <a href="http://pan.baidu.com/s/1bnvlVnL" target="_blank" rel="external">http://pan.baidu.com/s/1bnvlVnL</a>;</p>
-<p>Adt Bundle Linux 32位版 : <a href="http://pan.baidu.com/s/1jG41dI2" target="_blank" rel="external">http://pan.baidu.com/s/1jG41dI2</a>;</p>
-<p>Adt Bundle Linux 64位版  : <a href="http://pan.baidu.com/s/1dDxjHXv" target="_blank" rel="external">http://pan.baidu.com/s/1dDxjHXv</a>;</p>
-<p>NDK Linux 32位 : <a href="http://pan.baidu.com/s/1eQtJVe6" target="_blank" rel="external">http://pan.baidu.com/s/1eQtJVe6</a>;</p>
-<p>NDK Linux 64位 : <a href="http://pan.baidu.com/s/1bnvRRJL" target="_blank" rel="external">http://pan.baidu.com/s/1bnvRRJL</a>;</p>
-<p>NDK Windows 32位 : <a href="http://pan.baidu.com/s/1eQzj9iq" target="_blank" rel="external">http://pan.baidu.com/s/1eQzj9iq</a>;</p>
-<p>##2.下载安装JDK<br>第一:</p>
-<figure class="highlight plain"><figcaption><span>Ubuntu 中使用 PPA 安装 Java 8 ( 支持 Ubuntu 10.04 - Ubuntu 14.04 ):</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">sudo add-apt-repository ppa:webupd8team/java</div><div class="line"></div><div class="line">sudo apt-get update</div><div class="line"></div><div class="line">sudo apt-get install Oracle-java8-installer</div><div class="line"></div><div class="line">完成之后可以通过以下命令来查看版本：</div><div class="line"></div><div class="line">javac -version</div><div class="line"></div><div class="line">安装 Java 8 需要接受许可，如果你想自动安装，那么可以在安装之前运行：</div><div class="line"></div><div class="line">echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | sudo /usr/bin/debconf-set-selections</div><div class="line"></div><div class="line">设置 Java 8 环境变量：</div><div class="line"></div><div class="line">sudo apt-get install oracle-java8-set-default</div><div class="line"></div><div class="line">切换为 Java 7 ：</div><div class="line"></div><div class="line">sudo update-java-alternatives -s java-7-oracle</div><div class="line"></div><div class="line">再切换为 Java 8：</div><div class="line"></div><div class="line">sudo update-java-alternatives -s java-8-oracle</div></pre></td></tr></table></figure>
-<p>##3.测试</p>
-<p>打开一个终端，输入下面命令：</p>
-<figure class="highlight applescript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java -<span class="built_in">version</span></div></pre></td></tr></table></figure>
-<p>显示结果：</p>
-<p>java version “1.7.0_05”<br>Java(TM) SE Runtime Environment (build 1.7.0_05-b05)</p>
-<p>Java HotSpot(TM) Server VM (build 23.1-b03, mixed mode)</p>
-<p>这表示java命令已经可以运行了。</p>
-<p>##4.安装Android Studio<br>上面网盘的资源</p>
-<figure class="highlight armasm"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="number">1</span>、下载<span class="keyword">android </span>studio包<span class="keyword">android-studio-bundle-133.970939-linux.tgz</span></div><div class="line">解压：$ sudo tar zxvf <span class="keyword">android-studio-bundle-133.970939-linux.tgz</span></div><div class="line">解压后文件夹名为<span class="keyword">android-studio。</span></div><div class="line">移动：$ sudo mv <span class="keyword">android-studio </span>/<span class="meta">opt</span>/</div><div class="line">打开文件夹：$ cd /<span class="meta">opt</span>/<span class="keyword">android-studio/bin/</span></div><div class="line">运行：$ sudo studio.sh</div><div class="line"><span class="symbol">oh</span> shit，提示命令不存在，怎么回事？额，恩，不是这么打的吧？！</div><div class="line">再次运行：$ sudo ./studio.sh</div><div class="line"><span class="symbol">OK</span>，打开了。固定到任务栏方便以后打开</div></pre></td></tr></table></figure>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;pre&gt;&lt;code&gt;实在是不喜欢使用Windows了，时间长了就变得卡顿，还是喜欢Linux的文件系统不会像Windows的文件系统一样产生碎片化严重、
-&lt;/code&gt;&lt;/pre&gt;&lt;p&gt;用Linux开发Android 感觉太好了，Android Studio 美观，编译速度也快
-    
-    </summary>
-    
-      <category term="linux" scheme="http://fushenghua.github.io/categories/linux/"/>
-    
-    
-      <category term="linux" scheme="http://fushenghua.github.io/tags/linux/"/>
     
   </entry>
   
@@ -1511,6 +1477,44 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     <summary type="html">
     
       &lt;p&gt;在Java方法调用的过程中，JVM是如何知道调用的是哪个类的方法源代码？ 这里面到底有什么内幕呢？ 这篇文章我们就将揭露JVM方法调用的&lt;strong&gt;静态(static binding) &lt;/strong&gt;和&lt;strong&gt;动态绑定机制(auto binding) &lt;/s
+    
+    </summary>
+    
+      <category term="java" scheme="http://fushenghua.github.io/categories/java/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>Java并发集合-CopyOnWriteArrayList</title>
+    <link href="http://fushenghua.github.io/archives/1aa08dc.html"/>
+    <id>http://fushenghua.github.io/archives/1aa08dc.html</id>
+    <published>2015-04-07T00:55:29.000Z</published>
+    <updated>2018-05-10T03:27:52.646Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="什么是CopyOnWrite容器"><a href="#什么是CopyOnWrite容器" class="headerlink" title="什么是CopyOnWrite容器"></a>什么是CopyOnWrite容器</h3><p>CopyOnWrite容器即写时复制的容器。通俗的理解是当我们往一个容器添加元素的时候，不直接往当前容器添加，而是先将当前容器进行Copy，复制出一个新的容器，然后新的容器里添加元素，添加完元素之后，再将原容器的引用指向新的容器。这样做的好处是我们可以对CopyOnWrite容器进行并发的读，而不需要加锁，因为当前容器不会添加任何元素。所以CopyOnWrite容器也是一种读写分离的思想，读和写不同的容器。</p>
+<p>CopyOnWriteArrayList API的定义如下：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CopyOnWriteArrayList</span>&lt;<span class="title">E</span>&gt;</span></div><div class="line"><span class="keyword">extends</span> <span class="title">Object</span></div><div class="line"><span class="keyword">implements</span> <span class="title">List</span>&lt;<span class="title">E</span>&gt;, <span class="title">RandomAccess</span>, <span class="title">Cloneable</span>, <span class="title">Serializable</span></div></pre></td></tr></table></figure>
+<p>它也属于Java集合框架的一部分，是<strong>ArrayList</strong>的线程安全的变体，跟ArrayList的不同在于：CopyOnWriteArrayList针对数组的修改操作（add、set等）是基于<strong>内部拷贝的一份数据而进行</strong>的。换句话说，即使在一个线程进行遍历操作时有其他线程可能进行插入或删除操作，我们也可以“线程安全”得遍历CopyOnWriteArrayList。</p>
+<h3 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h3><p>适合使用在读操作远远大于写操作的场景里</p>
+<h4 id="插入（删除）数据的同时进行遍历"><a href="#插入（删除）数据的同时进行遍历" class="headerlink" title="插入（删除）数据的同时进行遍历"></a>插入（删除）数据的同时进行遍历</h4><p>CopyOnWriteArrayList的实现原理是，在一个线程开始遍历（创建Iterator对象）时，内部会创建一个“快照”数组，遍历基于这个快照Iterator进行，在遍历过程中这个快照数组不会改变，也就不会抛出<code>ConcurrentModificationException</code>。如果在遍历的过程中有其他线程尝试改变数组的内容，就会拷贝一份新的数据进行变更，而后面再来访问这个数组的线程，看到的就是变更过的数组。<br>如下：</p>
+<figure class="highlight dart"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.<span class="built_in">Iterator</span>;</div><div class="line"><span class="keyword">import</span> java.util.LinkedList;</div><div class="line"><span class="keyword">import</span> java.util.<span class="built_in">List</span>;</div><div class="line"><span class="keyword">import</span> java.util.concurrent.CopyOnWriteArrayList;</div><div class="line"></div><div class="line"><span class="keyword">import</span> <span class="keyword">static</span> org.assertj.core.api.Assertions.*;</div><div class="line"></div><div class="line">public <span class="class"><span class="keyword">class</span> <span class="title">CopyOnWriteArrayListExample</span> </span>&#123;</div><div class="line"></div><div class="line">    public <span class="keyword">static</span> <span class="keyword">void</span> main(<span class="built_in">String</span>[] args) &#123;</div><div class="line">        CopyOnWriteArrayList&lt;Integer&gt; numbers = <span class="keyword">new</span> CopyOnWriteArrayList&lt;&gt;(<span class="keyword">new</span> Integer[]&#123;<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">78</span>&#125;);</div><div class="line"></div><div class="line">        <span class="built_in">Iterator</span>&lt;Integer&gt; iterator = numbers.iterator();</div><div class="line">        numbers.add(<span class="number">100</span>);</div><div class="line">        <span class="built_in">List</span>&lt;Integer&gt; result = <span class="keyword">new</span> LinkedList&lt;&gt;();</div><div class="line">        iterator.forEachRemaining(result::add);</div><div class="line">        assertThat(result).containsOnly(<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">78</span>);</div><div class="line"></div><div class="line">        <span class="built_in">Iterator</span>&lt;Integer&gt; iterator2 = numbers.iterator();</div><div class="line">        numbers.remove(<span class="number">3</span>);</div><div class="line">        <span class="built_in">List</span>&lt;Integer&gt; result2 = <span class="keyword">new</span> LinkedList&lt;&gt;();</div><div class="line">        iterator2.forEachRemaining(result2::add);</div><div class="line">        assertThat(result2).containsOnly(<span class="number">1</span>, <span class="number">3</span>, <span class="number">5</span>, <span class="number">78</span>, <span class="number">100</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="CopyOnWriteArrayList的实现原理"><a href="#CopyOnWriteArrayList的实现原理" class="headerlink" title="CopyOnWriteArrayList的实现原理"></a>CopyOnWriteArrayList的实现原理</h3><p>在使用CopyOnWriteArrayList之前，我们先阅读其源码了解下它是如何实现的。以下代码是向ArrayList里添加元素，可以发现在添加的时候是<strong>需要加锁</strong>的，否则多线程写的时候会Copy出N个副本出来。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> boolean <span class="title">add</span>(<span class="params">T e</span>) </span>&#123;</div><div class="line">    final ReentrantLock <span class="keyword">lock</span> = <span class="keyword">this</span>.<span class="keyword">lock</span>;</div><div class="line">    <span class="keyword">lock</span>.<span class="keyword">lock</span>();</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line"> </div><div class="line">        Object[] elements = getArray();</div><div class="line"> </div><div class="line">        <span class="keyword">int</span> len = elements.length;</div><div class="line">        <span class="comment">// 复制出新数组</span></div><div class="line"> </div><div class="line">        Object[] newElements = Arrays.copyOf(elements, len + <span class="number">1</span>);</div><div class="line">        <span class="comment">// 把新元素添加到新数组里</span></div><div class="line"> </div><div class="line">        newElements[len] = e;</div><div class="line">        <span class="comment">// 把原数组引用指向新数组</span></div><div class="line"> </div><div class="line">        setArray(newElements);</div><div class="line"> </div><div class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</div><div class="line"> </div><div class="line">    &#125; <span class="keyword">finally</span> &#123;</div><div class="line"> </div><div class="line">        <span class="keyword">lock</span>.unlock();</div><div class="line"> </div><div class="line">    &#125;</div><div class="line"> </div><div class="line">&#125;</div><div class="line"> </div><div class="line"><span class="function">final <span class="keyword">void</span> <span class="title">setArray</span>(<span class="params">Object[] a</span>) </span>&#123;</div><div class="line">    array = a;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>读的时候不需要加锁，如果读的时候有多个线程正在向ArrayList添加数据，读还是会读到旧的数据，因为写的时候不会锁住旧的ArrayList。</p>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> E <span class="built_in">get</span>(<span class="keyword">int</span> index) &#123;</div><div class="line">    <span class="built_in">return</span> <span class="built_in">get</span>(getArray(), index);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ul>
+<li><p><strong>CopyOnWriteArrayList</strong>适合使用在读操作远远大于写操作的场景里，比如缓存。发生修改时候做copy，新老版本分离，保证读的高性能，适用于以读为主的情况。</p>
+</li>
+<li><p><strong>内存占用问题</strong>：因为CopyOnWrite的写时复制机制，所以在进行写操作的时候，内存里会同时驻扎两个对象的内存，旧的对象和新写入的对象（注意:在复制的时候只是复制容器里的引用，只是在写的时候会创建新对象添加到新容器里，而旧容器的对象还在使用，所以有两份对象内存）。如果这些对象占用的内存比较大，比如说200M左右，那么再写入100M数据进去，内存就会占用300M，那么这个时候很有可能造成频繁的Yong GC和Full GC。之前我们系统中使用了一个服务由于每晚使用CopyOnWrite机制更新大对象，造成了每晚15秒的Full GC，应用响应时间也随之变长。</p>
+</li>
+<li><strong>数据一致性问题</strong>：CopyOnWrite容器只能保证数据的最终一致性，不能保证数据的实时一致性。所以如果你希望写入的的数据，马上能读到，请不要使用CopyOnWrite容器。</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;h3 id=&quot;什么是CopyOnWrite容器&quot;&gt;&lt;a href=&quot;#什么是CopyOnWrite容器&quot; class=&quot;headerlink&quot; title=&quot;什么是CopyOnWrite容器&quot;&gt;&lt;/a&gt;什么是CopyOnWrite容器&lt;/h3&gt;&lt;p&gt;CopyOnWrite容器即
     
     </summary>
     

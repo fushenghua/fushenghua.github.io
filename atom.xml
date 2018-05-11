@@ -289,7 +289,7 @@
     <link href="http://fushenghua.github.io/archives/3dbdbf17.html"/>
     <id>http://fushenghua.github.io/archives/3dbdbf17.html</id>
     <published>2018-04-02T00:55:29.000Z</published>
-    <updated>2018-05-10T03:30:31.574Z</updated>
+    <updated>2018-05-11T04:47:39.994Z</updated>
     
     <content type="html"><![CDATA[<p>Android 运行时 (ART) 包含一个具备代码分析功能的即时 (JIT) 编译器，该编译器可以在 Android 应用运行时持续提高其性能。JIT 编译器补充了 ART 当前的预先 (AOT) 编译器的功能，有助于提高运行时性能，节省存储空间，以及加快应用及系统更新速度。相较于 AOT 编译器，JIT 编译器的优势也更为明显，因为它不会在应用自动更新期间或重新编译应用（在无线下载 (OTA) 更新期间）时拖慢系统速度。</p>
 <p>尽管 JIT 和 AOT 使用相同的编译器，它们所进行的一系列优化也较为相似，但它们生成的代码可能会有所不同。JIT 会利用运行时类型信息，可以更高效地进行内联，并可让堆栈替换 (OSR) 编译成为可能，而这一切都会使其生成的代码略有不同。</p>

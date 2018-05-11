@@ -4,6 +4,24 @@
 
     
   <url>
+    <loc>http://fushenghua.github.io/archives/3dbdbf17.html</loc>
+    <lastmod>2018-05-11T04:47:39.994Z</lastmod>
+    <data>
+        <display>
+        <title>实现 ART 即时 (JIT) 编译器</title>
+        <pubTime>2018-04-02T00:55:29.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="android" url="http://fushenghua.github.io/categories/android/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://fushenghua.github.io/archives/1aa08dc.html</loc>
     <lastmod>2018-05-10T03:31:55.545Z</lastmod>
     <data>
@@ -15,24 +33,6 @@
            
              
               <breadCrumb title="java" url="http://fushenghua.github.io/categories/java/"/>
-          
-        </display>
-    </data>
-    </url>
-
-    
-  <url>
-    <loc>http://fushenghua.github.io/archives/3dbdbf17.html</loc>
-    <lastmod>2018-05-10T03:30:31.574Z</lastmod>
-    <data>
-        <display>
-        <title>实现 ART 即时 (JIT) 编译器</title>
-        <pubTime>2018-04-02T00:55:29.000Z</pubTime>
-        
-         
-           
-             
-              <breadCrumb title="android" url="http://fushenghua.github.io/categories/android/"/>
           
         </display>
     </data>

@@ -947,7 +947,7 @@
     <link href="http://fushenghua.github.io/archives/8e05eece.html"/>
     <id>http://fushenghua.github.io/archives/8e05eece.html</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.640Z</updated>
+    <updated>2018-05-12T17:15:32.017Z</updated>
     
     <content type="html"><![CDATA[<p>最近又要把公司<code>Stash</code>上的项目在别部门一个私有仓库,平移到自己部门项目组的仓库，要求迁移的时候要保留已有的分支和以前的提交记录，类似的需求经常遇到，刚好做个记录。</p>
 <p>1). 从原地址克隆一份裸版本库(纯仓库形式)，比如原本托管于 GitHub。</p>
@@ -966,7 +966,7 @@
 <p>4). 到新服务器 Stash 上找到 Clone 地址，直接 Clone 到本地就可以了。</p>
 <p><img src="/images/git-clone.png" alt="git-clone"></p>
 <figure class="highlight css"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="selector-tag">git</span> <span class="selector-tag">clone</span> <span class="selector-tag">git</span>@<span class="keyword">Stash</span>.<span class="keyword">com</span>/<span class="keyword">username</span>/<span class="keyword">newproject</span>.<span class="keyword">git</span></div></pre></td></tr></table></figure>
-<p>这种方式可以保留原版本库中的所有内容(<code>tag</code>,<code>branch</code>等记录)</p>
+<p>这种方式可以保留原版本库中的所有内容(<code>tag</code>,<code>branch</code>等记录)。</p>
 ]]></content>
     
     <summary type="html">

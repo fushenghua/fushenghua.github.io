@@ -149,6 +149,107 @@
   </entry>
   
   <entry>
+    <title>实现 ART 即时 (JIT) 编译器</title>
+    <link href="http://fushenghua.github.io/archives/3dbdbf17.html"/>
+    <id>http://fushenghua.github.io/archives/3dbdbf17.html</id>
+    <published>2018-04-02T00:55:29.000Z</published>
+    <updated>2018-05-11T04:47:49.270Z</updated>
+    
+    <content type="html"><![CDATA[<p>Android 运行时 (ART) 包含一个具备代码分析功能的即时 (JIT) 编译器，该编译器可以在 Android 应用运行时持续提高其性能。JIT 编译器补充了 ART 当前的预先 (AOT) 编译器的功能，有助于提高运行时性能，节省存储空间，以及加快应用及系统更新速度。相较于 AOT 编译器，JIT 编译器的优势也更为明显，因为它不会在应用自动更新期间或重新编译应用（在无线下载 (OTA) 更新期间）时拖慢系统速度。</p>
+<p>尽管 JIT 和 AOT 使用相同的编译器，它们所进行的一系列优化也较为相似，但它们生成的代码可能会有所不同。JIT 会利用运行时类型信息，可以更高效地进行内联，并可让堆栈替换 (OSR) 编译成为可能，而这一切都会使其生成的代码略有不同。</p>
+<h2 id="JIT-架构"><a href="#JIT-架构" class="headerlink" title="JIT 架构"></a>JIT 架构</h2><p><img src="/images/jit-arch.png" alt="JIT 架构"></p>
+<p><strong>图 1.</strong> JIT 架构。</p>
+<h2 id="JIT-编译"><a href="#JIT-编译" class="headerlink" title="JIT 编译"></a>JIT 编译</h2><p>JIT 编译涉及以下活动：</p>
+<p><img src="/images/jit-profile-comp.png" alt="配置文件引导的编译"></p>
+<p><strong>图 2.</strong> 配置文件引导的编译。</p>
+<ol>
+<li><p>用户运行应用，而这随后就会触发 ART 加载 <code>.dex</code> 文件。</p>
+<ul>
+<li>如果有 <code>.oat</code> 文件（即 <code>.dex</code> 文件的 AOT 二进制文件），则 ART 会直接使用该文件。虽然 <code>.oat</code> 文件会定期生成，但文件中不一定会包含经过编译的代码（即 AOT 二进制文件）。</li>
+<li><p>如果没有 <code>.oat</code> 文件，则 ART 会通过 JIT 或解释器执行 <code>.dex</code> 文件。</p>
+<p><code>.oat</code></p>
+<p><code>.dex</code></p>
+</li>
+</ul>
+</li>
+<li><p>针对任何未根据 <code>speed</code> 编译过滤器编译的应用启用 JIT（也就是说，要尽可能多地编译应用中的代码）。</p>
+</li>
+<li>将 JIT 配置文件数据转存到只限应用访问的系统目录内的文件中。</li>
+<li><p>AOT 编译 (<code>dex2oat</code>) 守护进程通过解析该文件来推进其编译。</p>
+<p> <img src="/images/jit-daemon.png" alt="JIT 守护进程"></p>
+<p> <strong>图 3.</strong> JIT 守护进程活动。</p>
+</li>
+</ol>
+<p>举例来说，Google Play 服务就是一种由其他应用使用的类似于共享库的服务。</p>
+<h2 id="JIT-工作流程"><a href="#JIT-工作流程" class="headerlink" title="JIT 工作流程"></a>JIT 工作流程</h2><p><img src="/images/jit-workflow.png" alt="JIT 架构"></p>
+<p><strong>图 4.</strong> JIT 数据流。</p>
+<ul>
+<li>分析信息会存储在代码缓存中，并会在内存紧张时作为垃圾被回收。<ul>
+<li>无法保证在应用处于后台运行状态时所捕获的快照能够包含完整的数据（即 JIT 编译的所有内容）。</li>
+<li>该过程不会尝试确保记录所有内容（因为这将影响运行时性能）。</li>
+</ul>
+</li>
+<li>方法可能有三种不同的状态：<ul>
+<li>已经过解释（dex 代码）</li>
+<li>已经过 JIT 编译</li>
+<li>已经过 AOT 编译如果同时存在 JIT 和 AOT 代码（例如，由于反复进行逆优化），经过 JIT 编译的代码将是首选代码。</li>
+</ul>
+</li>
+<li>在不影响前台应用性能的情况下运行 JIT 所需的内存取决于相关应用。大型应用比小型应用需要更多内存。一般来说，大型应用所需的内存稳定维持在 4 MB 左右。</li>
+</ul>
+<h2 id="开启-JIT-日志记录"><a href="#开启-JIT-日志记录" class="headerlink" title="开启 JIT 日志记录"></a>开启 JIT 日志记录</h2><p>要开启 JIT 日志记录，请运行以下命令：</p>
+<p><code>adb root</code><br><code>adb shell stop</code><br><code>adb shell setprop dalvik.vm.extra-opts -verbose:jit</code><br><code>adb shell start</code></p>
+<h2 id="停用-JIT"><a href="#停用-JIT" class="headerlink" title="停用 JIT"></a>停用 JIT</h2><p>要停用 JIT，请运行以下命令：</p>
+<p><code>adb root</code><br><code>adb shell stop</code><br><code>adb shell setprop dalvik.vm.usejit false</code><br><code>adb shell start</code></p>
+<h2 id="强制编译"><a href="#强制编译" class="headerlink" title="强制编译"></a>强制编译</h2><p>要强制编译，请运行以下命令：</p>
+<p>adb shell cmd package compile</p>
+<p>强制编译特定软件包的常见用例：</p>
+<ul>
+<li><p>基于配置文件：</p>
+<p>  adb shell cmd package compile -m speed-profile -f my-package</p>
+</li>
+</ul>
+<ul>
+<li><p>全面：</p>
+<p>  adb shell cmd package compile -m speed -f my-package</p>
+</li>
+</ul>
+<p>强制编译所有软件包的常见用例：</p>
+<ul>
+<li><p>基于配置文件：</p>
+<p>  adb shell cmd package compile -m speed-profile -f -a</p>
+</li>
+</ul>
+<ul>
+<li><p>全面：</p>
+<p>  adb shell cmd package compile -m speed -f -a</p>
+</li>
+</ul>
+<h2 id="清除配置文件数据"><a href="#清除配置文件数据" class="headerlink" title="清除配置文件数据"></a>清除配置文件数据</h2><p>要清除配置文件数据并移除经过编译的代码，请运行以下命令：</p>
+<ul>
+<li><p>针对一个软件包：</p>
+<p>  adb shell cmd package compile –reset my-package</p>
+</li>
+</ul>
+<ul>
+<li><p>针对所有软件包：</p>
+<p>  adb shell cmd package compile –reset -a</p>
+</li>
+</ul>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Android 运行时 (ART) 包含一个具备代码分析功能的即时 (JIT) 编译器，该编译器可以在 Android 应用运行时持续提高其性能。JIT 编译器补充了 ART 当前的预先 (AOT) 编译器的功能，有助于提高运行时性能，节省存储空间，以及加快应用及系统更新速
+    
+    </summary>
+    
+      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>Android 8.0 中的 ART 功能改进</title>
     <link href="http://fushenghua.github.io/archives/3b12125.html"/>
     <id>http://fushenghua.github.io/archives/3b12125.html</id>
@@ -285,98 +386,29 @@
   </entry>
   
   <entry>
-    <title>实现 ART 即时 (JIT) 编译器</title>
-    <link href="http://fushenghua.github.io/archives/3dbdbf17.html"/>
-    <id>http://fushenghua.github.io/archives/3dbdbf17.html</id>
+    <title>INSTALL_FAILED_TEST_ONLY的原因</title>
+    <link href="http://fushenghua.github.io/archives/af68deab.html"/>
+    <id>http://fushenghua.github.io/archives/af68deab.html</id>
     <published>2018-04-02T00:55:29.000Z</published>
-    <updated>2018-05-11T04:47:49.270Z</updated>
+    <updated>2018-05-15T03:25:19.277Z</updated>
     
-    <content type="html"><![CDATA[<p>Android 运行时 (ART) 包含一个具备代码分析功能的即时 (JIT) 编译器，该编译器可以在 Android 应用运行时持续提高其性能。JIT 编译器补充了 ART 当前的预先 (AOT) 编译器的功能，有助于提高运行时性能，节省存储空间，以及加快应用及系统更新速度。相较于 AOT 编译器，JIT 编译器的优势也更为明显，因为它不会在应用自动更新期间或重新编译应用（在无线下载 (OTA) 更新期间）时拖慢系统速度。</p>
-<p>尽管 JIT 和 AOT 使用相同的编译器，它们所进行的一系列优化也较为相似，但它们生成的代码可能会有所不同。JIT 会利用运行时类型信息，可以更高效地进行内联，并可让堆栈替换 (OSR) 编译成为可能，而这一切都会使其生成的代码略有不同。</p>
-<h2 id="JIT-架构"><a href="#JIT-架构" class="headerlink" title="JIT 架构"></a>JIT 架构</h2><p><img src="/images/jit-arch.png" alt="JIT 架构"></p>
-<p><strong>图 1.</strong> JIT 架构。</p>
-<h2 id="JIT-编译"><a href="#JIT-编译" class="headerlink" title="JIT 编译"></a>JIT 编译</h2><p>JIT 编译涉及以下活动：</p>
-<p><img src="/images/jit-profile-comp.png" alt="配置文件引导的编译"></p>
-<p><strong>图 2.</strong> 配置文件引导的编译。</p>
-<ol>
-<li><p>用户运行应用，而这随后就会触发 ART 加载 <code>.dex</code> 文件。</p>
-<ul>
-<li>如果有 <code>.oat</code> 文件（即 <code>.dex</code> 文件的 AOT 二进制文件），则 ART 会直接使用该文件。虽然 <code>.oat</code> 文件会定期生成，但文件中不一定会包含经过编译的代码（即 AOT 二进制文件）。</li>
-<li><p>如果没有 <code>.oat</code> 文件，则 ART 会通过 JIT 或解释器执行 <code>.dex</code> 文件。</p>
-<p><code>.oat</code></p>
-<p><code>.dex</code></p>
-</li>
-</ul>
-</li>
-<li><p>针对任何未根据 <code>speed</code> 编译过滤器编译的应用启用 JIT（也就是说，要尽可能多地编译应用中的代码）。</p>
-</li>
-<li>将 JIT 配置文件数据转存到只限应用访问的系统目录内的文件中。</li>
-<li><p>AOT 编译 (<code>dex2oat</code>) 守护进程通过解析该文件来推进其编译。</p>
-<p> <img src="/images/jit-daemon.png" alt="JIT 守护进程"></p>
-<p> <strong>图 3.</strong> JIT 守护进程活动。</p>
-</li>
-</ol>
-<p>举例来说，Google Play 服务就是一种由其他应用使用的类似于共享库的服务。</p>
-<h2 id="JIT-工作流程"><a href="#JIT-工作流程" class="headerlink" title="JIT 工作流程"></a>JIT 工作流程</h2><p><img src="/images/jit-workflow.png" alt="JIT 架构"></p>
-<p><strong>图 4.</strong> JIT 数据流。</p>
-<ul>
-<li>分析信息会存储在代码缓存中，并会在内存紧张时作为垃圾被回收。<ul>
-<li>无法保证在应用处于后台运行状态时所捕获的快照能够包含完整的数据（即 JIT 编译的所有内容）。</li>
-<li>该过程不会尝试确保记录所有内容（因为这将影响运行时性能）。</li>
-</ul>
-</li>
-<li>方法可能有三种不同的状态：<ul>
-<li>已经过解释（dex 代码）</li>
-<li>已经过 JIT 编译</li>
-<li>已经过 AOT 编译如果同时存在 JIT 和 AOT 代码（例如，由于反复进行逆优化），经过 JIT 编译的代码将是首选代码。</li>
-</ul>
-</li>
-<li>在不影响前台应用性能的情况下运行 JIT 所需的内存取决于相关应用。大型应用比小型应用需要更多内存。一般来说，大型应用所需的内存稳定维持在 4 MB 左右。</li>
-</ul>
-<h2 id="开启-JIT-日志记录"><a href="#开启-JIT-日志记录" class="headerlink" title="开启 JIT 日志记录"></a>开启 JIT 日志记录</h2><p>要开启 JIT 日志记录，请运行以下命令：</p>
-<p><code>adb root</code><br><code>adb shell stop</code><br><code>adb shell setprop dalvik.vm.extra-opts -verbose:jit</code><br><code>adb shell start</code></p>
-<h2 id="停用-JIT"><a href="#停用-JIT" class="headerlink" title="停用 JIT"></a>停用 JIT</h2><p>要停用 JIT，请运行以下命令：</p>
-<p><code>adb root</code><br><code>adb shell stop</code><br><code>adb shell setprop dalvik.vm.usejit false</code><br><code>adb shell start</code></p>
-<h2 id="强制编译"><a href="#强制编译" class="headerlink" title="强制编译"></a>强制编译</h2><p>要强制编译，请运行以下命令：</p>
-<p>adb shell cmd package compile</p>
-<p>强制编译特定软件包的常见用例：</p>
-<ul>
-<li><p>基于配置文件：</p>
-<p>  adb shell cmd package compile -m speed-profile -f my-package</p>
-</li>
-</ul>
-<ul>
-<li><p>全面：</p>
-<p>  adb shell cmd package compile -m speed -f my-package</p>
-</li>
-</ul>
-<p>强制编译所有软件包的常见用例：</p>
-<ul>
-<li><p>基于配置文件：</p>
-<p>  adb shell cmd package compile -m speed-profile -f -a</p>
-</li>
-</ul>
-<ul>
-<li><p>全面：</p>
-<p>  adb shell cmd package compile -m speed -f -a</p>
-</li>
-</ul>
-<h2 id="清除配置文件数据"><a href="#清除配置文件数据" class="headerlink" title="清除配置文件数据"></a>清除配置文件数据</h2><p>要清除配置文件数据并移除经过编译的代码，请运行以下命令：</p>
-<ul>
-<li><p>针对一个软件包：</p>
-<p>  adb shell cmd package compile –reset my-package</p>
-</li>
-</ul>
-<ul>
-<li><p>针对所有软件包：</p>
-<p>  adb shell cmd package compile –reset -a</p>
-</li>
-</ul>
+    <content type="html"><![CDATA[<p>有一天给测试同学打了个deubg 包发现无法安装，提示无法解析，使用adb install 安装后提示<code>INSTALL_FAILED_TEST_ONLY</code>，原来是<code>Android Studio 3.0</code>会在debug apk的<code>manifest</code>文件<code>application</code>标签里自动添加 <code>android:testOnly=&quot;true&quot;</code>属性</p>
+<h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>在Android Studio进行开发的时候，生成的debug apk手动使用adb install无法安装，提示错误：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">➜  apk adb <span class="keyword">install</span> <span class="string">'/home/silver/桌面/share/apk/app-android-debug.apk'</span> </div><div class="line">adb <span class="keyword">server</span> <span class="keyword">is</span> <span class="keyword">out</span> <span class="keyword">of</span> date.  killing...</div><div class="line">* daemon started successfully *</div><div class="line"><span class="number">5347</span> KB/s (<span class="number">8754206</span> <span class="keyword">bytes</span> <span class="keyword">in</span> <span class="number">1.598</span>s)</div><div class="line">	pkg: /<span class="keyword">data</span>/<span class="keyword">local</span>/tmp/app-android-debug.apk</div><div class="line"><span class="keyword">Failure</span> [INSTALL_FAILED_TEST_ONLY]</div></pre></td></tr></table></figure>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>但是使用Android Studio开发过程中发现可以直接安装成功。经过查询资料发现在<code>AndroidManifest.xml</code>文件中添加了属性<code>testOnly=true</code>， </p>
+<p><a href="https://developer.android.com/guide/topics/manifest/application-element" target="_blank" rel="external">https://developer.android.com/guide/topics/manifest/application-element</a></p>
+<p><img src="/images/15263540381830.jpg" alt=""></p>
+<p>反编译当前apk发现的确清单文件中的确新加了这个属性，研究发现原来是<code>Android Studio 3.0</code>会在debug apk的<code>manifest</code>文件<code>application</code>标签里自动添加 <code>android:testOnly=&quot;true&quot;</code>属性，导致IDE中run跑出的apk在大部分手机上只能用adb install -t <apk>来安装。</apk></p>
+<h3 id="解决方法一"><a href="#解决方法一" class="headerlink" title="解决方法一"></a>解决方法一</h3><p>在项目中的<code>gradle.properties</code>全局配置中设置：</p>
+<figure class="highlight stylus"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">android<span class="selector-class">.injected</span><span class="selector-class">.testOnly</span>=false</div></pre></td></tr></table></figure>
+<h3 id="解决方法二，加-t-："><a href="#解决方法二，加-t-：" class="headerlink" title="解决方法二，加 -t ：　　"></a>解决方法二，加 -t ：　　</h3><figure class="highlight mipsasm"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">adb <span class="keyword">install </span>-t app-<span class="built_in">debug</span>.apk</div></pre></td></tr></table></figure>
+<p><img src="/images/15263543802023.jpg" alt=""></p>
+<p>通过方法一设置后，反编译就没有属性<code>testOnly=true</code>了。</p>
 ]]></content>
     
     <summary type="html">
     
-      &lt;p&gt;Android 运行时 (ART) 包含一个具备代码分析功能的即时 (JIT) 编译器，该编译器可以在 Android 应用运行时持续提高其性能。JIT 编译器补充了 ART 当前的预先 (AOT) 编译器的功能，有助于提高运行时性能，节省存储空间，以及加快应用及系统更新速
+      &lt;p&gt;有一天给测试同学打了个deubg 包发现无法安装，提示无法解析，使用adb install 安装后提示&lt;code&gt;INSTALL_FAILED_TEST_ONLY&lt;/code&gt;，原来是&lt;code&gt;Android Studio 3.0&lt;/code&gt;会在debug apk的&lt;c
     
     </summary>
     
@@ -435,112 +467,59 @@
   </entry>
   
   <entry>
-    <title>优化Gradle 依赖使用方式</title>
-    <link href="http://fushenghua.github.io/archives/c66eed35.html"/>
-    <id>http://fushenghua.github.io/archives/c66eed35.html</id>
+    <title>版本管理发布流程</title>
+    <link href="http://fushenghua.github.io/archives/375726b.html"/>
+    <id>http://fushenghua.github.io/archives/375726b.html</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.653Z</updated>
+    <updated>2018-04-20T05:25:03.655Z</updated>
     
-    <content type="html"><![CDATA[<p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p>
-<blockquote>
-<p><a href="http://stash.lab.tclclouds.com/projects/CLEAN/repos/cleaner_module/commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318" target="_blank" rel="external">commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318</a></p>
-</blockquote>
-<p>现在仍有些问题,比如 <strong>SpaceBase</strong> 依赖了 <strong>VirusEngine</strong> 等问题。</p>
-<h3 id="全新的依赖方式"><a href="#全新的依赖方式" class="headerlink" title="全新的依赖方式"></a>全新的依赖方式</h3><h4 id="需要那个开那个"><a href="#需要那个开那个" class="headerlink" title="需要那个开那个"></a>需要那个开那个</h4><p>修改项目中 <code>module.properties</code> 的配置, <code>true</code> 代表以<code>Project</code> 方式引入,反之则是<code>aar</code>方式,<strong>该配置已被忽略,只对当前工程配置有效。</strong></p>
-<p>如果你确实想提交修改,请使用 <code>git add -f module.properties</code> 命令强制添加。</p>
-<figure class="highlight lasso"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="params">...</span></div><div class="line">isBoostengineDebug=<span class="literal">false</span></div><div class="line">isAppmgrDebug=<span class="literal">false</span></div><div class="line">isCpuDebug=<span class="literal">false</span></div><div class="line">isNotifyboxDebug=<span class="literal">false</span></div><div class="line">isHardwareDebug=<span class="literal">false</span></div><div class="line">isAntivirusDebug=<span class="literal">false</span></div><div class="line">isJunkDebug=<span class="literal">false</span></div><div class="line">isAllDebug=<span class="literal">false</span><span class="comment">// 全部 Debug，即编译Project模式</span></div></pre></td></tr></table></figure>
-<h4 id="添加新的模块依赖"><a href="#添加新的模块依赖" class="headerlink" title="添加新的模块依赖"></a>添加新的模块依赖</h4><p>如果你需要添加新的模块依赖,请按照以下方法,在 <code>module.gradle</code> 脚本中新增 <code>compile_*</code> 方法,如下:</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">def</span> compile_junk(<span class="keyword">Project</span> projectModule)&#123;</div><div class="line">    projectModule.<span class="keyword">dependencies</span>&#123;</div><div class="line">        <span class="keyword">if</span> (isAllDebug.toBoolean() || isJunkDebug.toBoolean()) &#123;</div><div class="line">            <span class="keyword">compile</span> <span class="keyword">project</span>(<span class="string">':junk'</span>)</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">compile</span>(name: <span class="string">'junk'</span>, ext: <span class="string">'aar'</span>)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>然后通过闭包形式传递出去,在 <code>module.gradle</code> 脚本中有<code>ext</code> 扩展属性 ，添加如下：</p>
-<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class">ext </span>&#123;</div><div class="line">  compile_junk = this.<span class="variable">&amp;compile_junk</span>  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>最终通过以下方式使用</p>
-<figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compile_junk(<span class="name">getProject</span>())</div></pre></td></tr></table></figure>
-<h3 id="模块公用的Libs库"><a href="#模块公用的Libs库" class="headerlink" title="模块公用的Libs库"></a>模块公用的Libs库</h3><p>在工程目录的顶级 <code>libs</code> 文件夹中存放着各个模块的 <code>aar</code> ,如果需要更新,可以通过脚本进行<br>全量更新,或者各模块部分更新。</p>
-<h3 id="更新AAR"><a href="#更新AAR" class="headerlink" title="更新AAR"></a>更新AAR</h3><p>在<code>cleaner</code> 工程目录下，在你每次<strong>运行</strong>程序时 <code>update-aar.gradle</code>会自动更新<strong>已开启</strong>模块(如<code>isJunkDebug=true</code>)的<code>aar</code> 到 公用<code>libs</code>库中，你所需要做的就是 <code>commit</code>，这样能保证各位小伙伴使用的都是较新的<code>aar</code>。</p>
-<p>同样的你也可以手动触发<code>Task</code>来更新<code>aar</code>，相应<code>Task</code> 如下：</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">task</span> updateAAR &lt;&lt; &#123;</div><div class="line">    eachLibsAAR()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="版本发布"><a href="#版本发布" class="headerlink" title="版本发布"></a>版本发布</h3><p>如果需要全部通过 <code>Project</code> 形式构建<strong>版本发布</strong>,只需添加动态参数 <code>isAllDebug=true</code> ，比如：</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAllDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
-<p>同样的可以添加更多的模块参数,来表示某些模块通过 <code>Project</code> 形式构建，比如：</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAppmgrDebug=<span class="literal">true</span> -PisJunkDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
-<blockquote>
-<p>注意: 默认都是以引入<code>aar</code> 形式构建(除<strong>SpaceBase</strong>),所以如果不添加参数,需要及时更新<code>aar</code></p>
-</blockquote>
-<h3 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h3><h4 id="2017-4-21-优化Gradle编译速度，最快3s。"><a href="#2017-4-21-优化Gradle编译速度，最快3s。" class="headerlink" title="2017/4/21 优化Gradle编译速度，最快3s。"></a>2017/4/21 优化Gradle编译速度，最快3s。</h4><blockquote>
-<p>1、修改<strong><code>isAllDebug</code></strong> 作用域，由原存放在<code>module.properties</code> 修改存放在<code>gradle.properties</code>中。<br>2、可选模块<strong>include</strong>，只有在<code>module.properties</code>配置文件中开关为<strong>true</strong> 的模块，才会被Android Studio 所<strong>include</strong>。<br>3、新增<code>task</code> 耗时监听，方便查看耗时<code>task</code>，在<em>Gradle Console</em> 中输出。<br>4、区分测试开发输出，新增<strong><code>dev</code></strong> <code>productFlavors</code>,同时关闭一些不用的<code>productFlavors</code>，其中<strong><code>dev</code></strong> 用于测试Jenkins 输出apk <code>flavors</code>，<strong><code>buildVersion</code></strong> 用于研发本地输出apk，<strong>minSdkVersion=21</strong>，关闭<strong>fabric</strong> 在<strong><code>buildVersion</code></strong> 中上报初始化，同时也优化了其他模块的依赖。<br>5、本地默认只有<strong><code>buildVersion</code></strong><code>flavors</code>，只有在<code>isAllDebug=true</code>的情况，才会开启其他的<code>flavors</code>。以便获得更好的编译体验。<strong>还有修改完gradle配置文件后记得点build sync<img src="/images/toolbar-sync-gradle.png" alt="Alt text">进行同步一下。</strong></p>
-</blockquote>
-<h4 id="2017-5-27-添加自动合并多语言task"><a href="#2017-5-27-添加自动合并多语言task" class="headerlink" title="2017/5/27  添加自动合并多语言task"></a>2017/5/27  添加自动合并多语言task</h4><blockquote>
-<p>1 、使用<code>Python</code>脚本自动化合入多语言的<code>task</code>，所以在使用前需要有<code>Python</code>环境，相应代码块如下：</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">task mergeLanguage(<span class="built_in">type</span>: Exec) &#123;</div><div class="line">    workingDir <span class="string">'./'</span></div><div class="line">    <span class="built_in">command</span>Line <span class="string">"python"</span>, <span class="string">"merge_strs.py"</span>,</div><div class="line"><span class="string">"/home/silver/ssd/AndroidStudioProjects/cleaner_module/spaceplus_android/junk/src/main/res/"</span>,</div><div class="line">            <span class="string">"/home/silver/桌面/清理缓存0502-多语言/"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>其中第一个参数是需要添入多语言模块文件目录，第二个参数是存放多语言文件目录。修改参数 执行<strong><code>mergeLanguage</code></strong> <code>task</code>即可合并多语言。<br><img src="/images/2017-05-27 19:26:37屏幕截图.png" alt="Alt text"></p>
-<h4 id="2017-5-31-Auto-Update-Librarys-AAR"><a href="#2017-5-31-Auto-Update-Librarys-AAR" class="headerlink" title="2017/5/31  Auto Update Librarys AAR"></a>2017/5/31  Auto Update Librarys AAR</h4><blockquote>
-<p>1 、<strong><code>quartz-robot</code></strong>会在<strong>每周一至周五(8,12,16,20h)</strong>准时自动更新<code>aar</code>到git repos。</p>
-</blockquote>
-<h4 id="2017-5-1-更新说明"><a href="#2017-5-1-更新说明" class="headerlink" title="2017/5/1  更新说明"></a>2017/5/1  更新说明</h4><p>以上是模块化后解决过渡时期编译速度慢,方便开发调试等各种便利的方案,各位研发大拿体验<br>下,感受如丝般顺滑,如有问题及时沟通。</p>
+    <content type="html"><![CDATA[<p>为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。</p>
+<h3 id="版本命名规范"><a href="#版本命名规范" class="headerlink" title="版本命名规范"></a>版本命名规范</h3><p>软件版本号由四部分组成，第一个1为主版本号，第二个1为子版本号，第三个1为阶段版本号，第四部分为日期版本号加希腊字母版本号，希腊字母版本号共有5种，分别为：base、alpha、beta、RC、release。例如：1.1.1.051021_beta。</p>
+<h4 id="版本号修改规则"><a href="#版本号修改规则" class="headerlink" title="版本号修改规则"></a>版本号修改规则</h4><p>⑴ 主版本号(1)<br>当功能模块有较大的变动，比如增加多个模块或者整体架构发生变化。此版本号由项目决定是否修改。<br>⑵ 子版本号(1)<br>相对于主版本号而言，子版本号升级对应的是软件功能有一定的增加或变化，比如增加了对权限控制、增加自定义视图等功能。此版本号由项目决定是否修改。<br>⑶ 阶段版本号(1)<br>一般是 Bug 修复或是一些小的变动，要经常发布修订版，时间间隔不限，修复一个严重的bug即可发布一个修订版。此版本号由项目经理决定是否修改。<br>⑷ 日期版本号(051021)<br>用于记录修改项目的当前日期，每天对项目的修改都需要更改日期版本号。此版本号由开发人员决定是否修改。<br>⑸ 希腊字母版本号(beta)<br>此版本号用于标注当前版本的软件处于哪个开发阶段，当软件进入到另一个阶段时需要修改此版本号。此版本号由项目决定是否修改。</p>
+<h4 id="软件版本阶段说明"><a href="#软件版本阶段说明" class="headerlink" title="软件版本阶段说明"></a>软件版本阶段说明</h4><p>⑴ Base：<br>此版本表示该软件仅仅是一个假页面链接，通常包括所有的功能和页面布局，但是页面中的功能都没有做完整的实现，只是做为整体网站的一个基础架构。<br>⑵ α（Alpha）版：内测版。<br>软件的初级版本，表示该软件在此阶段以实现软件功能为主，通常只在软件开发者 内部交流，或者专业测试人员测试用，一般而言，该版本软件的Bug较多，需要继续修改，是测试版本。测试人员提交Bug经开发人员修改确认之后，发布到测试网址让测试人员测试，此时可将软件版本标注为alpha版。<br>⑶ β（Beta）版：公测版。<br>该版本相对于α版已有了很大的改进，消除了严重的错误，但还是存在着一些缺陷，需要经过多次测试来进一步消除，此版本主要的修改对像是软件的UI，供专业爱好者大规模测试用。<br>⑷ RC 版：<br>是 Release Candidate 的缩写，意思是发布倒计时，候选版本，该版本已经相当成熟了，完成全部功能并清除大部分的BUG，基本上不存在导致错误的BUG，与即将发行的正式版相差无几。<br>⑷ Release 版：<br>该版本意味“最终版本”，在前面版本的一系列测试版之后，终归会有一个正式版本，是最终交付用户使用的一个版本。该版本有时也称为标准版。一般情况下，Release不会以单词形式出现在软件封面上，取而代之的是符号(R)。</p>
+<h4 id="版本号修改举例说明"><a href="#版本号修改举例说明" class="headerlink" title="版本号修改举例说明"></a>版本号修改举例说明</h4><p>比如版本号为：1.0.0.0321_alpha ，此时为内部测试阶段<br>⑴ 开发人员修复了测试人员提交的bug并经测试人员测试验证关闭bug之后，发布到外网时，此时就进入了软件的下一个阶段，版本号可改为：1.0.0.0321_beta ，如当前日期跟上一个版本号的日期不一样，版本号可改为：1.0.0.0322_beta。<br>⑵ 如果修复了一些重大Bug 并按照流程发布到外网时就可发布一个修订版，如1.0.1.0322_beta，日期为发布的当前日期。<br>⑶ 如果对软件进行了一些功能上的改进或增强，进行了一些局部变动的时候要修改次版本号，如：1.1.0.0322_beta（上一级有变动时，下级要归零）。<br>⑷ 当功能模块有较大变动，增加模块或整体架构发生变化时要修改主版本号，如新增加了退款功能，则版本号要改为：2.0.0.0322_beta 。<br>⑸ 紧急情况：如果bug比较紧急可跳过一般流程，由开发人员尽快修复bug，测试确认之后直接发布该版本的beta版。</p>
+<h4 id="APK-文件命名"><a href="#APK-文件命名" class="headerlink" title="APK 文件命名"></a>APK 文件命名</h4><p>appName_版本号，即中间用“下划线”分割。</p>
+<h2 id="持续集成流程"><a href="#持续集成流程" class="headerlink" title="持续集成流程"></a>持续集成流程</h2><p>引用自百科的话来说，持续集成是一种软件开发实践，即团队开发成员经常集成它们的工作，通过每个成员每天至少集成一次，也就意味着每天可能会发生多次集成。每次集成都通过自动化的构建（包括编译，发布，自动化测试）来验证，从而尽早地发现集成错误。</p>
+<h2 id="项目自动化流程"><a href="#项目自动化流程" class="headerlink" title="项目自动化流程"></a>项目自动化流程</h2><p>在没有自动化的开发过程中，很多事就需要我们人为去做，那就增长我们的时间成本，而且难免会有疏忽的一些问题，比如某个配置文件忘改了，哪个版本出问题，代码的集成，重复构建等一些耗时且易于犯错的问题。</p>
+<p>于是我们引入一些自动化的Java构建工具：</p>
+<h3 id="Apache-Ant"><a href="#Apache-Ant" class="headerlink" title="Apache Ant"></a>Apache Ant</h3><p>Apache Ant，是一个将软件编译、测试、部署等步骤联系在一起加以自动化的一个工具，大多用于Java环境中的软件开发。由Apache软件基金会所提供。默认情况下，它的buildfile(XML文件)名为build.xml。每一个buildfile含有一个<project>和至少一个预设的<target>，这些targets包含许多task elements。每一个task element有一个用来被参考的id，此id必须是唯一的</target></project></p>
+<p>build.xml 示例：<br><figure class="highlight plain"><figcaption><span>version="1.0" ?> </span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;project name=&quot;Hello World&quot; default=&quot;execute&quot;&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;init&quot;&gt;</div><div class="line">		&lt;mkdir dir=&quot;build/classes&quot;/&gt;</div><div class="line">		&lt;mkdir dir=&quot;dist&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	&lt;target name=&quot;compile&quot; depends=&quot;init&quot;&gt;</div><div class="line">		&lt;javac srcdir=&quot;src&quot; destdir=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	</div><div class="line">	&lt;target name=&quot;compress&quot; depends=&quot;compile&quot;&gt;</div><div class="line">	        &lt;jar destfile=&quot;dist/HelloWorld.jar&quot; basedir=&quot;build/classes&quot;  /&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;execute&quot; depends=&quot;compile&quot;&gt;</div><div class="line">		&lt;java classname=&quot;HelloWorld&quot; classpath=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure></p>
+<h3 id="Apache-Maven"><a href="#Apache-Maven" class="headerlink" title="Apache Maven"></a>Apache Maven</h3><p>Apache Maven，是一个软件（特别是Java软件）项目管理及自动构建工具，由Apache软件基金会所提供。基于项目对象模型（缩写：POM）概念，Maven利用一个中央信息片断能管理一个项目的构建、报告和文档等步骤。<br>Maven也可被用于构建和管理各种项目，例如C#，Ruby，Scala和其他语言编写的项目。Maven曾是Jakarta项目的子项目，现为由Apache软件基金会主持的独立Apache项目</p>
+<p>Maven项目使用项目对象模型（Project Object Model，POM）来配置。<br>项目对象模型存储在名为 pom.xml 的文件中。<br>以下是一个简单的示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">  &lt;!-- model version is always 4.0.0 for Maven 2.x POMs --&gt;</div><div class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</div><div class="line">  </div><div class="line">  &lt;!-- project coordinates, i.e. a group of values which</div><div class="line">       uniquely identify this project --&gt;</div><div class="line">  </div><div class="line">  &lt;groupId&gt;com.mycompany.app&lt;/groupId&gt;</div><div class="line">  &lt;artifactId&gt;my-app&lt;/artifactId&gt;</div><div class="line">  &lt;version&gt;1.0&lt;/version&gt;</div><div class="line"></div><div class="line">  &lt;!-- library dependencies --&gt;</div><div class="line">  </div><div class="line">  &lt;dependencies&gt;</div><div class="line">    &lt;dependency&gt;</div><div class="line">    </div><div class="line">      &lt;!-- coordinates of the required library --&gt;</div><div class="line">      </div><div class="line">      &lt;groupId&gt;junit&lt;/groupId&gt;</div><div class="line">      &lt;artifactId&gt;junit&lt;/artifactId&gt;</div><div class="line">      &lt;version&gt;3.8.1&lt;/version&gt;</div><div class="line">      </div><div class="line">      &lt;!-- this dependency is only used for running and compiling tests --&gt;</div><div class="line">      </div><div class="line">      &lt;scope&gt;test&lt;/scope&gt;</div><div class="line">      </div><div class="line">    &lt;/dependency&gt;</div><div class="line">  &lt;/dependencies&gt;</div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure>
+<p>引自<a href="https://zh.wikipedia.org/wiki/Apache_Maven介绍" target="_blank" rel="external">https://zh.wikipedia.org/wiki/Apache_Maven介绍</a></p>
+<p>目前JavaEE使用Apache_Maven的比较多，而我们选择了Android Studio 内置的封装布署工具，拥有以上工具中优秀特性并且更棒的工具Gradle。</p>
+<h3 id="Gradle"><a href="#Gradle" class="headerlink" title="Gradle"></a>Gradle</h3><p>Gradle是一个基于Apache Ant和Apache Maven概念的项目自动化建构工具。它使用一种基于Groovy的特定领域语言来声明项目设置，而不是传统的XML。[2]<br>当前其支持的语言限于Java、Groovy和Scala[3]，计划未来将支持更多的语言。</p>
+<h4 id="使用-Gradle-的优势"><a href="#使用-Gradle-的优势" class="headerlink" title="使用 Gradle 的优势"></a>使用 Gradle 的优势</h4><pre><code>•    自动处理包相依关系 - 取自 Maven Repos 的概念
+•    自动处理布署问题 - 取自 Ant 的概念
+•    条件判断写法直觉 - 使用 Groovy 语言
+</code></pre><p>过去 Java 开发者常用 Maven 和 Ant 等工具进行封装布署的自动化，或是两者兼用，不过这两个包彼此有优缺点，如果频繁改变相依包版本，使用 Ant 相当麻烦，如果琐碎工作很多，Maven 功能不足，而且两者都使用 XML 描述，相当不利于设计 if、switch 等判段式，即使写了可读性也不佳，而 Gradle 改良了过去 Maven、Ant 带给开发者的问题，至今也成为 Android Studio 内置的封装布署工具。</p>
+<h2 id="代码检测流程"><a href="#代码检测流程" class="headerlink" title="代码检测流程"></a>代码检测流程</h2><p>在我们日常开发过程中，使用静态代码检查工具自动进行代码检查，对软件开发者来讲是有利的事情，因为这些工具相比人工方式，能更快捷的查找软件存在的缺陷。但是，在很多情况下，这些工具并没用被开发者所广泛采用。</p>
+<p>尽管在我们开发中编译和测试的结果给出了一些产品健康状态的基本报告，但没有提供代码质量的基本报告，也没有任何地方可以查看到我们开发代码质量，产品质量的趋势，来帮助我们发现问题提升产品质量，我们公司内部构建平台会对代码质量，产品质量做一些分析，来推进产品的前进。</p>
+<h3 id="代码覆盖率"><a href="#代码覆盖率" class="headerlink" title="代码覆盖率"></a>代码覆盖率</h3><p>在Java中有很多免费和商业的代码覆盖率工具，大多数这些工具都可以集成在我们的构建平台上。这里我们列举几个Gradle比较流行的代码覆盖率工具。</p>
+<h4 id="Cobertura"><a href="#Cobertura" class="headerlink" title="Cobertura"></a>Cobertura</h4><p><a href="http://cobertura.sourceforge.net/" target="_blank" rel="external">Cobertura</a> 是一种开源工具，它通过检测基本的代码，并观察在测试包运行时执行了哪些代码和没有执行哪些代码，来测量测试覆盖率。除了找出未测试到的代码并发现 bug 外，Cobertura 还可以通过标记无用的、执行不到的代码来优化代码。</p>
+<h4 id="Emma"><a href="#Emma" class="headerlink" title="Emma"></a>Emma</h4><p><a href="http://emma.sourceforge.net/" target="_blank" rel="external">EMMA</a> 是一个开源、面向 Java 程序测试覆盖率收集和报告工具。它通过对编译后的 Java 字节码文件进行插装，在测试执行过程中收集覆盖率信息，并通过支持多种报表格式对覆盖率结果进行展示。 EMMA 所使用的字节码插装不仅保证 EMMA 不会给源代码带来“脏代码”，还确保 EMMA 摆脱了源代码的束缚，这一特点使 EMMA 应用于功能测试成为了可能。</p>
+<h4 id="Clover"><a href="#Clover" class="headerlink" title="Clover"></a>Clover</h4><p><a href="https://www.atlassian.com/software/clover" target="_blank" rel="external">Clover</a>是一款量度单元测试代码覆盖率（Code Coverage）的软件，用于检测Java单元测试是否完整覆盖代码中所有可能的路径，能够快速、准确地检测测试是否覆盖代码中的所有路径。</p>
+<p>团队成员通过Code review来发现架构、逻辑设计方面、安全缺漏和一些潜在的bug，但随着项目业务的增长，Code review的过程难免也会疏忽很多潜在的bug等问题。</p>
+<p>在我们工作中还有一些静态代码检查工具如<a href="http://checkstyle.sourceforge.net/" target="_blank" rel="external">Checkstyle</a>、<a href="http://findbugs.sourceforge.net/" target="_blank" rel="external">Findbugs</a>、<a href="http://pmd.sourceforge.net/" target="_blank" rel="external">PMD</a>等，将他们集成在我们的构建平台上，并成为我们构建流程中的一步骤。</p>
+<h2 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h2><p>对于开发流程，在不同的项目团队中，开发流程不太一样，但大致可为：<br>每天下班前RD必须把今天工作代码全部提交到Git上。</p>
+<p>####</p>
+<ul>
+<li>使用Jenkins CI ，每天定期会从Git上拉去最新代码，自定编译构建生成APK发出邮件，二维码等到产品维护人员的邮箱，并且将应用更新至公司内测分发平台。</li>
+<li>编译构建成功，进行自动化测试、单元测试覆盖率（Cobertura、Emma或Clover等生成）、功能测试结果（如Selenium）、静态代码检查结果（Checkstyle、Findbugs、PMD等）</li>
+<li>测试人员对产品进行test，测试中若有紧急问题也可以让开发人员可以随时修改提交代码。并且立即重新构建测试安装包。</li>
+</ul>
+<h2 id="打包和发布流程"><a href="#打包和发布流程" class="headerlink" title="打包和发布流程"></a>打包和发布流程</h2><p>以上版本管理发布流程只是参考指南，而不是具体规则。你可以根据自己实际情况来选择适合自己的版本管理发布流程或微调来满足自己的需要。</p>
 ]]></content>
     
     <summary type="html">
     
-      &lt;p&gt;经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 &lt;strong&gt;commit&lt;/strong&gt;：&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;http://stash.lab.
+      &lt;p&gt;为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。&lt;/p&gt;
+&lt;h3 id=&quot;版本命名规范&quot;&gt;&lt;a href=&quot;#版本命名
     
     </summary>
     
       <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>app安全之Apk完整性校验</title>
-    <link href="http://fushenghua.github.io/archives/a72a1e10.html"/>
-    <id>http://fushenghua.github.io/archives/a72a1e10.html</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.638Z</updated>
-    
-    <content type="html"><![CDATA[<p>APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。</p>
-<h2 id="一、认识APK安全性"><a href="#一、认识APK安全性" class="headerlink" title="一、认识APK安全性"></a>一、认识APK安全性</h2><h3 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h3><p>可以通过修改客户端文件篡改客户端行为。攻击者可以让客户端显示自己制作的钓鱼网站，偷取用户信息</p>
-<h2 id="二、完整性校验原理"><a href="#二、完整性校验原理" class="headerlink" title="二、完整性校验原理"></a>二、完整性校验原理</h2><h3 id="完整性校验的几种方式"><a href="#完整性校验的几种方式" class="headerlink" title="完整性校验的几种方式"></a>完整性校验的几种方式</h3><ol>
-<li>CRC校验</li>
-<li>MD5值校验</li>
-<li>SHA1值校验</li>
-</ol>
-<h3 id="常见android完整性检测"><a href="#常见android完整性检测" class="headerlink" title="常见android完整性检测"></a>常见android完整性检测</h3><ol>
-<li>检测签名</li>
-<li>校验classes.dex</li>
-<li>校验整个apk</li>
-</ol>
-<h4 id="检测签名"><a href="#检测签名" class="headerlink" title="检测签名"></a>检测签名</h4><p>Android对每一个Apk文件都会进行签名，在Apk文件安装时，系统会对其签名信息进行比对，判断程序的完整性，从而决定该Apk文件是否可以安装，在一定程度上达到安全的目的。</p>
-<ol>
-<li>MANIFEST.MF：这是摘要文件。程序遍历Apk包中的所有文件(entry)，对非文件夹非签名文件的文件，逐个用SHA1生成摘要信息，再用Base64进行编码。如果你改变了apk包中的文件，那么在apk安装校验时，改变后的文件摘要信息与MANIFEST.MF的检验信息不同，于是程序就不能成功安装。</li>
-<li>CERT.SF：这是对摘要的签名文件。对前一步生成的MANIFEST.MF，使用SHA1-RSA算法，用开发者的私钥进行签名。在安装时只能使用公钥才能解密它。解密之后，将它与未加密的摘要信息（即，MANIFEST.MF文件）进行对比，如果相符，则表明内容没有被异常修改。</li>
-<li>CERT.RSA文件中保存了公钥、所采用的加密算法等信息。系统对签名文件进行解密，所需要的公钥就是从这个文件里取出来的。<br>这三个文件在apk META-INFO文件夹</li>
-</ol>
-<p>结论：从上面的总结可以看出，META-INFO里面的说那个文件环环相扣，从而保证Android程序的安全性。（只是防止开发者的程序不被攻击者修改，如果开发者的公私钥对对攻击者得到或者开发者开发出攻击程序，Android系统都无法检测出来。）</p>
-<p>虽然系统通过以上方式可以防止，但如果是root的手机就不安全了，建议通过服务器来校验，</p>
-<h4 id="校验classes-dex"><a href="#校验classes-dex" class="headerlink" title="校验classes.dex"></a>校验classes.dex</h4><p><strong>用crc32对classes.dex文件的完整性进行校验</strong></p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"> </div><div class="line"><span class="meta">@Override</span></div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(BundlesavedInstanceState)</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line"> </div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line"> </div><div class="line">    String apkPath = getPackageCodePath();</div><div class="line"> </div><div class="line">    Long dexCrc = Long.parseLong(getString(R.string.classesdex_crc));</div><div class="line">    <span class="comment">//建议将dexCrc值放在服务器做校验</span></div><div class="line"> </div><div class="line">    <span class="keyword">try</span></div><div class="line"> </div><div class="line">    &#123;</div><div class="line"> </div><div class="line">        ZipFile zipfile = <span class="keyword">new</span> ZipFile(apkPath);</div><div class="line"> </div><div class="line">        ZipEntry dexentry = zipfile.getEntry(<span class="string">"classes.dex"</span>);</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"classes.dexcrc="</span>+dexentry.getCrc());</div><div class="line"> </div><div class="line">        <span class="keyword">if</span>(dexentry.getCrc() != dexCrc)&#123;</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"Dexhas been modified!"</span>);</div><div class="line"> </div><div class="line">        &#125;<span class="keyword">else</span>&#123;</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"Dex hasn't been modified!"</span>);</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"> </div><div class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line"> </div><div class="line">     <span class="comment">// TODO Auto-generated catch block</span></div><div class="line"> </div><div class="line">     e.printStackTrace();</div><div class="line"> </div><div class="line">    &#125;</div><div class="line"> </div><div class="line">   &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="校验整个apk"><a href="#校验整个apk" class="headerlink" title="校验整个apk"></a>校验整个apk</h4><p>用哈希值对整个apk完整性进行校验</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"> </div><div class="line"><span class="meta">@Override</span></div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(BundlesavedInstanceState)</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line"> </div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line"> </div><div class="line">   </div><div class="line"> String apkPath = getPackageCodePath();</div><div class="line"> </div><div class="line">     MessageDigest msgDigest = <span class="keyword">null</span>;</div><div class="line"> </div><div class="line">     <span class="keyword">try</span> &#123;</div><div class="line"> </div><div class="line">        msgDigest = MessageDigest.getInstance(<span class="string">"SHA-1"</span>);</div><div class="line"> </div><div class="line">        <span class="keyword">byte</span>[] bytes = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span>];</div><div class="line"> </div><div class="line">        <span class="keyword">int</span> byteCount;</div><div class="line"> </div><div class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(apkPath));</div><div class="line"> </div><div class="line">        <span class="keyword">while</span> ((byteCount = fis.read(bytes)) &gt; <span class="number">0</span>)</div><div class="line"> </div><div class="line">        &#123;</div><div class="line"> </div><div class="line">            msgDigest.update(bytes, <span class="number">0</span>, byteCount);</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"> </div><div class="line">        BigInteger bi = <span class="keyword">new</span> BigInteger(<span class="number">1</span>, msgDigest.digest());</div><div class="line"> </div><div class="line">        String sha = bi.toString(<span class="number">16</span>);</div><div class="line"> </div><div class="line">        fis.close();</div><div class="line"> </div><div class="line">        <span class="comment">//这里添加从服务器中获取哈希值然后进行对比校验</span></div><div class="line"> </div><div class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line"> </div><div class="line">            e.printStackTrace();</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"></div><div class="line"> </div><div class="line">   &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>我们将把crc值和sha1值放在服务器做处理，做个记录。</p>
-<p>更多Android 之美，请阅读<a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external">《Android 之美 从0到1 – 高手之路》</a>系列文章</p>
-<blockquote>
-<p>水平有限，若有错漏，欢迎指正，批评，如需转载，请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a>，谢谢！</p>
-<p>作者：fuchenxuan<br>出处：<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a><br>欢迎访问我的个人站点：<a href="http://fuchenxuan.cn" target="_blank" rel="external">http://fuchenxuan.cn</a><br>转载请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a></p>
-</blockquote>
-<p><a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external"><img src="http://img.blog.csdn.net/20160608234402229" alt="Android 之美 从0到1"></a></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。&lt;/p&gt;
-&lt;h2 id=&quot;一、认识APK安全性&quot;&gt;&lt;a href=&quot;#一、认识APK安全性&quot; class=&quot;headerlink&quot; title=&quot;一、认识AP
-    
-    </summary>
-    
-      <category term="安全" scheme="http://fushenghua.github.io/categories/%E5%AE%89%E5%85%A8/"/>
     
     
   </entry>
@@ -774,6 +753,54 @@
   </entry>
   
   <entry>
+    <title>ViewStub原理分析</title>
+    <link href="http://fushenghua.github.io/archives/235d5e38.html"/>
+    <id>http://fushenghua.github.io/archives/235d5e38.html</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-20T05:25:03.646Z</updated>
+    
+    <content type="html"><![CDATA[<p>ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 <code>inflate()</code> 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调用了 <code>setVisibility(int)</code> 或 <code>inflate()</code>。</p>
+<p>我们先来看看构造方法：</p>
+<p>非常简单的两步，就能做到View的懒加载，非常方便，其原因是什么呢？</p>
+<p>接下去深入源码分析一下。</p>
+<h2 id="构造方法分析"><a href="#构造方法分析" class="headerlink" title="构造方法分析"></a>构造方法分析</h2><p>首先分析一下构造方法，了解一下它是如何创建的。</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, @LayoutRes <span class="keyword">int</span> layoutResource)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, <span class="keyword">null</span>);</div><div class="line">    <span class="comment">// StubbedView的资源id</span></div><div class="line">    mLayoutResource = layoutResource;</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, attrs, <span class="number">0</span>);</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, attrs, defStyleAttr, <span class="number">0</span>);</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr, <span class="keyword">int</span> defStyleRes)</span> </span>&#123;</div><div class="line">    <span class="keyword">super</span>(context);</div><div class="line">    <span class="keyword">final</span> TypedArray a = context.obtainStyledAttributes(attrs,</div><div class="line">            R.styleable.ViewStub, defStyleAttr, defStyleRes);</div><div class="line">    <span class="comment">// mInflatedId 存储StubbedView的id</span></div><div class="line">    mInflatedId = a.getResourceId(R.styleable.ViewStub_inflatedId, NO_ID);</div><div class="line">    <span class="comment">// mLayoutResource 为StubbedView的resourceId</span></div><div class="line">    mLayoutResource = a.getResourceId(R.styleable.ViewStub_layout, <span class="number">0</span>);</div><div class="line">    <span class="comment">// viewStub 自己的id</span></div><div class="line">    mID = a.getResourceId(R.styleable.ViewStub_id, NO_ID);</div><div class="line">    a.recycle();</div><div class="line">    <span class="comment">// 设置为不可见 </span></div><div class="line">    setVisibility(GONE);</div><div class="line">    <span class="comment">// 不绘制本身</span></div><div class="line">    setWillNotDraw(<span class="keyword">true</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>ViewStub</code>在构造方法里不仅仅获取赋值属性，比较关键的是，还 默认将ViewStub自己设置为不可见（跳过onMeasure与onLayout），不绘制。</p>
+<p>这里有一个要点：<strong>在XML里配置ViewStub的可见性是没有用的</strong>。</p>
+<h2 id="测量-与-绘制"><a href="#测量-与-绘制" class="headerlink" title="测量 与 绘制"></a>测量 与 绘制</h2><figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="variable">@Override</span></div><div class="line">protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) &#123;</div><div class="line">    <span class="comment">// 写死的宽高为0</span></div><div class="line">    setMeasuredDimension(0, 0);</div><div class="line">&#125;</div><div class="line"><span class="variable">@Override</span></div><div class="line">public void draw(Canvas canvas) &#123;</div><div class="line">    <span class="comment">//空方法，不draw任何东西</span></div><div class="line">&#125;</div><div class="line"><span class="variable">@Override</span></div><div class="line">protected void dispatchDraw(Canvas canvas) &#123;</div><div class="line">    <span class="comment">//空方法，不draw任何东西</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="inflate-方法分析"><a href="#inflate-方法分析" class="headerlink" title="inflate()方法分析"></a>inflate()方法分析</h2><p>之前在简单教程里有提到 <code>inflate</code>方法，它是<code>ViewStub</code>实现懒加载的最为关键的方法，接下去去分析一下。</p>
+<figure class="highlight zephir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 返回 StubbedView</span></div><div class="line"><span class="keyword">public</span> View inflate() &#123;</div><div class="line">    <span class="comment">// 尝试去获取 viewParent 第一次调用的时候不为null，而后则为null</span></div><div class="line">    <span class="keyword">final</span> ViewParent viewParent = getParent();</div><div class="line">    <span class="comment">// 当 viewParent 不为null的时候</span></div><div class="line">    <span class="keyword">if</span> (viewParent != <span class="keyword">null</span> &amp;&amp; viewParent <span class="keyword">instanceof</span> ViewGroup) &#123;</div><div class="line">        <span class="comment">// 我们在xml里配置的layout的资源id 如果id无效，则会报错</span></div><div class="line">        <span class="keyword">if</span> (mLayoutResource != <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">final</span> ViewGroup <span class="keyword">parent</span> = (ViewGroup) viewParent;</div><div class="line">            <span class="comment">// 实例化 LayoutInflater</span></div><div class="line">            <span class="keyword">final</span> LayoutInflater factory;</div><div class="line">            <span class="keyword">if</span> (mInflater != <span class="keyword">null</span>) &#123;</div><div class="line">                factory = mInflater;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                factory = LayoutInflater.from(mContext);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// inflate，StubbedView在这里被实例化</span></div><div class="line">            <span class="keyword">final</span> View view = factory.inflate(mLayoutResource, <span class="keyword">parent</span>,</div><div class="line">                    <span class="keyword">false</span>);</div><div class="line">            <span class="comment">// 可以看到，这里如果我们在XML里写了inflateId，则会设置给StubbedView</span></div><div class="line">            <span class="keyword">if</span> (mInflatedId != NO_ID) &#123;</div><div class="line">                view.setId(mInflatedId);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 注意：这两步步 ViewSutb 找到自己的位置，并从父View中移除了自己</span></div><div class="line">            <span class="comment">// 这会导致 以后调用inflate的时候 再也获取不到 viewParent了</span></div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> index = <span class="keyword">parent</span>.indexOfChild(this);</div><div class="line">            <span class="keyword">parent</span>.removeViewInLayout(this);</div><div class="line">            <span class="comment">// 拿出ViewStub的LayoutParamas，不为null 则会赋值给 StubbedView</span></div><div class="line">            <span class="keyword">final</span> ViewGroup.LayoutParams layoutParams = getLayoutParams();</div><div class="line">            <span class="comment">// 把 StubbedView 添加到ViewStub的父View里</span></div><div class="line">            <span class="keyword">if</span> (layoutParams != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">parent</span>.addView(view, index, layoutParams);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">parent</span>.addView(view, index);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">//使用一个弱引用来保存StubbedView</span></div><div class="line">            mInflatedViewRef = <span class="keyword">new</span> WeakReference(view);</div><div class="line">            <span class="comment">//回调listener</span></div><div class="line">            <span class="keyword">if</span> (mInflateListener != <span class="keyword">null</span>) &#123;</div><div class="line">                mInflateListener.onInflate(this, view);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 返回 StubbedView</span></div><div class="line">            <span class="keyword">return</span> view;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">// id无效，则throw一个 IllegalArgumentException</span></div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"ViewStub must have a valid layoutResource"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">// inflate被调用一次后 就没有了ViewParent，就会报这个错</span></div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"ViewStub must have a non-null ViewGroup viewParent"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我在每行代码上都加上了详细的注释，主要的操作就是把StubbedView给Inflate出来，然后把它放到自己的位置，代码非常清晰，非常简单。</p>
+<p>总结来说，其实<code>inflate</code>方法是做了一个『偷梁换柱』的操作，把 <code>StubbedView</code>动态的添加到自己原来的位置上，也因此实现了懒加载功能。</p>
+<p>这里还需要注意的是 <strong>ViewStub 必须要有一个 Parent，即必须要有父视图！</strong><br>另外值得一提的是：ViewStub还重写了View的<code>setVisibility</code>方法，让我们来分析一下：</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setVisibility</span><span class="params">(<span class="keyword">int</span> visibility)</span> </span>&#123;</div><div class="line">    <span class="comment">// mInflatedViewRef 保存了 StubbedView还记得吗？ inflate过后它就不是null了 </span></div><div class="line">    <span class="keyword">if</span> (mInflatedViewRef != <span class="keyword">null</span>) &#123;</div><div class="line">        View view = mInflatedViewRef.get();</div><div class="line">        <span class="comment">// 操作 StubbedView</span></div><div class="line">        <span class="keyword">if</span> (view != <span class="keyword">null</span>) &#123;</div><div class="line">            view.setVisibility(visibility);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"setVisibility called on un-referenced view"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">// 操作ViewStub自己，构造方法里的GONE记得么？</span></div><div class="line">        <span class="keyword">super</span>.setVisibility(visibility);</div><div class="line">        <span class="comment">// 如果是 VISIBLE INVISIBLE 则会去调用 inflate方法！！！！</span></div><div class="line">        <span class="keyword">if</span> (visibility == VISIBLE || visibility == INVISIBLE) &#123;</div><div class="line">            inflate();<span class="comment">//注意这一行代码</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看到<code>setVisibility</code>方法中也可能会调用<code>inflate()</code>方法，所以当我们想让StubbedView被加载进来，而我们不需要StubbedView的实例的时候，可以用<code>setVisibility（View.VISIBLE）</code>。</p>
+<p>不过需要注意的是 不要再接着调用<code>inflate</code>方法，因为此时的 ViewStub 已经被移除了！</p>
+<h2 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h2><ol>
+<li>使用ViewStub，必须指定layoutResourceId(必须是布局文件)</li>
+<li>在XML里配置ViewStub的可见性是没有用的</li>
+<li>ViewStub 主要原理藏在<code>inflate()</code>方法中，是它把真正要加载的View给加载了进来</li>
+<li><code>inflate()</code>方法只能调用一次</li>
+<li>ViewStub调用<code>inflate()</code>后就不要再用它了（让它功成身退！）</li>
+<li>要小心<code>setVisibility</code>方法，因为它可能会调用<code>inflate()</code></li>
+<li>在XML里给ViewStub设置的LayoutParamas(宽高margin等)会传递给StubbedView,所以我们如果要控制StubbedView的LayoutParamas，则需要写在ViewStub里而不是StubbedView！</li>
+<li>期待补充</li>
+</ol>
+<p>好了，主要的都分析完了，知道原理之后就可以自己动手写一个加强版的 ViewStub </p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 &lt;code&gt;inflate()&lt;/code&gt; 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调
+    
+    </summary>
+    
+      <category term="性能优化" scheme="http://fushenghua.github.io/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>EventBus解析</title>
     <link href="http://fushenghua.github.io/archives/5f794a45.html"/>
     <id>http://fushenghua.github.io/archives/5f794a45.html</id>
@@ -885,55 +912,56 @@
   </entry>
   
   <entry>
-    <title>版本管理发布流程</title>
-    <link href="http://fushenghua.github.io/archives/375726b.html"/>
-    <id>http://fushenghua.github.io/archives/375726b.html</id>
+    <title>优化Gradle 依赖使用方式</title>
+    <link href="http://fushenghua.github.io/archives/c66eed35.html"/>
+    <id>http://fushenghua.github.io/archives/c66eed35.html</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.655Z</updated>
+    <updated>2018-04-20T05:25:03.653Z</updated>
     
-    <content type="html"><![CDATA[<p>为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。</p>
-<h3 id="版本命名规范"><a href="#版本命名规范" class="headerlink" title="版本命名规范"></a>版本命名规范</h3><p>软件版本号由四部分组成，第一个1为主版本号，第二个1为子版本号，第三个1为阶段版本号，第四部分为日期版本号加希腊字母版本号，希腊字母版本号共有5种，分别为：base、alpha、beta、RC、release。例如：1.1.1.051021_beta。</p>
-<h4 id="版本号修改规则"><a href="#版本号修改规则" class="headerlink" title="版本号修改规则"></a>版本号修改规则</h4><p>⑴ 主版本号(1)<br>当功能模块有较大的变动，比如增加多个模块或者整体架构发生变化。此版本号由项目决定是否修改。<br>⑵ 子版本号(1)<br>相对于主版本号而言，子版本号升级对应的是软件功能有一定的增加或变化，比如增加了对权限控制、增加自定义视图等功能。此版本号由项目决定是否修改。<br>⑶ 阶段版本号(1)<br>一般是 Bug 修复或是一些小的变动，要经常发布修订版，时间间隔不限，修复一个严重的bug即可发布一个修订版。此版本号由项目经理决定是否修改。<br>⑷ 日期版本号(051021)<br>用于记录修改项目的当前日期，每天对项目的修改都需要更改日期版本号。此版本号由开发人员决定是否修改。<br>⑸ 希腊字母版本号(beta)<br>此版本号用于标注当前版本的软件处于哪个开发阶段，当软件进入到另一个阶段时需要修改此版本号。此版本号由项目决定是否修改。</p>
-<h4 id="软件版本阶段说明"><a href="#软件版本阶段说明" class="headerlink" title="软件版本阶段说明"></a>软件版本阶段说明</h4><p>⑴ Base：<br>此版本表示该软件仅仅是一个假页面链接，通常包括所有的功能和页面布局，但是页面中的功能都没有做完整的实现，只是做为整体网站的一个基础架构。<br>⑵ α（Alpha）版：内测版。<br>软件的初级版本，表示该软件在此阶段以实现软件功能为主，通常只在软件开发者 内部交流，或者专业测试人员测试用，一般而言，该版本软件的Bug较多，需要继续修改，是测试版本。测试人员提交Bug经开发人员修改确认之后，发布到测试网址让测试人员测试，此时可将软件版本标注为alpha版。<br>⑶ β（Beta）版：公测版。<br>该版本相对于α版已有了很大的改进，消除了严重的错误，但还是存在着一些缺陷，需要经过多次测试来进一步消除，此版本主要的修改对像是软件的UI，供专业爱好者大规模测试用。<br>⑷ RC 版：<br>是 Release Candidate 的缩写，意思是发布倒计时，候选版本，该版本已经相当成熟了，完成全部功能并清除大部分的BUG，基本上不存在导致错误的BUG，与即将发行的正式版相差无几。<br>⑷ Release 版：<br>该版本意味“最终版本”，在前面版本的一系列测试版之后，终归会有一个正式版本，是最终交付用户使用的一个版本。该版本有时也称为标准版。一般情况下，Release不会以单词形式出现在软件封面上，取而代之的是符号(R)。</p>
-<h4 id="版本号修改举例说明"><a href="#版本号修改举例说明" class="headerlink" title="版本号修改举例说明"></a>版本号修改举例说明</h4><p>比如版本号为：1.0.0.0321_alpha ，此时为内部测试阶段<br>⑴ 开发人员修复了测试人员提交的bug并经测试人员测试验证关闭bug之后，发布到外网时，此时就进入了软件的下一个阶段，版本号可改为：1.0.0.0321_beta ，如当前日期跟上一个版本号的日期不一样，版本号可改为：1.0.0.0322_beta。<br>⑵ 如果修复了一些重大Bug 并按照流程发布到外网时就可发布一个修订版，如1.0.1.0322_beta，日期为发布的当前日期。<br>⑶ 如果对软件进行了一些功能上的改进或增强，进行了一些局部变动的时候要修改次版本号，如：1.1.0.0322_beta（上一级有变动时，下级要归零）。<br>⑷ 当功能模块有较大变动，增加模块或整体架构发生变化时要修改主版本号，如新增加了退款功能，则版本号要改为：2.0.0.0322_beta 。<br>⑸ 紧急情况：如果bug比较紧急可跳过一般流程，由开发人员尽快修复bug，测试确认之后直接发布该版本的beta版。</p>
-<h4 id="APK-文件命名"><a href="#APK-文件命名" class="headerlink" title="APK 文件命名"></a>APK 文件命名</h4><p>appName_版本号，即中间用“下划线”分割。</p>
-<h2 id="持续集成流程"><a href="#持续集成流程" class="headerlink" title="持续集成流程"></a>持续集成流程</h2><p>引用自百科的话来说，持续集成是一种软件开发实践，即团队开发成员经常集成它们的工作，通过每个成员每天至少集成一次，也就意味着每天可能会发生多次集成。每次集成都通过自动化的构建（包括编译，发布，自动化测试）来验证，从而尽早地发现集成错误。</p>
-<h2 id="项目自动化流程"><a href="#项目自动化流程" class="headerlink" title="项目自动化流程"></a>项目自动化流程</h2><p>在没有自动化的开发过程中，很多事就需要我们人为去做，那就增长我们的时间成本，而且难免会有疏忽的一些问题，比如某个配置文件忘改了，哪个版本出问题，代码的集成，重复构建等一些耗时且易于犯错的问题。</p>
-<p>于是我们引入一些自动化的Java构建工具：</p>
-<h3 id="Apache-Ant"><a href="#Apache-Ant" class="headerlink" title="Apache Ant"></a>Apache Ant</h3><p>Apache Ant，是一个将软件编译、测试、部署等步骤联系在一起加以自动化的一个工具，大多用于Java环境中的软件开发。由Apache软件基金会所提供。默认情况下，它的buildfile(XML文件)名为build.xml。每一个buildfile含有一个<project>和至少一个预设的<target>，这些targets包含许多task elements。每一个task element有一个用来被参考的id，此id必须是唯一的</target></project></p>
-<p>build.xml 示例：<br><figure class="highlight plain"><figcaption><span>version="1.0" ?> </span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;project name=&quot;Hello World&quot; default=&quot;execute&quot;&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;init&quot;&gt;</div><div class="line">		&lt;mkdir dir=&quot;build/classes&quot;/&gt;</div><div class="line">		&lt;mkdir dir=&quot;dist&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	&lt;target name=&quot;compile&quot; depends=&quot;init&quot;&gt;</div><div class="line">		&lt;javac srcdir=&quot;src&quot; destdir=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	</div><div class="line">	&lt;target name=&quot;compress&quot; depends=&quot;compile&quot;&gt;</div><div class="line">	        &lt;jar destfile=&quot;dist/HelloWorld.jar&quot; basedir=&quot;build/classes&quot;  /&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;execute&quot; depends=&quot;compile&quot;&gt;</div><div class="line">		&lt;java classname=&quot;HelloWorld&quot; classpath=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure></p>
-<h3 id="Apache-Maven"><a href="#Apache-Maven" class="headerlink" title="Apache Maven"></a>Apache Maven</h3><p>Apache Maven，是一个软件（特别是Java软件）项目管理及自动构建工具，由Apache软件基金会所提供。基于项目对象模型（缩写：POM）概念，Maven利用一个中央信息片断能管理一个项目的构建、报告和文档等步骤。<br>Maven也可被用于构建和管理各种项目，例如C#，Ruby，Scala和其他语言编写的项目。Maven曾是Jakarta项目的子项目，现为由Apache软件基金会主持的独立Apache项目</p>
-<p>Maven项目使用项目对象模型（Project Object Model，POM）来配置。<br>项目对象模型存储在名为 pom.xml 的文件中。<br>以下是一个简单的示例：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">  &lt;!-- model version is always 4.0.0 for Maven 2.x POMs --&gt;</div><div class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</div><div class="line">  </div><div class="line">  &lt;!-- project coordinates, i.e. a group of values which</div><div class="line">       uniquely identify this project --&gt;</div><div class="line">  </div><div class="line">  &lt;groupId&gt;com.mycompany.app&lt;/groupId&gt;</div><div class="line">  &lt;artifactId&gt;my-app&lt;/artifactId&gt;</div><div class="line">  &lt;version&gt;1.0&lt;/version&gt;</div><div class="line"></div><div class="line">  &lt;!-- library dependencies --&gt;</div><div class="line">  </div><div class="line">  &lt;dependencies&gt;</div><div class="line">    &lt;dependency&gt;</div><div class="line">    </div><div class="line">      &lt;!-- coordinates of the required library --&gt;</div><div class="line">      </div><div class="line">      &lt;groupId&gt;junit&lt;/groupId&gt;</div><div class="line">      &lt;artifactId&gt;junit&lt;/artifactId&gt;</div><div class="line">      &lt;version&gt;3.8.1&lt;/version&gt;</div><div class="line">      </div><div class="line">      &lt;!-- this dependency is only used for running and compiling tests --&gt;</div><div class="line">      </div><div class="line">      &lt;scope&gt;test&lt;/scope&gt;</div><div class="line">      </div><div class="line">    &lt;/dependency&gt;</div><div class="line">  &lt;/dependencies&gt;</div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure>
-<p>引自<a href="https://zh.wikipedia.org/wiki/Apache_Maven介绍" target="_blank" rel="external">https://zh.wikipedia.org/wiki/Apache_Maven介绍</a></p>
-<p>目前JavaEE使用Apache_Maven的比较多，而我们选择了Android Studio 内置的封装布署工具，拥有以上工具中优秀特性并且更棒的工具Gradle。</p>
-<h3 id="Gradle"><a href="#Gradle" class="headerlink" title="Gradle"></a>Gradle</h3><p>Gradle是一个基于Apache Ant和Apache Maven概念的项目自动化建构工具。它使用一种基于Groovy的特定领域语言来声明项目设置，而不是传统的XML。[2]<br>当前其支持的语言限于Java、Groovy和Scala[3]，计划未来将支持更多的语言。</p>
-<h4 id="使用-Gradle-的优势"><a href="#使用-Gradle-的优势" class="headerlink" title="使用 Gradle 的优势"></a>使用 Gradle 的优势</h4><pre><code>•    自动处理包相依关系 - 取自 Maven Repos 的概念
-•    自动处理布署问题 - 取自 Ant 的概念
-•    条件判断写法直觉 - 使用 Groovy 语言
-</code></pre><p>过去 Java 开发者常用 Maven 和 Ant 等工具进行封装布署的自动化，或是两者兼用，不过这两个包彼此有优缺点，如果频繁改变相依包版本，使用 Ant 相当麻烦，如果琐碎工作很多，Maven 功能不足，而且两者都使用 XML 描述，相当不利于设计 if、switch 等判段式，即使写了可读性也不佳，而 Gradle 改良了过去 Maven、Ant 带给开发者的问题，至今也成为 Android Studio 内置的封装布署工具。</p>
-<h2 id="代码检测流程"><a href="#代码检测流程" class="headerlink" title="代码检测流程"></a>代码检测流程</h2><p>在我们日常开发过程中，使用静态代码检查工具自动进行代码检查，对软件开发者来讲是有利的事情，因为这些工具相比人工方式，能更快捷的查找软件存在的缺陷。但是，在很多情况下，这些工具并没用被开发者所广泛采用。</p>
-<p>尽管在我们开发中编译和测试的结果给出了一些产品健康状态的基本报告，但没有提供代码质量的基本报告，也没有任何地方可以查看到我们开发代码质量，产品质量的趋势，来帮助我们发现问题提升产品质量，我们公司内部构建平台会对代码质量，产品质量做一些分析，来推进产品的前进。</p>
-<h3 id="代码覆盖率"><a href="#代码覆盖率" class="headerlink" title="代码覆盖率"></a>代码覆盖率</h3><p>在Java中有很多免费和商业的代码覆盖率工具，大多数这些工具都可以集成在我们的构建平台上。这里我们列举几个Gradle比较流行的代码覆盖率工具。</p>
-<h4 id="Cobertura"><a href="#Cobertura" class="headerlink" title="Cobertura"></a>Cobertura</h4><p><a href="http://cobertura.sourceforge.net/" target="_blank" rel="external">Cobertura</a> 是一种开源工具，它通过检测基本的代码，并观察在测试包运行时执行了哪些代码和没有执行哪些代码，来测量测试覆盖率。除了找出未测试到的代码并发现 bug 外，Cobertura 还可以通过标记无用的、执行不到的代码来优化代码。</p>
-<h4 id="Emma"><a href="#Emma" class="headerlink" title="Emma"></a>Emma</h4><p><a href="http://emma.sourceforge.net/" target="_blank" rel="external">EMMA</a> 是一个开源、面向 Java 程序测试覆盖率收集和报告工具。它通过对编译后的 Java 字节码文件进行插装，在测试执行过程中收集覆盖率信息，并通过支持多种报表格式对覆盖率结果进行展示。 EMMA 所使用的字节码插装不仅保证 EMMA 不会给源代码带来“脏代码”，还确保 EMMA 摆脱了源代码的束缚，这一特点使 EMMA 应用于功能测试成为了可能。</p>
-<h4 id="Clover"><a href="#Clover" class="headerlink" title="Clover"></a>Clover</h4><p><a href="https://www.atlassian.com/software/clover" target="_blank" rel="external">Clover</a>是一款量度单元测试代码覆盖率（Code Coverage）的软件，用于检测Java单元测试是否完整覆盖代码中所有可能的路径，能够快速、准确地检测测试是否覆盖代码中的所有路径。</p>
-<p>团队成员通过Code review来发现架构、逻辑设计方面、安全缺漏和一些潜在的bug，但随着项目业务的增长，Code review的过程难免也会疏忽很多潜在的bug等问题。</p>
-<p>在我们工作中还有一些静态代码检查工具如<a href="http://checkstyle.sourceforge.net/" target="_blank" rel="external">Checkstyle</a>、<a href="http://findbugs.sourceforge.net/" target="_blank" rel="external">Findbugs</a>、<a href="http://pmd.sourceforge.net/" target="_blank" rel="external">PMD</a>等，将他们集成在我们的构建平台上，并成为我们构建流程中的一步骤。</p>
-<h2 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h2><p>对于开发流程，在不同的项目团队中，开发流程不太一样，但大致可为：<br>每天下班前RD必须把今天工作代码全部提交到Git上。</p>
-<p>####</p>
-<ul>
-<li>使用Jenkins CI ，每天定期会从Git上拉去最新代码，自定编译构建生成APK发出邮件，二维码等到产品维护人员的邮箱，并且将应用更新至公司内测分发平台。</li>
-<li>编译构建成功，进行自动化测试、单元测试覆盖率（Cobertura、Emma或Clover等生成）、功能测试结果（如Selenium）、静态代码检查结果（Checkstyle、Findbugs、PMD等）</li>
-<li>测试人员对产品进行test，测试中若有紧急问题也可以让开发人员可以随时修改提交代码。并且立即重新构建测试安装包。</li>
-</ul>
-<h2 id="打包和发布流程"><a href="#打包和发布流程" class="headerlink" title="打包和发布流程"></a>打包和发布流程</h2><p>以上版本管理发布流程只是参考指南，而不是具体规则。你可以根据自己实际情况来选择适合自己的版本管理发布流程或微调来满足自己的需要。</p>
+    <content type="html"><![CDATA[<p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p>
+<blockquote>
+<p><a href="http://stash.lab.tclclouds.com/projects/CLEAN/repos/cleaner_module/commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318" target="_blank" rel="external">commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318</a></p>
+</blockquote>
+<p>现在仍有些问题,比如 <strong>SpaceBase</strong> 依赖了 <strong>VirusEngine</strong> 等问题。</p>
+<h3 id="全新的依赖方式"><a href="#全新的依赖方式" class="headerlink" title="全新的依赖方式"></a>全新的依赖方式</h3><h4 id="需要那个开那个"><a href="#需要那个开那个" class="headerlink" title="需要那个开那个"></a>需要那个开那个</h4><p>修改项目中 <code>module.properties</code> 的配置, <code>true</code> 代表以<code>Project</code> 方式引入,反之则是<code>aar</code>方式,<strong>该配置已被忽略,只对当前工程配置有效。</strong></p>
+<p>如果你确实想提交修改,请使用 <code>git add -f module.properties</code> 命令强制添加。</p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="params">...</span></div><div class="line">isBoostengineDebug=<span class="literal">false</span></div><div class="line">isAppmgrDebug=<span class="literal">false</span></div><div class="line">isCpuDebug=<span class="literal">false</span></div><div class="line">isNotifyboxDebug=<span class="literal">false</span></div><div class="line">isHardwareDebug=<span class="literal">false</span></div><div class="line">isAntivirusDebug=<span class="literal">false</span></div><div class="line">isJunkDebug=<span class="literal">false</span></div><div class="line">isAllDebug=<span class="literal">false</span><span class="comment">// 全部 Debug，即编译Project模式</span></div></pre></td></tr></table></figure>
+<h4 id="添加新的模块依赖"><a href="#添加新的模块依赖" class="headerlink" title="添加新的模块依赖"></a>添加新的模块依赖</h4><p>如果你需要添加新的模块依赖,请按照以下方法,在 <code>module.gradle</code> 脚本中新增 <code>compile_*</code> 方法,如下:</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">def</span> compile_junk(<span class="keyword">Project</span> projectModule)&#123;</div><div class="line">    projectModule.<span class="keyword">dependencies</span>&#123;</div><div class="line">        <span class="keyword">if</span> (isAllDebug.toBoolean() || isJunkDebug.toBoolean()) &#123;</div><div class="line">            <span class="keyword">compile</span> <span class="keyword">project</span>(<span class="string">':junk'</span>)</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">compile</span>(name: <span class="string">'junk'</span>, ext: <span class="string">'aar'</span>)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后通过闭包形式传递出去,在 <code>module.gradle</code> 脚本中有<code>ext</code> 扩展属性 ，添加如下：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class">ext </span>&#123;</div><div class="line">  compile_junk = this.<span class="variable">&amp;compile_junk</span>  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最终通过以下方式使用</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compile_junk(<span class="name">getProject</span>())</div></pre></td></tr></table></figure>
+<h3 id="模块公用的Libs库"><a href="#模块公用的Libs库" class="headerlink" title="模块公用的Libs库"></a>模块公用的Libs库</h3><p>在工程目录的顶级 <code>libs</code> 文件夹中存放着各个模块的 <code>aar</code> ,如果需要更新,可以通过脚本进行<br>全量更新,或者各模块部分更新。</p>
+<h3 id="更新AAR"><a href="#更新AAR" class="headerlink" title="更新AAR"></a>更新AAR</h3><p>在<code>cleaner</code> 工程目录下，在你每次<strong>运行</strong>程序时 <code>update-aar.gradle</code>会自动更新<strong>已开启</strong>模块(如<code>isJunkDebug=true</code>)的<code>aar</code> 到 公用<code>libs</code>库中，你所需要做的就是 <code>commit</code>，这样能保证各位小伙伴使用的都是较新的<code>aar</code>。</p>
+<p>同样的你也可以手动触发<code>Task</code>来更新<code>aar</code>，相应<code>Task</code> 如下：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">task</span> updateAAR &lt;&lt; &#123;</div><div class="line">    eachLibsAAR()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="版本发布"><a href="#版本发布" class="headerlink" title="版本发布"></a>版本发布</h3><p>如果需要全部通过 <code>Project</code> 形式构建<strong>版本发布</strong>,只需添加动态参数 <code>isAllDebug=true</code> ，比如：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAllDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
+<p>同样的可以添加更多的模块参数,来表示某些模块通过 <code>Project</code> 形式构建，比如：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAppmgrDebug=<span class="literal">true</span> -PisJunkDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
+<blockquote>
+<p>注意: 默认都是以引入<code>aar</code> 形式构建(除<strong>SpaceBase</strong>),所以如果不添加参数,需要及时更新<code>aar</code></p>
+</blockquote>
+<h3 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h3><h4 id="2017-4-21-优化Gradle编译速度，最快3s。"><a href="#2017-4-21-优化Gradle编译速度，最快3s。" class="headerlink" title="2017/4/21 优化Gradle编译速度，最快3s。"></a>2017/4/21 优化Gradle编译速度，最快3s。</h4><blockquote>
+<p>1、修改<strong><code>isAllDebug</code></strong> 作用域，由原存放在<code>module.properties</code> 修改存放在<code>gradle.properties</code>中。<br>2、可选模块<strong>include</strong>，只有在<code>module.properties</code>配置文件中开关为<strong>true</strong> 的模块，才会被Android Studio 所<strong>include</strong>。<br>3、新增<code>task</code> 耗时监听，方便查看耗时<code>task</code>，在<em>Gradle Console</em> 中输出。<br>4、区分测试开发输出，新增<strong><code>dev</code></strong> <code>productFlavors</code>,同时关闭一些不用的<code>productFlavors</code>，其中<strong><code>dev</code></strong> 用于测试Jenkins 输出apk <code>flavors</code>，<strong><code>buildVersion</code></strong> 用于研发本地输出apk，<strong>minSdkVersion=21</strong>，关闭<strong>fabric</strong> 在<strong><code>buildVersion</code></strong> 中上报初始化，同时也优化了其他模块的依赖。<br>5、本地默认只有<strong><code>buildVersion</code></strong><code>flavors</code>，只有在<code>isAllDebug=true</code>的情况，才会开启其他的<code>flavors</code>。以便获得更好的编译体验。<strong>还有修改完gradle配置文件后记得点build sync<img src="/images/toolbar-sync-gradle.png" alt="Alt text">进行同步一下。</strong></p>
+</blockquote>
+<h4 id="2017-5-27-添加自动合并多语言task"><a href="#2017-5-27-添加自动合并多语言task" class="headerlink" title="2017/5/27  添加自动合并多语言task"></a>2017/5/27  添加自动合并多语言task</h4><blockquote>
+<p>1 、使用<code>Python</code>脚本自动化合入多语言的<code>task</code>，所以在使用前需要有<code>Python</code>环境，相应代码块如下：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">task mergeLanguage(<span class="built_in">type</span>: Exec) &#123;</div><div class="line">    workingDir <span class="string">'./'</span></div><div class="line">    <span class="built_in">command</span>Line <span class="string">"python"</span>, <span class="string">"merge_strs.py"</span>,</div><div class="line"><span class="string">"/home/silver/ssd/AndroidStudioProjects/cleaner_module/spaceplus_android/junk/src/main/res/"</span>,</div><div class="line">            <span class="string">"/home/silver/桌面/清理缓存0502-多语言/"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中第一个参数是需要添入多语言模块文件目录，第二个参数是存放多语言文件目录。修改参数 执行<strong><code>mergeLanguage</code></strong> <code>task</code>即可合并多语言。<br><img src="/images/2017-05-27 19:26:37屏幕截图.png" alt="Alt text"></p>
+<h4 id="2017-5-31-Auto-Update-Librarys-AAR"><a href="#2017-5-31-Auto-Update-Librarys-AAR" class="headerlink" title="2017/5/31  Auto Update Librarys AAR"></a>2017/5/31  Auto Update Librarys AAR</h4><blockquote>
+<p>1 、<strong><code>quartz-robot</code></strong>会在<strong>每周一至周五(8,12,16,20h)</strong>准时自动更新<code>aar</code>到git repos。</p>
+</blockquote>
+<h4 id="2017-5-1-更新说明"><a href="#2017-5-1-更新说明" class="headerlink" title="2017/5/1  更新说明"></a>2017/5/1  更新说明</h4><p>以上是模块化后解决过渡时期编译速度慢,方便开发调试等各种便利的方案,各位研发大拿体验<br>下,感受如丝般顺滑,如有问题及时沟通。</p>
 ]]></content>
     
     <summary type="html">
     
-      &lt;p&gt;为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。&lt;/p&gt;
-&lt;h3 id=&quot;版本命名规范&quot;&gt;&lt;a href=&quot;#版本命名
+      &lt;p&gt;经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 &lt;strong&gt;commit&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;a href=&quot;http://stash.lab.
     
     </summary>
     
@@ -982,49 +1010,53 @@
   </entry>
   
   <entry>
-    <title>ViewStub原理分析</title>
-    <link href="http://fushenghua.github.io/archives/235d5e38.html"/>
-    <id>http://fushenghua.github.io/archives/235d5e38.html</id>
+    <title>app安全之Apk完整性校验</title>
+    <link href="http://fushenghua.github.io/archives/a72a1e10.html"/>
+    <id>http://fushenghua.github.io/archives/a72a1e10.html</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.646Z</updated>
+    <updated>2018-04-20T05:25:03.638Z</updated>
     
-    <content type="html"><![CDATA[<p>ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 <code>inflate()</code> 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调用了 <code>setVisibility(int)</code> 或 <code>inflate()</code>。</p>
-<p>我们先来看看构造方法：</p>
-<p>非常简单的两步，就能做到View的懒加载，非常方便，其原因是什么呢？</p>
-<p>接下去深入源码分析一下。</p>
-<h2 id="构造方法分析"><a href="#构造方法分析" class="headerlink" title="构造方法分析"></a>构造方法分析</h2><p>首先分析一下构造方法，了解一下它是如何创建的。</p>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, @LayoutRes <span class="keyword">int</span> layoutResource)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, <span class="keyword">null</span>);</div><div class="line">    <span class="comment">// StubbedView的资源id</span></div><div class="line">    mLayoutResource = layoutResource;</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, attrs, <span class="number">0</span>);</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, attrs, defStyleAttr, <span class="number">0</span>);</div><div class="line">&#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ViewStub</span><span class="params">(Context context, AttributeSet attrs, <span class="keyword">int</span> defStyleAttr, <span class="keyword">int</span> defStyleRes)</span> </span>&#123;</div><div class="line">    <span class="keyword">super</span>(context);</div><div class="line">    <span class="keyword">final</span> TypedArray a = context.obtainStyledAttributes(attrs,</div><div class="line">            R.styleable.ViewStub, defStyleAttr, defStyleRes);</div><div class="line">    <span class="comment">// mInflatedId 存储StubbedView的id</span></div><div class="line">    mInflatedId = a.getResourceId(R.styleable.ViewStub_inflatedId, NO_ID);</div><div class="line">    <span class="comment">// mLayoutResource 为StubbedView的resourceId</span></div><div class="line">    mLayoutResource = a.getResourceId(R.styleable.ViewStub_layout, <span class="number">0</span>);</div><div class="line">    <span class="comment">// viewStub 自己的id</span></div><div class="line">    mID = a.getResourceId(R.styleable.ViewStub_id, NO_ID);</div><div class="line">    a.recycle();</div><div class="line">    <span class="comment">// 设置为不可见 </span></div><div class="line">    setVisibility(GONE);</div><div class="line">    <span class="comment">// 不绘制本身</span></div><div class="line">    setWillNotDraw(<span class="keyword">true</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p><code>ViewStub</code>在构造方法里不仅仅获取赋值属性，比较关键的是，还 默认将ViewStub自己设置为不可见（跳过onMeasure与onLayout），不绘制。</p>
-<p>这里有一个要点：<strong>在XML里配置ViewStub的可见性是没有用的</strong>。</p>
-<h2 id="测量-与-绘制"><a href="#测量-与-绘制" class="headerlink" title="测量 与 绘制"></a>测量 与 绘制</h2><figure class="highlight less"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="variable">@Override</span></div><div class="line">protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) &#123;</div><div class="line">    <span class="comment">// 写死的宽高为0</span></div><div class="line">    setMeasuredDimension(0, 0);</div><div class="line">&#125;</div><div class="line"><span class="variable">@Override</span></div><div class="line">public void draw(Canvas canvas) &#123;</div><div class="line">    <span class="comment">//空方法，不draw任何东西</span></div><div class="line">&#125;</div><div class="line"><span class="variable">@Override</span></div><div class="line">protected void dispatchDraw(Canvas canvas) &#123;</div><div class="line">    <span class="comment">//空方法，不draw任何东西</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h2 id="inflate-方法分析"><a href="#inflate-方法分析" class="headerlink" title="inflate()方法分析"></a>inflate()方法分析</h2><p>之前在简单教程里有提到 <code>inflate</code>方法，它是<code>ViewStub</code>实现懒加载的最为关键的方法，接下去去分析一下。</p>
-<figure class="highlight zephir"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 返回 StubbedView</span></div><div class="line"><span class="keyword">public</span> View inflate() &#123;</div><div class="line">    <span class="comment">// 尝试去获取 viewParent 第一次调用的时候不为null，而后则为null</span></div><div class="line">    <span class="keyword">final</span> ViewParent viewParent = getParent();</div><div class="line">    <span class="comment">// 当 viewParent 不为null的时候</span></div><div class="line">    <span class="keyword">if</span> (viewParent != <span class="keyword">null</span> &amp;&amp; viewParent <span class="keyword">instanceof</span> ViewGroup) &#123;</div><div class="line">        <span class="comment">// 我们在xml里配置的layout的资源id 如果id无效，则会报错</span></div><div class="line">        <span class="keyword">if</span> (mLayoutResource != <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">final</span> ViewGroup <span class="keyword">parent</span> = (ViewGroup) viewParent;</div><div class="line">            <span class="comment">// 实例化 LayoutInflater</span></div><div class="line">            <span class="keyword">final</span> LayoutInflater factory;</div><div class="line">            <span class="keyword">if</span> (mInflater != <span class="keyword">null</span>) &#123;</div><div class="line">                factory = mInflater;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                factory = LayoutInflater.from(mContext);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// inflate，StubbedView在这里被实例化</span></div><div class="line">            <span class="keyword">final</span> View view = factory.inflate(mLayoutResource, <span class="keyword">parent</span>,</div><div class="line">                    <span class="keyword">false</span>);</div><div class="line">            <span class="comment">// 可以看到，这里如果我们在XML里写了inflateId，则会设置给StubbedView</span></div><div class="line">            <span class="keyword">if</span> (mInflatedId != NO_ID) &#123;</div><div class="line">                view.setId(mInflatedId);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 注意：这两步步 ViewSutb 找到自己的位置，并从父View中移除了自己</span></div><div class="line">            <span class="comment">// 这会导致 以后调用inflate的时候 再也获取不到 viewParent了</span></div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> index = <span class="keyword">parent</span>.indexOfChild(this);</div><div class="line">            <span class="keyword">parent</span>.removeViewInLayout(this);</div><div class="line">            <span class="comment">// 拿出ViewStub的LayoutParamas，不为null 则会赋值给 StubbedView</span></div><div class="line">            <span class="keyword">final</span> ViewGroup.LayoutParams layoutParams = getLayoutParams();</div><div class="line">            <span class="comment">// 把 StubbedView 添加到ViewStub的父View里</span></div><div class="line">            <span class="keyword">if</span> (layoutParams != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">parent</span>.addView(view, index, layoutParams);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">parent</span>.addView(view, index);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">//使用一个弱引用来保存StubbedView</span></div><div class="line">            mInflatedViewRef = <span class="keyword">new</span> WeakReference(view);</div><div class="line">            <span class="comment">//回调listener</span></div><div class="line">            <span class="keyword">if</span> (mInflateListener != <span class="keyword">null</span>) &#123;</div><div class="line">                mInflateListener.onInflate(this, view);</div><div class="line">            &#125;</div><div class="line">            <span class="comment">// 返回 StubbedView</span></div><div class="line">            <span class="keyword">return</span> view;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">// id无效，则throw一个 IllegalArgumentException</span></div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"ViewStub must have a valid layoutResource"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">// inflate被调用一次后 就没有了ViewParent，就会报这个错</span></div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"ViewStub must have a non-null ViewGroup viewParent"</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>我在每行代码上都加上了详细的注释，主要的操作就是把StubbedView给Inflate出来，然后把它放到自己的位置，代码非常清晰，非常简单。</p>
-<p>总结来说，其实<code>inflate</code>方法是做了一个『偷梁换柱』的操作，把 <code>StubbedView</code>动态的添加到自己原来的位置上，也因此实现了懒加载功能。</p>
-<p>这里还需要注意的是 <strong>ViewStub 必须要有一个 Parent，即必须要有父视图！</strong><br>另外值得一提的是：ViewStub还重写了View的<code>setVisibility</code>方法，让我们来分析一下：</p>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">setVisibility</span><span class="params">(<span class="keyword">int</span> visibility)</span> </span>&#123;</div><div class="line">    <span class="comment">// mInflatedViewRef 保存了 StubbedView还记得吗？ inflate过后它就不是null了 </span></div><div class="line">    <span class="keyword">if</span> (mInflatedViewRef != <span class="keyword">null</span>) &#123;</div><div class="line">        View view = mInflatedViewRef.get();</div><div class="line">        <span class="comment">// 操作 StubbedView</span></div><div class="line">        <span class="keyword">if</span> (view != <span class="keyword">null</span>) &#123;</div><div class="line">            view.setVisibility(visibility);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"setVisibility called on un-referenced view"</span>);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">// 操作ViewStub自己，构造方法里的GONE记得么？</span></div><div class="line">        <span class="keyword">super</span>.setVisibility(visibility);</div><div class="line">        <span class="comment">// 如果是 VISIBLE INVISIBLE 则会去调用 inflate方法！！！！</span></div><div class="line">        <span class="keyword">if</span> (visibility == VISIBLE || visibility == INVISIBLE) &#123;</div><div class="line">            inflate();<span class="comment">//注意这一行代码</span></div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>可以看到<code>setVisibility</code>方法中也可能会调用<code>inflate()</code>方法，所以当我们想让StubbedView被加载进来，而我们不需要StubbedView的实例的时候，可以用<code>setVisibility（View.VISIBLE）</code>。</p>
-<p>不过需要注意的是 不要再接着调用<code>inflate</code>方法，因为此时的 ViewStub 已经被移除了！</p>
-<h2 id="要点"><a href="#要点" class="headerlink" title="要点"></a>要点</h2><ol>
-<li>使用ViewStub，必须指定layoutResourceId(必须是布局文件)</li>
-<li>在XML里配置ViewStub的可见性是没有用的</li>
-<li>ViewStub 主要原理藏在<code>inflate()</code>方法中，是它把真正要加载的View给加载了进来</li>
-<li><code>inflate()</code>方法只能调用一次</li>
-<li>ViewStub调用<code>inflate()</code>后就不要再用它了（让它功成身退！）</li>
-<li>要小心<code>setVisibility</code>方法，因为它可能会调用<code>inflate()</code></li>
-<li>在XML里给ViewStub设置的LayoutParamas(宽高margin等)会传递给StubbedView,所以我们如果要控制StubbedView的LayoutParamas，则需要写在ViewStub里而不是StubbedView！</li>
-<li>期待补充</li>
+    <content type="html"><![CDATA[<p>APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。</p>
+<h2 id="一、认识APK安全性"><a href="#一、认识APK安全性" class="headerlink" title="一、认识APK安全性"></a>一、认识APK安全性</h2><h3 id="危害"><a href="#危害" class="headerlink" title="危害"></a>危害</h3><p>可以通过修改客户端文件篡改客户端行为。攻击者可以让客户端显示自己制作的钓鱼网站，偷取用户信息</p>
+<h2 id="二、完整性校验原理"><a href="#二、完整性校验原理" class="headerlink" title="二、完整性校验原理"></a>二、完整性校验原理</h2><h3 id="完整性校验的几种方式"><a href="#完整性校验的几种方式" class="headerlink" title="完整性校验的几种方式"></a>完整性校验的几种方式</h3><ol>
+<li>CRC校验</li>
+<li>MD5值校验</li>
+<li>SHA1值校验</li>
 </ol>
-<p>好了，主要的都分析完了，知道原理之后就可以自己动手写一个加强版的 ViewStub </p>
+<h3 id="常见android完整性检测"><a href="#常见android完整性检测" class="headerlink" title="常见android完整性检测"></a>常见android完整性检测</h3><ol>
+<li>检测签名</li>
+<li>校验classes.dex</li>
+<li>校验整个apk</li>
+</ol>
+<h4 id="检测签名"><a href="#检测签名" class="headerlink" title="检测签名"></a>检测签名</h4><p>Android对每一个Apk文件都会进行签名，在Apk文件安装时，系统会对其签名信息进行比对，判断程序的完整性，从而决定该Apk文件是否可以安装，在一定程度上达到安全的目的。</p>
+<ol>
+<li>MANIFEST.MF：这是摘要文件。程序遍历Apk包中的所有文件(entry)，对非文件夹非签名文件的文件，逐个用SHA1生成摘要信息，再用Base64进行编码。如果你改变了apk包中的文件，那么在apk安装校验时，改变后的文件摘要信息与MANIFEST.MF的检验信息不同，于是程序就不能成功安装。</li>
+<li>CERT.SF：这是对摘要的签名文件。对前一步生成的MANIFEST.MF，使用SHA1-RSA算法，用开发者的私钥进行签名。在安装时只能使用公钥才能解密它。解密之后，将它与未加密的摘要信息（即，MANIFEST.MF文件）进行对比，如果相符，则表明内容没有被异常修改。</li>
+<li>CERT.RSA文件中保存了公钥、所采用的加密算法等信息。系统对签名文件进行解密，所需要的公钥就是从这个文件里取出来的。<br>这三个文件在apk META-INFO文件夹</li>
+</ol>
+<p>结论：从上面的总结可以看出，META-INFO里面的说那个文件环环相扣，从而保证Android程序的安全性。（只是防止开发者的程序不被攻击者修改，如果开发者的公私钥对对攻击者得到或者开发者开发出攻击程序，Android系统都无法检测出来。）</p>
+<p>虽然系统通过以上方式可以防止，但如果是root的手机就不安全了，建议通过服务器来校验，</p>
+<h4 id="校验classes-dex"><a href="#校验classes-dex" class="headerlink" title="校验classes.dex"></a>校验classes.dex</h4><p><strong>用crc32对classes.dex文件的完整性进行校验</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"> </div><div class="line"><span class="meta">@Override</span></div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(BundlesavedInstanceState)</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line"> </div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line"> </div><div class="line">    String apkPath = getPackageCodePath();</div><div class="line"> </div><div class="line">    Long dexCrc = Long.parseLong(getString(R.string.classesdex_crc));</div><div class="line">    <span class="comment">//建议将dexCrc值放在服务器做校验</span></div><div class="line"> </div><div class="line">    <span class="keyword">try</span></div><div class="line"> </div><div class="line">    &#123;</div><div class="line"> </div><div class="line">        ZipFile zipfile = <span class="keyword">new</span> ZipFile(apkPath);</div><div class="line"> </div><div class="line">        ZipEntry dexentry = zipfile.getEntry(<span class="string">"classes.dex"</span>);</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"classes.dexcrc="</span>+dexentry.getCrc());</div><div class="line"> </div><div class="line">        <span class="keyword">if</span>(dexentry.getCrc() != dexCrc)&#123;</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"Dexhas been modified!"</span>);</div><div class="line"> </div><div class="line">        &#125;<span class="keyword">else</span>&#123;</div><div class="line"> </div><div class="line">        Log.i(<span class="string">"verification"</span>,<span class="string">"Dex hasn't been modified!"</span>);</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"> </div><div class="line">    &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line"> </div><div class="line">     <span class="comment">// TODO Auto-generated catch block</span></div><div class="line"> </div><div class="line">     e.printStackTrace();</div><div class="line"> </div><div class="line">    &#125;</div><div class="line"> </div><div class="line">   &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="校验整个apk"><a href="#校验整个apk" class="headerlink" title="校验整个apk"></a>校验整个apk</h4><p>用哈希值对整个apk完整性进行校验</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> </span>&#123;</div><div class="line"> </div><div class="line"><span class="meta">@Override</span></div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(BundlesavedInstanceState)</span> </span>&#123;</div><div class="line"> </div><div class="line">    <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line"> </div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line"> </div><div class="line">   </div><div class="line"> String apkPath = getPackageCodePath();</div><div class="line"> </div><div class="line">     MessageDigest msgDigest = <span class="keyword">null</span>;</div><div class="line"> </div><div class="line">     <span class="keyword">try</span> &#123;</div><div class="line"> </div><div class="line">        msgDigest = MessageDigest.getInstance(<span class="string">"SHA-1"</span>);</div><div class="line"> </div><div class="line">        <span class="keyword">byte</span>[] bytes = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">1024</span>];</div><div class="line"> </div><div class="line">        <span class="keyword">int</span> byteCount;</div><div class="line"> </div><div class="line">        FileInputStream fis = <span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(apkPath));</div><div class="line"> </div><div class="line">        <span class="keyword">while</span> ((byteCount = fis.read(bytes)) &gt; <span class="number">0</span>)</div><div class="line"> </div><div class="line">        &#123;</div><div class="line"> </div><div class="line">            msgDigest.update(bytes, <span class="number">0</span>, byteCount);</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"> </div><div class="line">        BigInteger bi = <span class="keyword">new</span> BigInteger(<span class="number">1</span>, msgDigest.digest());</div><div class="line"> </div><div class="line">        String sha = bi.toString(<span class="number">16</span>);</div><div class="line"> </div><div class="line">        fis.close();</div><div class="line"> </div><div class="line">        <span class="comment">//这里添加从服务器中获取哈希值然后进行对比校验</span></div><div class="line"> </div><div class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line"> </div><div class="line">            e.printStackTrace();</div><div class="line"> </div><div class="line">        &#125;</div><div class="line"></div><div class="line"> </div><div class="line">   &#125;</div><div class="line"> </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们将把crc值和sha1值放在服务器做处理，做个记录。</p>
+<p>更多Android 之美，请阅读<a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external">《Android 之美 从0到1 – 高手之路》</a>系列文章</p>
+<blockquote>
+<p>水平有限，若有错漏，欢迎指正，批评，如需转载，请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a>，谢谢！</p>
+<p>作者：fuchenxuan<br>出处：<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a><br>欢迎访问我的个人站点：<a href="http://fuchenxuan.cn" target="_blank" rel="external">http://fuchenxuan.cn</a><br>转载请注明出处–<a href="http://blog.csdn.net/vfush" target="_blank" rel="external">http://blog.csdn.net/vfush</a></p>
+</blockquote>
+<p><a href="http://blog.csdn.net/vfush/article/details/51508098" target="_blank" rel="external"><img src="http://img.blog.csdn.net/20160608234402229" alt="Android 之美 从0到1"></a></p>
 ]]></content>
     
     <summary type="html">
     
-      &lt;p&gt;ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 &lt;code&gt;inflate()&lt;/code&gt; 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调
+      &lt;p&gt;APK 完整性校验，虽然很难做到绝对的安全，但能提高应用的安全性和破解难度,下面简单记录一下Apk完整性的校验方案。&lt;/p&gt;
+&lt;h2 id=&quot;一、认识APK安全性&quot;&gt;&lt;a href=&quot;#一、认识APK安全性&quot; class=&quot;headerlink&quot; title=&quot;一、认识AP
     
     </summary>
     
-      <category term="性能优化" scheme="http://fushenghua.github.io/categories/%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%96/"/>
+      <category term="安全" scheme="http://fushenghua.github.io/categories/%E5%AE%89%E5%85%A8/"/>
     
     
   </entry>
@@ -1519,251 +1551,6 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     </summary>
     
       <category term="java" scheme="http://fushenghua.github.io/categories/java/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>计算机网络体系分类</title>
-    <link href="http://fushenghua.github.io/archives/394d1a7f.html"/>
-    <id>http://fushenghua.github.io/archives/394d1a7f.html</id>
-    <published>2015-03-07T00:55:29.000Z</published>
-    <updated>2018-04-28T02:48:48.257Z</updated>
-    
-    <content type="html"><![CDATA[<p>计算机网络整个体系有两个大的分类：一个是国际组织制定的OSI七层模型，一种是实际使用中的TCP/IP四层模型。</p>
-<table>
-<thead>
-<tr>
-<th>OSI七层模型</th>
-<th>TCP/IP四层模型</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>应用层</td>
-<td></td>
-</tr>
-<tr>
-<td>表示层</td>
-<td>应用层</td>
-</tr>
-<tr>
-<td>会话层</td>
-<td></td>
-</tr>
-<tr>
-<td>传输层</td>
-<td>传输层</td>
-</tr>
-<tr>
-<td>网络层</td>
-<td>网络层</td>
-</tr>
-<tr>
-<td>数据链路层</td>
-<td>物理接入层</td>
-</tr>
-<tr>
-<td>物理层</td>
-</tr>
-</tbody>
-</table>
-<h1 id="物理层："><a href="#物理层：" class="headerlink" title="物理层："></a>物理层：</h1><p>物理层主要是实现主机和网络之间的物理连接，规定一些与传输媒体接口有关的一些特性。</p>
-<h2 id="通信方式："><a href="#通信方式：" class="headerlink" title="通信方式："></a>通信方式：</h2><ul>
-<li><p><strong>单工通信：</strong>只能由A主机向B主机发送消息，通信是单向的。</p>
-</li>
-<li><p><strong>半双工通信：</strong>同一时间只能是由A主机向B主机或者是B主机向A主机发送信息，不能同时发送消息。</p>
-</li>
-<li><p><strong>全双工通信：</strong> A主机和B主机可以实现在同一时间内既接收消息，又发送消息，极大的提升了通信效率。</p>
-</li>
-</ul>
-<h2 id="常见引导型传输媒体："><a href="#常见引导型传输媒体：" class="headerlink" title="常见引导型传输媒体："></a>常见引导型传输媒体：</h2><h3 id="双绞线："><a href="#双绞线：" class="headerlink" title="双绞线："></a>双绞线：</h3><p>分为屏蔽双绞线（STP）和非屏蔽双绞线（UTP），屏蔽双绞线就是在非屏蔽双绞线外边又加了一层屏蔽层</p>
-<p>tips：为什么双绞线要两根线绞起来，两个线绞起来可以有效的减少相互之间的电磁干扰。</p>
-<h3 id="同轴电缆："><a href="#同轴电缆：" class="headerlink" title="同轴电缆："></a>同轴电缆：</h3><p>由内导体铜制芯线，绝缘层，网状编织的外导体屏蔽层，以及塑料保护外层组成。有良好的抗干扰性，被广泛用于较高速率的传输。</p>
-<h3 id="光缆："><a href="#光缆：" class="headerlink" title="光缆："></a>光缆：</h3><p>由非常透明的石英玻璃拉成细丝，主要由纤芯和包层构成双层通讯柱。可以分为单模光纤和多模光纤。</p>
-<h2 id="信道复用技术："><a href="#信道复用技术：" class="headerlink" title="信道复用技术："></a>信道复用技术：</h2><ul>
-<li><p><strong>频分复用：</strong>根据传输的波的频率的不同，将不同频段的波用于不同的通信。</p>
-</li>
-<li><p><strong>时分复用：</strong>将时间分割为时间段，规定在某个时间段内发送什么样的信息，根据时间段来进行信息类别的区分。也称为<strong>同步时分复用</strong></p>
-</li>
-<li><p><strong>统计时分复用：</strong>基于时分复用的一种改进，由于基本的时分复用并没有考虑到每个时间段内是否有信息发出，例如说每个时间段是20，但是发送消息只占用其中的2，那么剩下的18就处于空闲时间。统计时分复用就是基于这种考虑而设计的，他允许用户有数据时就将数据发送到缓存中，然后会依次扫描输入缓存，把缓存中的数据放入到STMD帧中，若没有就跳过，每当一个帧满了就把这个帧发出去。STMD帧不是分配的固定时序，而是根据需要动态的分配时隙，也称之为<strong>异步时分复用</strong></p>
-</li>
-<li><p>光分复用：就是光的频分复用，根据光谱中频率的不同，用不同频率的光来携带不同的信息。</p>
-</li>
-</ul>
-<h1 id="数据链路层："><a href="#数据链路层：" class="headerlink" title="数据链路层："></a>数据链路层：</h1><p>数据链路层主要是将上层的数据转化为数据帧发送到链路上，以及把接受到的帧中的数据取出并交给网络层。</p>
-<h2 id="通信方式：-1"><a href="#通信方式：-1" class="headerlink" title="通信方式："></a>通信方式：</h2><ul>
-<li><p><strong>点对点通信：</strong>通信方式是点到点的，也就是只能是两个点之间的通信。常见的就是PPP协议</p>
-</li>
-<li><p><strong>广播通信：</strong>广播通讯，也就是可以同时实现一对多的通信。常见的就是CSMA/CD（载波监听多点访问/冲突检测）</p>
-</li>
-</ul>
-<h2 id="核心要解决的问题："><a href="#核心要解决的问题：" class="headerlink" title="核心要解决的问题："></a>核心要解决的问题：</h2><ul>
-<li><p><strong>封装成帧：</strong>在一段数据的前后分别添加首部和尾部，这样就构成了一个帧。接收端在接受到后就可以方便准确的确定帧的首尾，也称为帧定界符。同时定义出了最大传输单元（MTU）–表示一次可以传输的最大长度上限。</p>
-</li>
-<li><p><strong>透明传输：</strong> 由于使用特定的字符来表示帧的开始和结束，所以传输的内容中不能出现和帧定界符相同的字符，但这显然是不可能的，为了解决这个办法，就可以在内容中和帧定界符一样的字符前边加上规定好的转义字符，这种方法称为字符填充或者是字节填充。</p>
-</li>
-<li><p><strong>差错检测：</strong> 比特在传输过程中可能产生差错，差错检测就是用于检测出现的差错，以便及时的重传，最常用的差错检测算法就是<a href="http://baike.sogou.com/v7730112.htm?fromTitle=CRC%E6%A0%A1%E9%AA%8C" target="_blank" rel="external">CRC（循环冗余检验）</a></p>
-</li>
-</ul>
-<h1 id="网络层"><a href="#网络层" class="headerlink" title="网络层"></a>网络层</h1><p>网络层主要是向上只提供简单灵活的，无连接的，尽最大努力交付的数据报服务。</p>
-<h2 id="IP协议（网际协议）："><a href="#IP协议（网际协议）：" class="headerlink" title="IP协议（网际协议）："></a>IP协议（网际协议）：</h2><p>IP协议是TCP/IP体系中最主要的协议之一，一切在IP之下，一切又在IP之上。我们常说的应该是IP协议族，还包含配套的协议：</p>
-<ul>
-<li><p>ARP（地址解析协议）：将网络的IP地址转化为实际的物理地址（MAC地址），并存储在MAC地址表中。</p>
-</li>
-<li><p>ICMP（网际控制报文协议）：用于进行差错情况和异常情况的反馈，分为询问报文和差错报告报文。</p>
-</li>
-<li><p>IGMP（网际组管理协议）：用于控制和管理多播和组播的协议。</p>
-</li>
-</ul>
-<p>网络地址（IP地址）主要分为五类：</p>
-<ul>
-<li><p>A类：前8位为网络位，后24位为主机位，首位为0</p>
-</li>
-<li><p>B类：前16位为网络位，后16位为主机位，前两位为10</p>
-</li>
-<li><p>C类：前24位为网络位，后8位位主机位，前三位为110</p>
-</li>
-<li><p>D类：前四位为1110，用于多播地址</p>
-</li>
-<li><p>E类：前四位为1111，保留为以后使用</p>
-</li>
-</ul>
-<h2 id="路由选择协议："><a href="#路由选择协议：" class="headerlink" title="路由选择协议："></a>路由选择协议：</h2><p>路由选择协议分为<strong>内部网关协议（IGP）</strong>和<strong>外部网关协议（EGP）</strong></p>
-<h3 id="内部网关协议："><a href="#内部网关协议：" class="headerlink" title="内部网关协议："></a>内部网关协议：</h3><p>主要是有RIP协议和OSPF协议</p>
-<ul>
-<li><p><strong>RIP协议（路由信息协议）：</strong>基于距离矢量的协议</p>
-</li>
-<li><p><strong>OSPF（开放最短路径优先协议）：</strong>基于链路状态的协议</p>
-</li>
-</ul>
-<h3 id="外部网关协议："><a href="#外部网关协议：" class="headerlink" title="外部网关协议："></a>外部网关协议：</h3><p>主要是<strong>边界网关协议（BGP）</strong>，将一个大的网络分为多个小的自治域，每个自治域内有一个网关路由负责和其他的自治域的网关进行通讯。</p>
-<h1 id="传输层"><a href="#传输层" class="headerlink" title="传输层"></a>传输层</h1><p>网络层主要是为主机之间提供逻辑通讯，而传输层为应用程序之间提供端到端的逻辑通讯。主要是两种类型的通讯方式，面向连接的TCP协议和面向无连接的UDP。</p>
-<h2 id="端口号："><a href="#端口号：" class="headerlink" title="端口号："></a>端口号：</h2><p>端口号按照使用地方的不同分为两大类：服务端端口号，客户端端口号。<br>按照占用时长又可以分为熟知端口号（0~1023），登记端口号（1024~49151），短暂端口号（49152~65535）</p>
-<h3 id="常见端口："><a href="#常见端口：" class="headerlink" title="常见端口："></a>常见端口：</h3><ul>
-<li><p>FTP（文件传输协议）：20，21——其中20端口用于传输数据，21端口用于命令控制</p>
-</li>
-<li><p>Telnet（远程登录协议）：23 </p>
-</li>
-<li><p>DNS（域名解析服务）：53</p>
-</li>
-<li><p>TFTP（简单文件传输协议）：69</p>
-</li>
-<li><p>HTTP（超文本传输协议）：80</p>
-</li>
-</ul>
-<h2 id="两种协议："><a href="#两种协议：" class="headerlink" title="两种协议："></a>两种协议：</h2><ul>
-<li><p><strong>UDP（用户数据报协议）：</strong> </p>
-<ul>
-<li>UDP是无连接的</li>
-<li>UDP使用尽最大努力交付，但是不保证可靠交付</li>
-<li>UDP是面向报文的</li>
-<li>UDP没有拥塞控制</li>
-<li>UDP支持一对一，一对多，多对一，多对一的交互通讯</li>
-<li>UDP首部的开销小</li>
-</ul>
-</li>
-<li><p><strong>TCP（传输控制协议）：</strong></p>
-<ul>
-<li>TCP是面向连接的</li>
-<li>每一条TCP连接只能由两个端点，每一条TCP连接只能是点对点的$TCP连接：：= { socket_1,socket_2 } ={ (IP_1:port_1),(IP_2:port_2)}$</li>
-<li>TCP提供可靠交付的服务</li>
-<li>TCP提供全双工通信</li>
-<li>面向字节流</li>
-</ul>
-</li>
-</ul>
-<h3 id="可靠传输的实现机制："><a href="#可靠传输的实现机制：" class="headerlink" title="可靠传输的实现机制："></a>可靠传输的实现机制：</h3><ul>
-<li><p><strong>停止等待协议：</strong> 每发完一个分组就停止发送，直到收到上一个分组的确认信息。若超过规定时间没有接收到确认信息，边认为是分组丢失，开始重传。</p>
-</li>
-<li><p><strong>连续ARQ协议：</strong>  发送方采用滑动窗口的形式，处于滑动窗口的分组可以直接发送出去；接收方一般采用累积确认的方式，也就是说接受方不必对接收到的每一个分组都进行确认，而是对按序到达的最后一个分组进行确认，而发送方每接收到一个确认，窗口就向前滑动一定距离。</p>
-</li>
-<li><p><strong>流量控制：</strong>协调发送方和接收方的收发速率，利用滑动窗口来协调，使用探测报文来探测当前应该发送的速率，采用<a href="http://baike.sogou.com/v10500918.htm?fromTitle=Nagle%E7%AE%97%E6%B3%95" target="_blank" rel="external">Nagle算法</a></p>
-</li>
-<li><p><strong>拥塞控制：</strong><br>当网络中某一资源的需求超出了该资源所能提供的可用部分，这时网络的性能就要开始变坏，这种情况就叫做拥塞。而拥塞控制就是为了减少或者避免拥塞对网络性能的影响而做出的一种控制手段。</p>
-<ul>
-<li><p><strong>拥塞控制思路：</strong>发送方维持一个叫做<strong>拥塞窗口</strong>的状态变量，拥塞窗口的大小取决于网络的拥塞程度，并且在动态的变化。发送方让自己的发送窗口等于拥塞窗口，如果在考虑接收方的接收能力，一般发送窗口还要小于拥塞窗口。</p>
-</li>
-<li><p><strong>慢开始：</strong>当主机开始发送数据的时候，由小到大的增大发送窗口，也就是由小到大的增大拥塞窗口。接收方接收到一个报文之后就回传一个确认报文，发送方每接收到一个确认报文，就将拥塞窗口加1，这样每经过一个传输轮次之后，拥塞窗口就增大一倍。</p>
-</li>
-<li><p><strong>拥塞避免：</strong>思路是让拥塞窗口缓慢的增大，即每经过一个往返时间RTT就把发送方的拥塞窗口加1，而不是加倍，这样拥塞窗口就是线性缓慢增加，比慢开始的增长速率缓慢的多。</p>
-</li>
-<li><p><strong>慢开始门限：</strong>为了防止拥塞窗口增长过大引起网络拥塞，还需要设置一个慢开始门限</p>
-<ul>
-<li>拥塞窗口&lt;慢开始门限时，使用慢开始算法</li>
-<li>拥塞窗口&gt;慢开始门限时，使用拥塞避免算法</li>
-<li>拥塞窗口=慢开始门限时，两种算法都可以</li>
-</ul>
-</li>
-<li><p><strong>快重传：</strong>要求收到方每收到一个时序的报文段之后就立即发出重复确认，而不要等到自己发送数据时才进行捎带确认。而发送方只要一连收到三个重复确认就应当立即重传对方尚未接受到的报文，而不必等待为报文设置的重传计时器到期。 </p>
-</li>
-<li><p><strong>快回复：</strong>与快重传配合使用，当发送方连续收到三个重复确认的时候，就执行“乘法减小”算法，将慢开始门限减半。将拥塞窗口设置为慢开始门限减半之后的值，并开始指向拥塞避免算法。</p>
-</li>
-</ul>
-</li>
-</ul>
-<h3 id="TCP的连接管理："><a href="#TCP的连接管理：" class="headerlink" title="TCP的连接管理："></a>TCP的连接管理：</h3><h4 id="连接三次握手："><a href="#连接三次握手：" class="headerlink" title="连接三次握手："></a>连接三次握手：</h4><ol>
-<li>客户端请求建立连接：SYN=1，seq=x；</li>
-<li>服务器对客户端的请求进行响应：SYN=1，ACK=1，seq=y，ack=x+1</li>
-<li>客户端对服务器端的响应信息进行回应：ACK=1，seq=x+1，ack=y+1</li>
-</ol>
-<p><strong>注：</strong> SYN为同步信息，在建立连接过程中始终为1</p>
-<h4 id="断开连接四次握手："><a href="#断开连接四次握手：" class="headerlink" title="断开连接四次握手："></a>断开连接四次握手：</h4><ol>
-<li>客户端请求断开连接： FIN=1，seq = u；</li>
-<li>服务端对客户端的请求应答：ACK=1，seq=v，ack=u+1；</li>
-<li>服务端请求断开连接：FIN=1，ACK=1，seq=w，ack=u+1；</li>
-<li>客户端对服务端的请求应答：ACK=1，seq=u+1，ack=w+1；</li>
-</ol>
-<h1 id="应用层"><a href="#应用层" class="headerlink" title="应用层"></a>应用层</h1><p>应用层有多种协议，常用到的就是HTTP以及HTTPS。</p>
-<p><strong>HTTP协议报文格式</strong></p>
-<table>
-<thead>
-<tr>
-<th>请求报文</th>
-<th>相应报文</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>请求行（用于区分是请求报文还是响应报文，在响应报文中为状态行）</td>
-<td>状态行</td>
-</tr>
-<tr>
-<td>首部行（用来说明浏览器，服务器或者是报文主体的一些信息）</td>
-<td>首部行</td>
-</tr>
-<tr>
-<td>空行（用于隔开请求实体和首部行）</td>
-<td>空行</td>
-</tr>
-<tr>
-<td>实体主体（用于一些请求或者是响应的的参数内容等）</td>
-<td>实体主体</td>
-</tr>
-</tbody>
-</table>
-<p><strong>常见状态码</strong></p>
-<blockquote>
-<p>1xx：表示通知信息，例如表示收到或者是正在处理<br>2xx：表示成功，例如表示接受或知道了<br>3xx：表示重定向，例如表示完成请求还需要采取进一步的行动<br>4xx：表示客户端的差错，例如表示请求中有语法错误或不能完成<br>5xx：表示服务器端的差错：例如表示服务器失效无法完成请求</p>
-</blockquote>
-<p>HTTPS协议就是对HTTP协议的加密，更加安全可靠，采用HTTP+SSL（安全套接字层）来保证数据的安全性。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;计算机网络整个体系有两个大的分类：一个是国际组织制定的OSI七层模型，一种是实际使用中的TCP/IP四层模型。&lt;/p&gt;
-&lt;table&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;OSI七层模型&lt;/th&gt;
-&lt;th&gt;TCP/IP四层模型&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbo
-    
-    </summary>
-    
-      <category term="网络" scheme="http://fushenghua.github.io/categories/%E7%BD%91%E7%BB%9C/"/>
     
     
   </entry>

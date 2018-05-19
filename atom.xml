@@ -390,7 +390,7 @@
     <link href="http://fushenghua.github.io/archives/af68deab.html"/>
     <id>http://fushenghua.github.io/archives/af68deab.html</id>
     <published>2018-04-02T00:55:29.000Z</published>
-    <updated>2018-05-15T03:35:00.528Z</updated>
+    <updated>2018-05-18T09:40:10.619Z</updated>
     
     <content type="html"><![CDATA[<p>有一天给测试同学打了个deubg 包发现无法安装，提示无法解析，使用adb install 安装后提示<code>INSTALL_FAILED_TEST_ONLY</code>，原来是<code>Android Studio 3.0</code>会在debug apk的<code>manifest</code>文件<code>application</code>标签里自动添加 <code>android:testOnly=&quot;true&quot;</code>属性</p>
 <h2 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h2><p>在Android Studio进行开发的时候，生成的debug apk手动使用adb install无法安装，提示错误：</p>

@@ -993,7 +993,7 @@
     <link href="http://fushenghua.github.io/archives/8e05eece.html"/>
     <id>http://fushenghua.github.io/archives/8e05eece.html</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-05-14T04:53:20.551Z</updated>
+    <updated>2018-05-22T02:59:15.212Z</updated>
     
     <content type="html"><![CDATA[<p>最近又要把公司<code>Stash</code>上的项目在别部门一个私有仓库,平移到自己部门项目组的仓库，要求迁移的时候要保留已有的分支和以前的提交记录，类似的需求经常遇到，刚好做个记录。</p>
 <p>1). 从原地址克隆一份裸版本库(纯仓库形式)，比如原本托管于 GitHub。</p>

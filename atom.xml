@@ -775,7 +775,7 @@
     <link href="http://fushenghua.github.io/archives/235d5e38.html"/>
     <id>http://fushenghua.github.io/archives/235d5e38.html</id>
     <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.646Z</updated>
+    <updated>2018-05-29T01:33:39.995Z</updated>
     
     <content type="html"><![CDATA[<p>ViewStub 是一个看不见的，没有大小，不占布局位置的 View，可以用来懒加载布局。当 ViewStub 变得可见或 <code>inflate()</code> 的时候，布局就会被加载（替换 ViewStub）。因此，ViewStub 一直存在于视图层次结构中直到调用了 <code>setVisibility(int)</code> 或 <code>inflate()</code>。</p>
 <p>我们先来看看构造方法：</p>
@@ -804,7 +804,7 @@
 <li>在XML里给ViewStub设置的LayoutParamas(宽高margin等)会传递给StubbedView,所以我们如果要控制StubbedView的LayoutParamas，则需要写在ViewStub里而不是StubbedView！</li>
 <li>期待补充</li>
 </ol>
-<p>好了，主要的都分析完了，知道原理之后就可以自己动手写一个加强版的 ViewStub </p>
+<p>好了，主要的ViewStub都分析完了，知道原理之后就可以自己动手写一个加强版的 ViewStub 。</p>
 ]]></content>
     
     <summary type="html">

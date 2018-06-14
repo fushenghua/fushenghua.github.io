@@ -4,12 +4,30 @@
 
     
   <url>
+    <loc>http://fushenghua.github.io/archives/1dde1414.html</loc>
+    <lastmod>2018-06-13T11:00:58.596Z</lastmod>
+    <data>
+        <display>
+        <title>Android中的设计模式</title>
+        <pubTime>2018-05-02T00:55:29.000Z</pubTime>
+        
+         
+           
+             
+              <breadCrumb title="android" url="http://fushenghua.github.io/categories/android/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://fushenghua.github.io/archives/59f7e7f7.html</loc>
-    <lastmod>2018-06-06T01:57:07.960Z</lastmod>
+    <lastmod>2018-06-06T07:06:46.192Z</lastmod>
     <data>
         <display>
         <title>调试 ART 垃圾回收</title>
-        <pubTime>2018-06-06T01:55:40.742Z</pubTime>
+        <pubTime>2018-04-02T00:55:29.000Z</pubTime>
         
          
            

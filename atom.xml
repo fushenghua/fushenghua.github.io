@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://fushenghua.github.io/"/>
-  <updated>2018-06-06T01:57:07.960Z</updated>
+  <updated>2018-06-13T11:00:58.596Z</updated>
   <id>http://fushenghua.github.io/</id>
   
   <author>
@@ -16,86 +16,72 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>调试 ART 垃圾回收</title>
-    <link href="http://fushenghua.github.io/archives/59f7e7f7.html"/>
-    <id>http://fushenghua.github.io/archives/59f7e7f7.html</id>
-    <published>2018-06-06T01:55:40.742Z</published>
-    <updated>2018-06-06T01:57:07.960Z</updated>
+    <title>Android中的设计模式</title>
+    <link href="http://fushenghua.github.io/archives/1dde1414.html"/>
+    <id>http://fushenghua.github.io/archives/1dde1414.html</id>
+    <published>2018-05-02T00:55:29.000Z</published>
+    <updated>2018-06-13T11:00:58.596Z</updated>
     
-    <content type="html"><![CDATA[<p>本文档介绍如何调试 Android 运行时 (ART) 垃圾回收 (GC) 的正确性和性能问题。本文档解释了如何使用 GC 验证选项、确定 GC 验证失败的解决方案，以及测量并解决 GC 性能问题。</p>
-<p>有关处理 ART 的说明，请参阅 <a href="https://source.android.google.cn/devices/tech/dalvik/index.html" target="_blank" rel="external">ART 和 Dalvik</a>、<a href="https://source.android.google.cn/devices/tech/dalvik/dex-format.html" target="_blank" rel="external">Dalvik 可执行格式</a>以及此 <a href="https://source.android.google.cn/devices/tech/dalvik/index.html" target="_blank" rel="external">ART 和 Dalvik</a> 部分的其他页面。有关验证应用行为的其他帮助信息，请参阅<a href="http://developer.android.google.cn/guide/practices/verifying-apps-art.html" target="_blank" rel="external">在 Android 运行时 (ART) 上验证应用行为</a>。</p>
-<h2 id="ART-GC-概述"><a href="#ART-GC-概述" class="headerlink" title="ART GC 概述"></a><a href="https://source.android.google.cn/devices/tech/dalvik/gc-debug#top_of_page" target="_blank" rel="external"></a>ART GC 概述</h2><p>ART 是在 Android 4.4 中引入的一个开发者选项，也是 Android 5.0 及更高版本的默认 Android 运行时。我们已不再继续维护和提供 Dalvik 运行时，现在 ART 采用了其字节码格式。请注意，本节仅总结 ART 的 GC。有关其他信息，请观看在 Google I/O 2014 上进行的 <a href="https://www.google.com/events/io/io14videos/b750c8da-aebe-e311-b297-00155d5066d7" target="_blank" rel="external">Android 运行时</a>演示。</p>
-<p>ART 有多个不同的 GC 方案，这些方案包括运行不同垃圾回收器。默认方案是 CMS（并发标记清除）方案，主要使用粘性 CMS 和部分 CMS。粘性 CMS 是 ART 的不移动分代垃圾回收器。它仅扫描堆中自上次 GC 后修改的部分，并且只能回收自上次 GC 后分配的对象。除 CMS 方案外，当应用将进程状态更改为察觉不到卡顿的进程状态（例如，后台或缓存）时，ART 将执行堆压缩。</p>
-<p>除了新的垃圾回收器之外，ART 还引入了一种基于位图的新内存分配程序，称为 RosAlloc（插槽运行分配器）。此新分配器具有分片锁，当分配规模较小时可添加线程的本地缓冲区，因而性能优于 DlMalloc。</p>
-<p>与 Dalvik 相比，ART CMS 垃圾回收计划在很多方面都有一定的改善：</p>
-<ul>
-<li>与 Dalvik 相比，暂停次数从 2 次减少到 1 次。Dalvik 的第一次暂停主要是为了进行根标记，即在 ART 中进行并发标记，让线程标记自己的根，然后马上恢复运行。</li>
-<li>与 Dalvik 类似，ART GC 在清除过程开始之前也会暂停 1 次。两者在这方面的主要差异在于：在此暂停期间，某些 Dalvik 环节在 ART 中并发进行。这些环节包括 <code>java.lang.ref.Reference</code> 处理、系统弱清除（例如，jni 弱全局等）、重新标记非线程根和卡片预清理。在 ART 暂停期间仍进行的阶段包括扫描脏卡片以及重新标记线程根，这些操作有助于缩短暂停时间。</li>
-<li>相对于 Dalvik，ART GC 改进的最后一个方面是粘性 CMS 回收器增加了 GC 吞吐量。不同于普通的分代 GC，粘性 CMS 不移动。系统会将年轻对象保存在一个分配堆栈（基本上是 <code>java.lang.Object</code> 数组）中，而非为其设置一个专属区域。这样可以避免移动所需的对象以维持低暂停次数，但缺点是容易在堆栈中加入大量复杂对象图像而使堆栈变长。</li>
-</ul>
-<p>ART GC 与 Dalvik 的另一个主要区别在于 ART GC 引入了移动垃圾回收器。使用移动 GC 的目的在于通过堆压缩来减少后台应用使用的内存。目前，触发堆压缩的事件是 ActivityManager 进程状态的改变。当应用转到后台运行时，它会通知 ART 已进入不再“感知”卡顿的进程状态。此时 ART 会进行一些操作（例如，压缩和监视器压缩），从而导致应用线程长时间暂停。目前正在使用的两个移动 GC 是同构空间压缩和半空间压缩。</p>
-<ul>
-<li>半空间压缩将对象在两个紧密排列的碰撞指针空间之间进行移动。这种移动 GC 适用于小内存设备，因为它可以比同构空间压缩稍微多节省一点内存。额外节省出的空间主要来自紧密排列的对象，这样可以避免 RosAlloc/DlMalloc 分配器占用开销。由于 CMS 仍在前台使用，且不能从碰撞指针空间中进行收集，因此当应用在前台使用时，半空间还要再进行一次转换。这种情况并不理想，因为它可能引起较长时间的暂停。</li>
-<li>同构空间压缩通过将对象从一个 RosAlloc 空间复制到另一个 RosAlloc 空间来实现。这有助于通过减少堆碎片来减少内存使用量。这是目前非低内存设备的默认压缩模式。相比半空间压缩，同构空间压缩的主要优势在于应用从后台切换到前台时无需进行堆转换。</li>
-</ul>
-<h2 id="GC-验证和性能选项"><a href="#GC-验证和性能选项" class="headerlink" title="GC 验证和性能选项"></a><a href="https://source.android.google.cn/devices/tech/dalvik/gc-debug#top_of_page" target="_blank" rel="external"></a>GC 验证和性能选项</h2><p>如果您是原始设备制造商 (OEM)，就可以更改 GC 类型。要执行该操作，您需要通过 adb 修改系统属性。请记住，这些属性只能在非用户版本或 root 版本上修改。</p>
-<h3 id="更改-GC-类型"><a href="#更改-GC-类型" class="headerlink" title="更改 GC 类型"></a>更改 GC 类型</h3><p>您可以采用多种方法来更改 ART 使用的 GC 计划。更改前台 GC 计划的主要方法是更改 <code>dalvik.vm.gctype</code> 属性或传递 <code>-Xgc:</code> 选项。您可以通过以逗号分隔的格式传递多个 GC 选项。</p>
-<p>为了导出可用 <code>-Xgc</code> 设置的完整列表，可以键入 <code>adb shell dalvikvm -help</code> 来输出各种运行时命令行选项。</p>
-<p>以下是将 GC 更改为半空间并打开 GC 前堆验证的一个示例： <code>adb shell setprop dalvik.vm.gctype SS,preverify</code></p>
-<ul>
-<li><code>CMS</code> 也是默认值，指定并发标记清除 GC 计划。该计划包括运行粘性分代 CMS、部分 CMS 和完整 CMS。该计划的分配器是适用于可移动对象的 RosAlloc 和适用于不可移动对象的 DlMalloc。</li>
-<li><code>SS</code> 指定半空间 GC 计划。该计划有两个适用于可移动对象的半空间和一个适用于不可移动对象的 DlMalloc 空间。可移动对象分配器默认设置为使用原子操作的共享碰撞指针分配器。但是，如果 <code>-XX:UseTLAB</code> 标记也被传入，则分配器使用线程局部碰撞指针分配。</li>
-<li><code>GSS</code> 指定分代半空间计划。该计划与半空间计划非常相似，但区别在于其会将存留期较长的对象提升到大型 RosAlloc 空间中。这样就可明显减少典型用例中需复制的对象。</li>
-</ul>
-<h3 id="验证堆"><a href="#验证堆" class="headerlink" title="验证堆"></a>验证堆</h3><p>堆验证可能是调试 GC 相关错误或堆损坏的最有用的 GC 选项。启用堆验证会使 GC 在垃圾回收过程中在几个点检查堆的正确性。堆验证与更改 GC 类型的选项相同。启用堆验证后，堆验证会验证根，并确保可访问对象仅引用其他可访问对象。通过传入以下 -<code>Xgc</code> 值可以启用 GC 验证：</p>
-<ul>
-<li>如果启用 GC 验证，<code>[no]preverify</code> 将在 GC 启动之前执行堆验证。</li>
-<li>如果启用 GC 验证，<code>[no]presweepingverify</code> 将在启动垃圾回收器清除过程之前执行堆验证。</li>
-<li>如果启用 GC 验证，<code>[no]postverify</code> 将在 GC 完成清除后执行堆验证。</li>
-<li><code>[no]preverify_rosalloc</code>、<code>[no]postsweepingverify_rosalloc</code> 和 <code>[no]postverify_rosalloc</code> 也是附加 GC 选项，仅验证 RosAlloc 内部计算的状态。验证的主要内容是，魔数值是否与预期常量匹配，以及可用内存块是否已在 <code>free_page_runs_</code> 映射中注册。</li>
-</ul>
-<h3 id="使用-TLAB-分配器选项"><a href="#使用-TLAB-分配器选项" class="headerlink" title="使用 TLAB 分配器选项"></a>使用 TLAB 分配器选项</h3><p>目前，只有 TLAB 选项可以更改分配器而不影响活动 GC 类型。此选项不可通过系统属性使用，但可以通过将 - <code>XX:UseTLAB</code> 传递给 <code>dalvikvm</code> 来启用。该选项的分配代码路径更短，因此分配速度更快。由于此选项需要使用暂停时间相当长的 SS 或 GSS GC 类型，因此默认情况下不启用。</p>
-<h2 id="性能"><a href="#性能" class="headerlink" title="性能"></a><a href="https://source.android.google.cn/devices/tech/dalvik/gc-debug#top_of_page" target="_blank" rel="external"></a>性能</h2><p>评测 GC 性能主要使用两种工具：GC 时间转储和 systrace。评测 GC 性能问题的最直观方法是使用 systrace 确定哪些 GC 会导致长时间暂停或抢占应用线程。尽管 ART GC 效率相对较高，但是过度分配或错误的变异器行为等都能造成性能问题。</p>
-<h3 id="人机工程学"><a href="#人机工程学" class="headerlink" title="人机工程学"></a>人机工程学</h3><p>与 Dalvik 相比，ART 在 GC 人机工程学方面存在一些重要差异。与 Dalvik 相比，其中一项重要改进是在我们延后启用并行 GC 时不再分配 GC。但是，此操作存在一个缺点：在某些情况下，不阻止 GC 会导致堆的增长速度比 Dalvik 快。好在 ART 具有堆压缩功能，可在进程变为后台进程状态时对堆进行碎片整理来缓解此问题。</p>
-<p>CMS GC 人机工程学有两种定期运行的 GC。理想情况下，GC 人机工程学更多时间运行的是分代粘性 CMS，而非部分 CMS。GC 将一直运行粘性 CMS，直到最后一个 GC 的吞吐量（通过释放的字节数/GC 持续秒数计算得出）小于部分 CMS 的平均吞吐量。发生此情况时，人机工程学将下一个并发 GC 计划为部分 CMS，而非粘性 CMS。部分 CMS 完成后，人机工程学将下一个 GC 更改回粘性 CMS。粘性 CMS 在完成后不会调整堆占用空间限制，这是促使人机工程学发挥作用的一个关键因素。这样，粘性 CMS 的发生频率更高，直到吞吐量低于部分 CMS，最终导致堆增大。</p>
-<h3 id="使用-SIGQUIT-获取-GC-性能信息"><a href="#使用-SIGQUIT-获取-GC-性能信息" class="headerlink" title="使用 SIGQUIT 获取 GC 性能信息"></a>使用 SIGQUIT 获取 GC 性能信息</h3><p>通过将 SIGQUIT 发送到已运行的应用，或在启动命令行程序时通过将 -<code>XX:DumpGCPerformanceOnShutdown</code> 传递给 <code>dalvikvm</code>，可以获得应用的 GC 性能时序。当应用获得 ANR 请求信号 (SIGQUIT) 时，它将转储与锁定、线程堆栈和 GC 性能相关的信息。</p>
-<p>获取 GC 时序转储的方法是使用以下命令：</p>
-<p>adb shell kill -S QUIT PID</p>
-<p>该操作将在 <code>/data/anr/</code> 中创建一个 <code>traces.txt</code> 文件。此文件包含一些 ANR 转储信息以及 GC 时序。您可以通过搜索“转储累计 GC 时序”来确定 GC 时序。这些时序会显示一些相关内容。它会显示各 GC 类型的阶段和暂停的直方图信息。暂停信息通常比较重要。例如：</p>
-<p>sticky concurrent mark sweep paused:    Sum: 5.491ms 99% C.I. 1.464ms-2.133ms Avg: 1.830ms Max: 2.133ms</p>
-<p><code>This</code> 显示暂停的平均时间为 1.83 ms。该值足够低，在大多数应用中不会导致丢帧，因此无需担心。</p>
-<p>需要关注的另一个问题是挂起时间。挂起时间测量在 GC 要求某个线程挂起后，线程到达挂起点所需的时间。该时间包含在 GC 暂停中，所以可用于确定长时间暂停是否是由 GC 缓慢或线程挂起缓慢造成。以下是 Nexus 5 上的正常挂起时间示例：</p>
-<p>suspend all histogram:    Sum: 1.513ms 99% C.I. 3us-546.560us Avg: 47.281us Max: 601us</p>
-<p>还有一些其他要关注的方面，例如总耗时、GC 吞吐量等。示例如下：</p>
-<p>Total time spent in GC: 502.251ms<br>Mean GC size throughput: 92MB/s<br>Mean GC object throughput: 1.54702e+06 objects/s</p>
-<p>转储已运行应用的 GC 时序的示例如下：</p>
-<p><code>adb shell kill -s QUIT &lt;var style=&quot;box-sizing: inherit; color: rgb(236, 64, 122); -webkit-font-smoothing: auto; font-weight: 700;&quot;&gt;PID&lt;/var&gt;</code><br><code>adb pull /data/anr/traces.txt</code></p>
-<p>此时，GC 时序包含在 trace.txt 中。Google 地图的输出示例如下：</p>
-<p>Start Dumping histograms for 34 iterations for sticky concurrent mark sweep<br>ScanGrayAllocSpaceObjects:    Sum: 196.174ms 99% C.I. 0.011ms-11.615ms Avg: 1.442ms Max: 14.091ms<br>FreeList:    Sum: 140.457ms 99% C.I. 6us-1676.749us Avg: 128.505us Max: 9886us<br>MarkRootsCheckpoint:    Sum: 110.687ms 99% C.I. 0.056ms-9.515ms Avg: 1.627ms Max: 10.280ms<br>SweepArray:    Sum: 78.727ms 99% C.I. 0.121ms-11.780ms Avg: 2.315ms Max: 12.744ms<br>ProcessMarkStack:    Sum: 77.825ms 99% C.I. 1.323us-9120us Avg: 576.481us Max: 10185us<br>(Paused)ScanGrayObjects:    Sum: 32.538ms 99% C.I. 286us-3235.500us Avg: 986us Max: 3434us<br>AllocSpaceClearCards:    Sum: 30.592ms 99% C.I. 10us-2249.999us Avg: 224.941us Max: 4765us<br>MarkConcurrentRoots:    Sum: 30.245ms 99% C.I. 3us-3017.999us Avg: 444.779us Max: 3774us<br>ReMarkRoots:    Sum: 13.144ms 99% C.I. 66us-712us Avg: 386.588us Max: 712us<br>ScanGrayImageSpaceObjects:    Sum: 13.075ms 99% C.I. 29us-2538.999us Avg: 192.279us Max: 3080us<br>MarkingPhase:    Sum: 9.743ms 99% C.I. 170us-518us Avg: 286.558us Max: 518us<br>SweepSystemWeaks:    Sum: 8.046ms 99% C.I. 28us-479us Avg: 236.647us Max: 479us<br>MarkNonThreadRoots:    Sum: 5.215ms 99% C.I. 31us-698.999us Avg: 76.691us Max: 703us<br>ImageModUnionClearCards:    Sum: 2.708ms 99% C.I. 26us-92us Avg: 39.823us Max: 92us<br>ScanGrayZygoteSpaceObjects:    Sum: 2.488ms 99% C.I. 19us-250.499us Avg: 37.696us Max: 295us<br>ResetStack:    Sum: 2.226ms 99% C.I. 24us-449us Avg: 65.470us Max: 452us<br>ZygoteModUnionClearCards:    Sum: 2.124ms 99% C.I. 18us-233.999us Avg: 32.181us Max: 291us<br>FinishPhase:    Sum: 1.881ms 99% C.I. 31us-431.999us Avg: 55.323us Max: 466us<br>RevokeAllThreadLocalAllocationStacks:    Sum: 1.749ms 99% C.I. 8us-349us Avg: 51.441us Max: 377us<br>EnqueueFinalizerReferences:    Sum: 1.513ms 99% C.I. 3us-201us Avg: 44.500us Max: 201us<br>ProcessReferences:    Sum: 438us 99% C.I. 3us-212us Avg: 12.882us Max: 212us<br>ProcessCards:    Sum: 381us 99% C.I. 4us-17us Avg: 5.602us Max: 17us<br>PreCleanCards:    Sum: 363us 99% C.I. 8us-17us Avg: 10.676us Max: 17us<br>ReclaimPhase:    Sum: 357us 99% C.I. 7us-91.500us Avg: 10.500us Max: 93us<br>(Paused)PausePhase:    Sum: 312us 99% C.I. 7us-15us Avg: 9.176us Max: 15us<br>SwapBitmaps:    Sum: 166us 99% C.I. 4us-8us Avg: 4.882us Max: 8us<br>(Paused)ScanGrayAllocSpaceObjects:    Sum: 126us 99% C.I. 14us-112us Avg: 63us Max: 112us<br>MarkRoots:    Sum: 121us 99% C.I. 2us-7us Avg: 3.558us Max: 7us<br>(Paused)ScanGrayImageSpaceObjects:    Sum: 68us 99% C.I. 68us-68us Avg: 68us Max: 68us<br>BindBitmaps:    Sum: 50us 99% C.I. 1us-3us Avg: 1.470us Max: 3us<br>UnBindBitmaps:    Sum: 49us 99% C.I. 1us-3us Avg: 1.441us Max: 3us<br>SwapStacks:    Sum: 47us 99% C.I. 1us-3us Avg: 1.382us Max: 3us<br>RecordFree:    Sum: 42us 99% C.I. 1us-3us Avg: 1.235us Max: 3us<br>ForwardSoftReferences:    Sum: 37us 99% C.I. 1us-2us Avg: 1.121us Max: 2us<br>InitializePhase:    Sum: 36us 99% C.I. 1us-2us Avg: 1.058us Max: 2us<br>FindDefaultSpaceBitmap:    Sum: 32us 99% C.I. 250ns-1000ns Avg: 941ns Max: 1000ns<br>(Paused)ProcessMarkStack:    Sum: 5us 99% C.I. 250ns-3000ns Avg: 147ns Max: 3000ns<br>PreSweepingGcVerification:    Sum: 0 99% C.I. 0ns-0ns Avg: 0ns Max: 0ns<br>Done Dumping histograms<br>sticky concurrent mark sweep paused:    Sum: 63.268ms 99% C.I. 0.308ms-8.405ms<br>Avg: 1.860ms Max: 8.883ms<br>sticky concurrent mark sweep total time: 763.787ms mean time: 22.464ms<br>sticky concurrent mark sweep freed: 1072342 objects with total size 75MB<br>sticky concurrent mark sweep throughput: 1.40543e+06/s / 98MB/s<br>Total time spent in GC: 4.805s<br>Mean GC size throughput: 18MB/s<br>Mean GC object throughput: 330899 objects/s<br>Total number of allocations 2015049<br>Total bytes allocated 177MB<br>Free memory 4MB<br>Free memory until GC 4MB<br>Free memory until OOME 425MB<br>Total memory 90MB<br>Max memory 512MB<br>Zygote space size 4MB<br>Total mutator paused time: 229.566ms<br>Total time waiting for GC to complete: 187.655us</p>
-<h2 id="分析-GC-正确性问题的工具"><a href="#分析-GC-正确性问题的工具" class="headerlink" title="分析 GC 正确性问题的工具"></a><a href="https://source.android.google.cn/devices/tech/dalvik/gc-debug#top_of_page" target="_blank" rel="external"></a>分析 GC 正确性问题的工具</h2><p>造成 ART 内部崩溃的原因多种多样。读取或写入对象字段时出现崩溃可能表示存在堆损坏。如果 GC 在运行时崩溃，也可能是由堆损坏造成的。造成堆损坏的原因多种多样，最常见的原因可能是应用代码错误。好在可以使用相关工具调试与 GC 和堆相关的崩溃问题。此类工具包括上面指定的堆验证选项、valgrind 和 CheckJNI。</p>
-<h3 id="CheckJNI"><a href="#CheckJNI" class="headerlink" title="CheckJNI"></a>CheckJNI</h3><p>验证应用行为的另一种方法是使用 CheckJNI。CheckJNI 是一种添加额外 JNI 检查的模式；出于性能考虑，这些选项在默认情况下并不会启用。此类检查将捕获一些可能导致堆损坏的错误，例如使用无效/过时的局部和全局引用。启用 CheckJNI 的方法如下：</p>
-<p>adb shell setprop dalvik.vm.checkjni true</p>
-<p>Forcecopy 模式是 CheckJNI 的另一部分，对检测超出数组区域末端的写入非常有用。启用后，forcecopy 会促使数组访问 JNI 函数时始终返回带有红色区域的副本。红色区域是返回指针结束/开始处的一个区域，该区域具有特殊值，并在数组释放时得到验证。如果红色区域中的值与预期值不匹配，则通常意味着发生缓冲区溢出或欠载。这将导致 CheckJNI 中止。启用 forcecopy 模式的方法如下：</p>
-<p>adb shell setprop dalvik.vm.jniopts forcecopy</p>
-<p>CheckJNI 应捕获错误的一个示例是超出从 <code>GetPrimitiveArrayCritical</code> 获取的数组末端的写入。该操作很可能会破坏 Java 堆。如果写入位于 CheckJNI 红色区域内，则在调用相应 <code>ReleasePrimitiveArrayCritical</code> 时，CheckJNI 将会捕获该问题。否则，写入将最终损坏 Java 堆中的一些随机对象，并可能会导致之后出现 GC 崩溃。如果崩溃的内存是引用字段，则 GC 可能会捕获错误并输出“Tried to mark not contained by any spaces”这一错误消息。</p>
-<p>当 GC 尝试标记无法找到空间的对象时，就会发生此错误。在此检查失败后，GC 会遍历根，并尝试查看无效对象是否为根。结果共有两个选项：对象为根或非根。</p>
-<h3 id="Valgrind"><a href="#Valgrind" class="headerlink" title="Valgrind"></a>Valgrind</h3><p>ART 堆支持可选的 valgrind 工具，这款工具提供了一种方法来检测对无效堆地址的读取和写入操作。ART 可检测应用何时在 valgrind 下运行，并在每个对象分配前后插入红色区域。如果对这些红色区域有任何读取或写入错误，valgrind 将输出错误消息。例如，如果您在通过 JNI 直接访问数组时，越过数组元素末端进行读取或写入，就会出现此类错误。由于 AOT 编译器使用隐式 null 检查，因此建议使用 eng 版本运行 valgrind。另外值得一提的是，valgrind 比正常执行速度慢一个数量级。</p>
-<p>以下是一个使用示例：</p>
-<h1 id="build-and-install"><a href="#build-and-install" class="headerlink" title="build and install"></a>build and install</h1><p><code>mmm external/valgrind</code><br><code>adb remount &amp;&amp; adb sync</code></p>
-<h1 id="disable-selinux"><a href="#disable-selinux" class="headerlink" title="disable selinux"></a>disable selinux</h1><p><code>adb shell setenforce 0</code><br><code>adb shell setprop wrap.com.android.calculator2</code><br>“TMPDIR=/data/data/com.android.calculator2 logwrapper valgrind”</p>
-<h1 id="push-symbols"><a href="#push-symbols" class="headerlink" title="push symbols"></a>push symbols</h1><p><code>adb shell mkdir /data/local/symbols</code><br><code>adb push $OUT/symbols /data/local/symbols</code><br><code>adb logcat</code></p>
-<h3 id="无效的根示例"><a href="#无效的根示例" class="headerlink" title="无效的根示例"></a>无效的根示例</h3><p>如果对象实际上为无效根，则会输出一些有用信息： <code>art E 5955 5955 art/runtime/gc/collector/mark_sweep.cc:383] Tried to mark 0x2 not contained by any spaces</code></p>
-<p>art E  5955  5955 art/runtime/gc/collector/mark_sweep.cc:384] Attempting see if<br>it’s a bad root<br>art E  5955  5955 art/runtime/gc/collector/mark_sweep.cc:485] Found invalid<br>root: 0x2<br>art E  5955  5955 art/runtime/gc/collector/mark_sweep.cc:486]<br>Type=RootJavaFrame thread_id=1 location=Visiting method ‘java.lang.Object<br>com.google.gwt.corp.collections.JavaReadableJsArray.get(int)’ at dex PC 0x0002<br>(native PC 0xf19609d9) vreg=1</p>
-<p>在这种情况下，<code>vreg 1</code>（在 <code>com.google.gwt.corp.collections.JavaReadableJsArray.get</code>内）应该包含一个堆引用，但实际上却包含了地址 <code>0x2</code> 的一个无效指针。这显然是一个无效根。要调试此问题，下一步是在 oat 文件中使用 <code>oatdump</code>，并查看具有无效根的方法。在这种情况下，结果证明错误在于 x86 后端的编译器错误。修正该错误的更改列表如下：<a href="https://android-review.googlesource.com/#/c/133932/" target="_blank" rel="external">https://android-review.googlesource.com/#/c/133932/</a></p>
-<h3 id="损坏的对象示例"><a href="#损坏的对象示例" class="headerlink" title="损坏的对象示例"></a>损坏的对象示例</h3><p>如果对象不是根，则会输出类似于以下输出内容的消息：</p>
-<p>01-15 12:38:00.196  1217  1238 E art     : Attempting see if it’s a bad root<br>01-15 12:38:00.196  1217  1238 F art     :<br>art/runtime/gc/collector/mark_sweep.cc:381] Can’t mark invalid object</p>
-<p>当堆损坏不是无效根时，将很难进行调试。此错误消息表示堆中至少含有一个指向无效对象的对象。</p>
+    <content type="html"><![CDATA[<p>本文列举几个Android源码中的设计模式。</p>
+<p>设计模式分为创建型模式、结构型模式、行为型模式。</p>
+<h2 id="创建型模式"><a href="#创建型模式" class="headerlink" title="创建型模式"></a>创建型模式</h2><h3 id="单例模式"><a href="#单例模式" class="headerlink" title="单例模式"></a>单例模式</h3><p>单例在Android开发中经常用到，但是表现形式可能不太一样。</p>
+<p>以ActivityManager等系统服务来说，是通过静态代码块的形式实现单例，在首次加载类文件时，生成单例对象，然后保存在Cache中，之后的使用都是直接从Cache中获取。</p>
+<figure class="highlight scala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">ContextImpl</span> <span class="keyword">extends</span> <span class="title">Context</span> </span>&#123;</div><div class="line"></div><div class="line">    static &#123;</div><div class="line">        registerService(<span class="type">ACTIVITY_SERVICE</span>, <span class="keyword">new</span> <span class="type">ServiceFetcher</span>() &#123;</div><div class="line">                public <span class="type">Object</span> createService(<span class="type">ContextImpl</span> ctx) &#123;</div><div class="line">                    <span class="keyword">return</span> <span class="keyword">new</span> <span class="type">ActivityManager</span>(ctx.getOuterContext(),       ctx.mMainThread.getHandler());</div><div class="line">                &#125;&#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">``` </div><div class="line">当然，还有更加明显的例子，比如<span class="type">AccessibilityManager</span>内部自己也保证了单例，使用getInstance获取单例对象。</div></pre></td></tr></table></figure>
+<p>public static AccessibilityManager getInstance(Context context) {<br>        synchronized (sInstanceSync) {<br>            if (sInstance == null) {</p>
+<pre><code>           ......
+
+            IBinder iBinder = ServiceManager.getService(Context.ACCESSIBILITY_SERVICE);
+            IAccessibilityManager service = iBinder == null
+                    ? null : IAccessibilityManager.Stub.asInterface(iBinder);
+            sInstance = new AccessibilityManager(context, service, userId);
+        }
+    }
+    return sInstance;
+}
+</code></pre><figure class="highlight vala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="meta">### 工厂方法模式</span></div><div class="line"></div><div class="line">静态工厂方法在Android中比较明显的例子应该就是**BitmapFactory**了，通过各种decodeXXX()就可以从不同渠道获得Bitmap对象</div><div class="line"></div><div class="line"><span class="meta">### 原型模式</span></div><div class="line"></div><div class="line">书中以Intent介绍了原型模式，是通过实现Cloneable接口来做的</div></pre></td></tr></table></figure>
+<p>public class Intent implements Parcelable, Cloneable {<br>    @Override<br>        public Object clone() {<br>         return new Intent(this);<br>        }<br>    }<br><figure class="highlight vala"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="meta">### Builder模式</span></div><div class="line"></div><div class="line">工厂类模式提供的是创建单个类的模式，而建造者模式则是将各种产品集中起来进行管理，用来创建复合对象， 所谓复合对象就是指某个类具有不同的属性，其实建造者模式就是前面抽象工厂模式和最后的 Test 结合起来得到的</div><div class="line"></div><div class="line">在Android源码中，我们最常用到的Builder模式就是AlertDialog.Builder， 使用该Builder来构建复杂的AlertDialog对象。</div><div class="line"></div><div class="line"><span class="meta">## 行为型模式</span></div><div class="line"></div><div class="line"><span class="meta">### 责任链模式</span></div><div class="line"></div><div class="line">书中对于责任链模式选取的例子非常有代表性，那就是Android的触摸机制，这个看法让我从另一个维度去理解Android中的触摸事件传递。</div><div class="line"></div><div class="line"><span class="meta">### 观察者模式</span></div><div class="line"></div><div class="line">书中介绍观察者模式使用的是**ListView的Adapter**为例子，我之前知道Adapter属于适配器模式，不知道这里还有观察者模式的身影，学到了。</div><div class="line"></div><div class="line">Android里面的各种监听器，也都属于观察者模式，比如触摸、点击、按键等，ContentProvider和广播接收者也有观察者模式的身影，可以说是无处不在。</div><div class="line"></div><div class="line">除此之外，现在很多基于观察者模式的第三方框架也是非常多，比如EventBus、RxJava等等，都是对观察者模式的深入使用，感兴趣的同学可以研究一下。</div><div class="line"></div><div class="line"><span class="meta">### 模板方法模式</span></div><div class="line"></div><div class="line">对Activity生命周期的理解。</div><div class="line"></div><div class="line"><span class="meta">### 命令模式</span></div><div class="line"></div><div class="line">Command接口中定义了一个execute方法，客户端通过Invoker调用命令操作再来调用Recriver执行命令；把对Receiver的操作请求封装在具体的命令中，使得命令发起者和命令接收者解耦。 以Android中大家常见的Runnable为例：客户端只需要<span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable()&#123;&#125;).start()就开始执行一系列相关的请求，这些请求大部分都是实现Runnable接口的匿名类。 【O_o 模式就在我们身边~】</div><div class="line"></div><div class="line"><span class="meta">## 结构型模式</span></div><div class="line"></div><div class="line"><span class="meta">### 代理模式和装饰器模式</span></div><div class="line"></div><div class="line"><span class="number">1.</span> 装饰器模式关注于在一个对象上动态的添加方法，而代理模式关注于控制对对象的访问</div><div class="line">&gt; 顾名思义，装饰模式就是给一个对象增加一些新的功能，而且是动态的，要求装饰对象和被装饰对象实现同一个 接口，装饰对象持有被装饰对象的实例。</div><div class="line"></div><div class="line"><span class="number">2.</span> 代理模式，代理类可以对它的客户隐藏一个对象的具体信息。因此，当使用代理模式的时候，我们常常在一个代理类中创建一个对象的实例。而当我们使用装饰器模式的时候，通常的做法是将原始对象作为一个参数传给装饰者的构造器，和适配器模式的区别：适配器模式主要改变所考虑对象的接口，而代理模式不能改变所代理类的接口<span class="number">2</span>、和装饰器模式的区别：装饰器模式为了增强功能，而代理模式是为了加以控制。</div><div class="line"></div><div class="line"></div><div class="line">**WindowManagerImpl就是一个代理类**：</div></pre></td></tr></table></figure></p>
+<p>public final class WindowManagerImpl implements WindowManager {<br>    private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();<br>    private final Display mDisplay;<br>    private final Window mParentWindow;</p>
+<pre><code>......
+
+@Override
+public void addView(View view, ViewGroup.LayoutParams params) {
+    mGlobal.addView(view, params, mDisplay, mParentWindow);
+}
+
+@Override
+public void updateViewLayout(View view, ViewGroup.LayoutParams params) {
+    mGlobal.updateViewLayout(view, params);
+}
+
+@Override
+public void removeView(View view) {
+    mGlobal.removeView(view, false);
+}
+
+@Override
+public void removeViewImmediate(View view) {
+    mGlobal.removeView(view, true);
+}
+
+@Override
+public Display getDefaultDisplay() {
+    return mDisplay;
+}
+</code></pre><p>}<br><figure class="highlight coq"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">从上面的代码中可以看出，大部分WindowManagerImpl的方法都是通过WindowManagerGlobal实现的，而WindowManagerGlobal对象不需要额外的赋值，就存在于WindowManagerImpl中。另外，WindowManagerGlobal中其实有大量的方法，但是通过WindowManagerImpl代理之后，都没有暴露出来，对开发者是透明的。</div><div class="line"></div><div class="line">书中是以<span class="keyword">Context</span>和它的包装类ContextWrapper讲解的，也非常的典型：</div></pre></td></tr></table></figure></p>
+<p>public class ContextWrapper extends Context {<br>    Context mBase;</p>
+<pre><code>public ContextWrapper(Context base) {
+    mBase = base;
+}
+</code></pre><p>}<br>```</p>
+<h3 id="外观模式-Facade"><a href="#外观模式-Facade" class="headerlink" title="外观模式(Facade)"></a>外观模式(Facade)</h3><p>在开发过程中，Context是最重要的一个类型。它封装了很多重要的操作，比如startActivity()、sendBroadcast()等，几乎是开发者对应用操作的统一入口。Context是一个抽象类，它只是定义了抽象接口，真正的实现在ContextImpl类中。它就是今天我们要分析的外观类。</p>
+<h3 id="适配器模式"><a href="#适配器模式" class="headerlink" title="适配器模式"></a>适配器模式</h3><p>适配器模式将某个类的接口转换成客户端期望的另一个接口表示，目的是消除由于接口不匹配所造成的类的兼容 性问题。主要分为三类:类的适配器模式、对象的适配器模式、接口的适配器模式。</p>
 ]]></content>
     
     <summary type="html">
     
-      &lt;p&gt;本文档介绍如何调试 Android 运行时 (ART) 垃圾回收 (GC) 的正确性和性能问题。本文档解释了如何使用 GC 验证选项、确定 GC 验证失败的解决方案，以及测量并解决 GC 性能问题。&lt;/p&gt;
-&lt;p&gt;有关处理 ART 的说明，请参阅 &lt;a href=&quot;http
+      &lt;p&gt;本文列举几个Android源码中的设计模式。&lt;/p&gt;
+&lt;p&gt;设计模式分为创建型模式、结构型模式、行为型模式。&lt;/p&gt;
+&lt;h2 id=&quot;创建型模式&quot;&gt;&lt;a href=&quot;#创建型模式&quot; class=&quot;headerlink&quot; title=&quot;创建型模式&quot;&gt;&lt;/a&gt;创建型模式&lt;/h2
     
     </summary>
     
@@ -233,6 +219,95 @@
     </summary>
     
       <category term="python" scheme="http://fushenghua.github.io/categories/python/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>调试 ART 垃圾回收</title>
+    <link href="http://fushenghua.github.io/archives/59f7e7f7.html"/>
+    <id>http://fushenghua.github.io/archives/59f7e7f7.html</id>
+    <published>2018-04-02T00:55:29.000Z</published>
+    <updated>2018-06-06T07:06:46.192Z</updated>
+    
+    <content type="html"><![CDATA[<p>本文档介绍如何调试 Android 运行时 (ART) 垃圾回收 (GC) 的正确性和性能问题。本文档解释了如何使用 GC 验证选项、确定 GC 验证失败的解决方案，以及测量并解决 GC 性能问题。</p>
+<p>有关处理 ART 的说明，请参阅 <a href="https://source.android.google.cn/devices/tech/dalvik/index.html" target="_blank" rel="external">ART 和 Dalvik</a>、<a href="https://source.android.google.cn/devices/tech/dalvik/dex-format.html" target="_blank" rel="external">Dalvik 可执行格式</a>以及此 <a href="https://source.android.google.cn/devices/tech/dalvik/index.html" target="_blank" rel="external">ART 和 Dalvik</a> 部分的其他页面。有关验证应用行为的其他帮助信息，请参阅<a href="http://developer.android.google.cn/guide/practices/verifying-apps-art.html" target="_blank" rel="external">在 Android 运行时 (ART) 上验证应用行为</a>。</p>
+<h2 id="ART-GC-概述"><a href="#ART-GC-概述" class="headerlink" title="ART GC 概述"></a><a href="https://source.android.google.cn/devices/tech/dalvik/gc-debug#top_of_page" target="_blank" rel="external"></a>ART GC 概述</h2><p>ART 是在 Android 4.4 中引入的一个开发者选项，也是 Android 5.0 及更高版本的默认 Android 运行时。我们已不再继续维护和提供 Dalvik 运行时，现在 ART 采用了其字节码格式。请注意，本节仅总结 ART 的 GC。有关其他信息，请观看在 Google I/O 2014 上进行的 <a href="https://www.google.com/events/io/io14videos/b750c8da-aebe-e311-b297-00155d5066d7" target="_blank" rel="external">Android 运行时</a>演示。</p>
+<p>ART 有多个不同的 GC 方案，这些方案包括运行不同垃圾回收器。默认方案是 CMS（并发标记清除）方案，主要使用粘性 CMS 和部分 CMS。粘性 CMS 是 ART 的不移动分代垃圾回收器。它仅扫描堆中自上次 GC 后修改的部分，并且只能回收自上次 GC 后分配的对象。除 CMS 方案外，当应用将进程状态更改为察觉不到卡顿的进程状态（例如，后台或缓存）时，ART 将执行堆压缩。</p>
+<p>除了新的垃圾回收器之外，ART 还引入了一种基于位图的新内存分配程序，称为 RosAlloc（插槽运行分配器）。此新分配器具有分片锁，当分配规模较小时可添加线程的本地缓冲区，因而性能优于 DlMalloc。</p>
+<p>与 Dalvik 相比，ART CMS 垃圾回收计划在很多方面都有一定的改善：</p>
+<ul>
+<li>与 Dalvik 相比，暂停次数从 2 次减少到 1 次。Dalvik 的第一次暂停主要是为了进行根标记，即在 ART 中进行并发标记，让线程标记自己的根，然后马上恢复运行。</li>
+<li>与 Dalvik 类似，ART GC 在清除过程开始之前也会暂停 1 次。两者在这方面的主要差异在于：在此暂停期间，某些 Dalvik 环节在 ART 中并发进行。这些环节包括 <code>java.lang.ref.Reference</code> 处理、系统弱清除（例如，jni 弱全局等）、重新标记非线程根和卡片预清理。在 ART 暂停期间仍进行的阶段包括扫描脏卡片以及重新标记线程根，这些操作有助于缩短暂停时间。</li>
+<li>相对于 Dalvik，ART GC 改进的最后一个方面是粘性 CMS 回收器增加了 GC 吞吐量。不同于普通的分代 GC，粘性 CMS 不移动。系统会将年轻对象保存在一个分配堆栈（基本上是 <code>java.lang.Object</code> 数组）中，而非为其设置一个专属区域。这样可以避免移动所需的对象以维持低暂停次数，但缺点是容易在堆栈中加入大量复杂对象图像而使堆栈变长。</li>
+</ul>
+<p>ART GC 与 Dalvik 的另一个主要区别在于 ART GC 引入了移动垃圾回收器。使用移动 GC 的目的在于通过堆压缩来减少后台应用使用的内存。目前，触发堆压缩的事件是 ActivityManager 进程状态的改变。当应用转到后台运行时，它会通知 ART 已进入不再“感知”卡顿的进程状态。此时 ART 会进行一些操作（例如，压缩和监视器压缩），从而导致应用线程长时间暂停。目前正在使用的两个移动 GC 是同构空间压缩和半空间压缩。</p>
+<ul>
+<li>半空间压缩将对象在两个紧密排列的碰撞指针空间之间进行移动。这种移动 GC 适用于小内存设备，因为它可以比同构空间压缩稍微多节省一点内存。额外节省出的空间主要来自紧密排列的对象，这样可以避免 RosAlloc/DlMalloc 分配器占用开销。由于 CMS 仍在前台使用，且不能从碰撞指针空间中进行收集，因此当应用在前台使用时，半空间还要再进行一次转换。这种情况并不理想，因为它可能引起较长时间的暂停。</li>
+<li>同构空间压缩通过将对象从一个 RosAlloc 空间复制到另一个 RosAlloc 空间来实现。这有助于通过减少堆碎片来减少内存使用量。这是目前非低内存设备的默认压缩模式。相比半空间压缩，同构空间压缩的主要优势在于应用从后台切换到前台时无需进行堆转换。</li>
+</ul>
+<h2 id="GC-验证和性能选项"><a href="#GC-验证和性能选项" class="headerlink" title="GC 验证和性能选项"></a><a href="https://source.android.google.cn/devices/tech/dalvik/gc-debug#top_of_page" target="_blank" rel="external"></a>GC 验证和性能选项</h2><p>如果您是原始设备制造商 (OEM)，就可以更改 GC 类型。要执行该操作，您需要通过 adb 修改系统属性。请记住，这些属性只能在非用户版本或 root 版本上修改。</p>
+<h3 id="更改-GC-类型"><a href="#更改-GC-类型" class="headerlink" title="更改 GC 类型"></a>更改 GC 类型</h3><p>您可以采用多种方法来更改 ART 使用的 GC 计划。更改前台 GC 计划的主要方法是更改 <code>dalvik.vm.gctype</code> 属性或传递 <code>-Xgc:</code> 选项。您可以通过以逗号分隔的格式传递多个 GC 选项。</p>
+<p>为了导出可用 <code>-Xgc</code> 设置的完整列表，可以键入 <code>adb shell dalvikvm -help</code> 来输出各种运行时命令行选项。</p>
+<p>以下是将 GC 更改为半空间并打开 GC 前堆验证的一个示例： <code>adb shell setprop dalvik.vm.gctype SS,preverify</code></p>
+<ul>
+<li><code>CMS</code> 也是默认值，指定并发标记清除 GC 计划。该计划包括运行粘性分代 CMS、部分 CMS 和完整 CMS。该计划的分配器是适用于可移动对象的 RosAlloc 和适用于不可移动对象的 DlMalloc。</li>
+<li><code>SS</code> 指定半空间 GC 计划。该计划有两个适用于可移动对象的半空间和一个适用于不可移动对象的 DlMalloc 空间。可移动对象分配器默认设置为使用原子操作的共享碰撞指针分配器。但是，如果 <code>-XX:UseTLAB</code> 标记也被传入，则分配器使用线程局部碰撞指针分配。</li>
+<li><code>GSS</code> 指定分代半空间计划。该计划与半空间计划非常相似，但区别在于其会将存留期较长的对象提升到大型 RosAlloc 空间中。这样就可明显减少典型用例中需复制的对象。</li>
+</ul>
+<h3 id="验证堆"><a href="#验证堆" class="headerlink" title="验证堆"></a>验证堆</h3><p>堆验证可能是调试 GC 相关错误或堆损坏的最有用的 GC 选项。启用堆验证会使 GC 在垃圾回收过程中在几个点检查堆的正确性。堆验证与更改 GC 类型的选项相同。启用堆验证后，堆验证会验证根，并确保可访问对象仅引用其他可访问对象。通过传入以下 -<code>Xgc</code> 值可以启用 GC 验证：</p>
+<ul>
+<li>如果启用 GC 验证，<code>[no]preverify</code> 将在 GC 启动之前执行堆验证。</li>
+<li>如果启用 GC 验证，<code>[no]presweepingverify</code> 将在启动垃圾回收器清除过程之前执行堆验证。</li>
+<li>如果启用 GC 验证，<code>[no]postverify</code> 将在 GC 完成清除后执行堆验证。</li>
+<li><code>[no]preverify_rosalloc</code>、<code>[no]postsweepingverify_rosalloc</code> 和 <code>[no]postverify_rosalloc</code> 也是附加 GC 选项，仅验证 RosAlloc 内部计算的状态。验证的主要内容是，魔数值是否与预期常量匹配，以及可用内存块是否已在 <code>free_page_runs_</code> 映射中注册。</li>
+</ul>
+<h3 id="使用-TLAB-分配器选项"><a href="#使用-TLAB-分配器选项" class="headerlink" title="使用 TLAB 分配器选项"></a>使用 TLAB 分配器选项</h3><p>目前，只有 TLAB 选项可以更改分配器而不影响活动 GC 类型。此选项不可通过系统属性使用，但可以通过将 - <code>XX:UseTLAB</code> 传递给 <code>dalvikvm</code> 来启用。该选项的分配代码路径更短，因此分配速度更快。由于此选项需要使用暂停时间相当长的 SS 或 GSS GC 类型，因此默认情况下不启用。</p>
+<h2 id="性能"><a href="#性能" class="headerlink" title="性能"></a><a href="https://source.android.google.cn/devices/tech/dalvik/gc-debug#top_of_page" target="_blank" rel="external"></a>性能</h2><p>评测 GC 性能主要使用两种工具：GC 时间转储和 systrace。评测 GC 性能问题的最直观方法是使用 systrace 确定哪些 GC 会导致长时间暂停或抢占应用线程。尽管 ART GC 效率相对较高，但是过度分配或错误的变异器行为等都能造成性能问题。</p>
+<h3 id="人机工程学"><a href="#人机工程学" class="headerlink" title="人机工程学"></a>人机工程学</h3><p>与 Dalvik 相比，ART 在 GC 人机工程学方面存在一些重要差异。与 Dalvik 相比，其中一项重要改进是在我们延后启用并行 GC 时不再分配 GC。但是，此操作存在一个缺点：在某些情况下，不阻止 GC 会导致堆的增长速度比 Dalvik 快。好在 ART 具有堆压缩功能，可在进程变为后台进程状态时对堆进行碎片整理来缓解此问题。</p>
+<p>CMS GC 人机工程学有两种定期运行的 GC。理想情况下，GC 人机工程学更多时间运行的是分代粘性 CMS，而非部分 CMS。GC 将一直运行粘性 CMS，直到最后一个 GC 的吞吐量（通过释放的字节数/GC 持续秒数计算得出）小于部分 CMS 的平均吞吐量。发生此情况时，人机工程学将下一个并发 GC 计划为部分 CMS，而非粘性 CMS。部分 CMS 完成后，人机工程学将下一个 GC 更改回粘性 CMS。粘性 CMS 在完成后不会调整堆占用空间限制，这是促使人机工程学发挥作用的一个关键因素。这样，粘性 CMS 的发生频率更高，直到吞吐量低于部分 CMS，最终导致堆增大。</p>
+<h3 id="使用-SIGQUIT-获取-GC-性能信息"><a href="#使用-SIGQUIT-获取-GC-性能信息" class="headerlink" title="使用 SIGQUIT 获取 GC 性能信息"></a>使用 SIGQUIT 获取 GC 性能信息</h3><p>通过将 SIGQUIT 发送到已运行的应用，或在启动命令行程序时通过将 -<code>XX:DumpGCPerformanceOnShutdown</code> 传递给 <code>dalvikvm</code>，可以获得应用的 GC 性能时序。当应用获得 ANR 请求信号 (SIGQUIT) 时，它将转储与锁定、线程堆栈和 GC 性能相关的信息。</p>
+<p>获取 GC 时序转储的方法是使用以下命令：</p>
+<p>adb shell kill -S QUIT PID</p>
+<p>该操作将在 <code>/data/anr/</code> 中创建一个 <code>traces.txt</code> 文件。此文件包含一些 ANR 转储信息以及 GC 时序。您可以通过搜索“转储累计 GC 时序”来确定 GC 时序。这些时序会显示一些相关内容。它会显示各 GC 类型的阶段和暂停的直方图信息。暂停信息通常比较重要。例如：</p>
+<p>sticky concurrent mark sweep paused:    Sum: 5.491ms 99% C.I. 1.464ms-2.133ms Avg: 1.830ms Max: 2.133ms</p>
+<p><code>This</code> 显示暂停的平均时间为 1.83 ms。该值足够低，在大多数应用中不会导致丢帧，因此无需担心。</p>
+<p>需要关注的另一个问题是挂起时间。挂起时间测量在 GC 要求某个线程挂起后，线程到达挂起点所需的时间。该时间包含在 GC 暂停中，所以可用于确定长时间暂停是否是由 GC 缓慢或线程挂起缓慢造成。以下是 Nexus 5 上的正常挂起时间示例：</p>
+<p>suspend all histogram:    Sum: 1.513ms 99% C.I. 3us-546.560us Avg: 47.281us Max: 601us</p>
+<p>还有一些其他要关注的方面，例如总耗时、GC 吞吐量等。示例如下：</p>
+<p>Total time spent in GC: 502.251ms<br>Mean GC size throughput: 92MB/s<br>Mean GC object throughput: 1.54702e+06 objects/s</p>
+<p>转储已运行应用的 GC 时序的示例如下：</p>
+<p><code>adb shell kill -s QUIT &lt;var style=&quot;box-sizing: inherit; color: rgb(236, 64, 122); -webkit-font-smoothing: auto; font-weight: 700;&quot;&gt;PID&lt;/var&gt;</code><br><code>adb pull /data/anr/traces.txt</code></p>
+<p>此时，GC 时序包含在 trace.txt 中。Google 地图的输出示例如下：</p>
+<p>Start Dumping histograms for 34 iterations for sticky concurrent mark sweep<br>ScanGrayAllocSpaceObjects:    Sum: 196.174ms 99% C.I. 0.011ms-11.615ms Avg: 1.442ms Max: 14.091ms<br>FreeList:    Sum: 140.457ms 99% C.I. 6us-1676.749us Avg: 128.505us Max: 9886us<br>MarkRootsCheckpoint:    Sum: 110.687ms 99% C.I. 0.056ms-9.515ms Avg: 1.627ms Max: 10.280ms<br>SweepArray:    Sum: 78.727ms 99% C.I. 0.121ms-11.780ms Avg: 2.315ms Max: 12.744ms<br>ProcessMarkStack:    Sum: 77.825ms 99% C.I. 1.323us-9120us Avg: 576.481us Max: 10185us<br>(Paused)ScanGrayObjects:    Sum: 32.538ms 99% C.I. 286us-3235.500us Avg: 986us Max: 3434us<br>AllocSpaceClearCards:    Sum: 30.592ms 99% C.I. 10us-2249.999us Avg: 224.941us Max: 4765us<br>MarkConcurrentRoots:    Sum: 30.245ms 99% C.I. 3us-3017.999us Avg: 444.779us Max: 3774us<br>ReMarkRoots:    Sum: 13.144ms 99% C.I. 66us-712us Avg: 386.588us Max: 712us<br>ScanGrayImageSpaceObjects:    Sum: 13.075ms 99% C.I. 29us-2538.999us Avg: 192.279us Max: 3080us<br>MarkingPhase:    Sum: 9.743ms 99% C.I. 170us-518us Avg: 286.558us Max: 518us<br>SweepSystemWeaks:    Sum: 8.046ms 99% C.I. 28us-479us Avg: 236.647us Max: 479us<br>MarkNonThreadRoots:    Sum: 5.215ms 99% C.I. 31us-698.999us Avg: 76.691us Max: 703us<br>ImageModUnionClearCards:    Sum: 2.708ms 99% C.I. 26us-92us Avg: 39.823us Max: 92us<br>ScanGrayZygoteSpaceObjects:    Sum: 2.488ms 99% C.I. 19us-250.499us Avg: 37.696us Max: 295us<br>ResetStack:    Sum: 2.226ms 99% C.I. 24us-449us Avg: 65.470us Max: 452us<br>ZygoteModUnionClearCards:    Sum: 2.124ms 99% C.I. 18us-233.999us Avg: 32.181us Max: 291us<br>FinishPhase:    Sum: 1.881ms 99% C.I. 31us-431.999us Avg: 55.323us Max: 466us<br>RevokeAllThreadLocalAllocationStacks:    Sum: 1.749ms 99% C.I. 8us-349us Avg: 51.441us Max: 377us<br>EnqueueFinalizerReferences:    Sum: 1.513ms 99% C.I. 3us-201us Avg: 44.500us Max: 201us<br>ProcessReferences:    Sum: 438us 99% C.I. 3us-212us Avg: 12.882us Max: 212us<br>ProcessCards:    Sum: 381us 99% C.I. 4us-17us Avg: 5.602us Max: 17us<br>PreCleanCards:    Sum: 363us 99% C.I. 8us-17us Avg: 10.676us Max: 17us<br>ReclaimPhase:    Sum: 357us 99% C.I. 7us-91.500us Avg: 10.500us Max: 93us<br>(Paused)PausePhase:    Sum: 312us 99% C.I. 7us-15us Avg: 9.176us Max: 15us<br>SwapBitmaps:    Sum: 166us 99% C.I. 4us-8us Avg: 4.882us Max: 8us<br>(Paused)ScanGrayAllocSpaceObjects:    Sum: 126us 99% C.I. 14us-112us Avg: 63us Max: 112us<br>MarkRoots:    Sum: 121us 99% C.I. 2us-7us Avg: 3.558us Max: 7us<br>(Paused)ScanGrayImageSpaceObjects:    Sum: 68us 99% C.I. 68us-68us Avg: 68us Max: 68us<br>BindBitmaps:    Sum: 50us 99% C.I. 1us-3us Avg: 1.470us Max: 3us<br>UnBindBitmaps:    Sum: 49us 99% C.I. 1us-3us Avg: 1.441us Max: 3us<br>SwapStacks:    Sum: 47us 99% C.I. 1us-3us Avg: 1.382us Max: 3us<br>RecordFree:    Sum: 42us 99% C.I. 1us-3us Avg: 1.235us Max: 3us<br>ForwardSoftReferences:    Sum: 37us 99% C.I. 1us-2us Avg: 1.121us Max: 2us<br>InitializePhase:    Sum: 36us 99% C.I. 1us-2us Avg: 1.058us Max: 2us<br>FindDefaultSpaceBitmap:    Sum: 32us 99% C.I. 250ns-1000ns Avg: 941ns Max: 1000ns<br>(Paused)ProcessMarkStack:    Sum: 5us 99% C.I. 250ns-3000ns Avg: 147ns Max: 3000ns<br>PreSweepingGcVerification:    Sum: 0 99% C.I. 0ns-0ns Avg: 0ns Max: 0ns<br>Done Dumping histograms<br>sticky concurrent mark sweep paused:    Sum: 63.268ms 99% C.I. 0.308ms-8.405ms<br>Avg: 1.860ms Max: 8.883ms<br>sticky concurrent mark sweep total time: 763.787ms mean time: 22.464ms<br>sticky concurrent mark sweep freed: 1072342 objects with total size 75MB<br>sticky concurrent mark sweep throughput: 1.40543e+06/s / 98MB/s<br>Total time spent in GC: 4.805s<br>Mean GC size throughput: 18MB/s<br>Mean GC object throughput: 330899 objects/s<br>Total number of allocations 2015049<br>Total bytes allocated 177MB<br>Free memory 4MB<br>Free memory until GC 4MB<br>Free memory until OOME 425MB<br>Total memory 90MB<br>Max memory 512MB<br>Zygote space size 4MB<br>Total mutator paused time: 229.566ms<br>Total time waiting for GC to complete: 187.655us</p>
+<h2 id="分析-GC-正确性问题的工具"><a href="#分析-GC-正确性问题的工具" class="headerlink" title="分析 GC 正确性问题的工具"></a><a href="https://source.android.google.cn/devices/tech/dalvik/gc-debug#top_of_page" target="_blank" rel="external"></a>分析 GC 正确性问题的工具</h2><p>造成 ART 内部崩溃的原因多种多样。读取或写入对象字段时出现崩溃可能表示存在堆损坏。如果 GC 在运行时崩溃，也可能是由堆损坏造成的。造成堆损坏的原因多种多样，最常见的原因可能是应用代码错误。好在可以使用相关工具调试与 GC 和堆相关的崩溃问题。此类工具包括上面指定的堆验证选项、valgrind 和 CheckJNI。</p>
+<h3 id="CheckJNI"><a href="#CheckJNI" class="headerlink" title="CheckJNI"></a>CheckJNI</h3><p>验证应用行为的另一种方法是使用 CheckJNI。CheckJNI 是一种添加额外 JNI 检查的模式；出于性能考虑，这些选项在默认情况下并不会启用。此类检查将捕获一些可能导致堆损坏的错误，例如使用无效/过时的局部和全局引用。启用 CheckJNI 的方法如下：</p>
+<p>adb shell setprop dalvik.vm.checkjni true</p>
+<p>Forcecopy 模式是 CheckJNI 的另一部分，对检测超出数组区域末端的写入非常有用。启用后，forcecopy 会促使数组访问 JNI 函数时始终返回带有红色区域的副本。红色区域是返回指针结束/开始处的一个区域，该区域具有特殊值，并在数组释放时得到验证。如果红色区域中的值与预期值不匹配，则通常意味着发生缓冲区溢出或欠载。这将导致 CheckJNI 中止。启用 forcecopy 模式的方法如下：</p>
+<p>adb shell setprop dalvik.vm.jniopts forcecopy</p>
+<p>CheckJNI 应捕获错误的一个示例是超出从 <code>GetPrimitiveArrayCritical</code> 获取的数组末端的写入。该操作很可能会破坏 Java 堆。如果写入位于 CheckJNI 红色区域内，则在调用相应 <code>ReleasePrimitiveArrayCritical</code> 时，CheckJNI 将会捕获该问题。否则，写入将最终损坏 Java 堆中的一些随机对象，并可能会导致之后出现 GC 崩溃。如果崩溃的内存是引用字段，则 GC 可能会捕获错误并输出“Tried to mark not contained by any spaces”这一错误消息。</p>
+<p>当 GC 尝试标记无法找到空间的对象时，就会发生此错误。在此检查失败后，GC 会遍历根，并尝试查看无效对象是否为根。结果共有两个选项：对象为根或非根。</p>
+<h3 id="Valgrind"><a href="#Valgrind" class="headerlink" title="Valgrind"></a>Valgrind</h3><p>ART 堆支持可选的 valgrind 工具，这款工具提供了一种方法来检测对无效堆地址的读取和写入操作。ART 可检测应用何时在 valgrind 下运行，并在每个对象分配前后插入红色区域。如果对这些红色区域有任何读取或写入错误，valgrind 将输出错误消息。例如，如果您在通过 JNI 直接访问数组时，越过数组元素末端进行读取或写入，就会出现此类错误。由于 AOT 编译器使用隐式 null 检查，因此建议使用 eng 版本运行 valgrind。另外值得一提的是，valgrind 比正常执行速度慢一个数量级。</p>
+<p>以下是一个使用示例：</p>
+<h1 id="build-and-install"><a href="#build-and-install" class="headerlink" title="build and install"></a>build and install</h1><p><code>mmm external/valgrind</code><br><code>adb remount &amp;&amp; adb sync</code></p>
+<h1 id="disable-selinux"><a href="#disable-selinux" class="headerlink" title="disable selinux"></a>disable selinux</h1><p><code>adb shell setenforce 0</code><br><code>adb shell setprop wrap.com.android.calculator2</code><br>“TMPDIR=/data/data/com.android.calculator2 logwrapper valgrind”</p>
+<h1 id="push-symbols"><a href="#push-symbols" class="headerlink" title="push symbols"></a>push symbols</h1><p><code>adb shell mkdir /data/local/symbols</code><br><code>adb push $OUT/symbols /data/local/symbols</code><br><code>adb logcat</code></p>
+<h3 id="无效的根示例"><a href="#无效的根示例" class="headerlink" title="无效的根示例"></a>无效的根示例</h3><p>如果对象实际上为无效根，则会输出一些有用信息： <code>art E 5955 5955 art/runtime/gc/collector/mark_sweep.cc:383] Tried to mark 0x2 not contained by any spaces</code></p>
+<p>art E  5955  5955 art/runtime/gc/collector/mark_sweep.cc:384] Attempting see if<br>it’s a bad root<br>art E  5955  5955 art/runtime/gc/collector/mark_sweep.cc:485] Found invalid<br>root: 0x2<br>art E  5955  5955 art/runtime/gc/collector/mark_sweep.cc:486]<br>Type=RootJavaFrame thread_id=1 location=Visiting method ‘java.lang.Object<br>com.google.gwt.corp.collections.JavaReadableJsArray.get(int)’ at dex PC 0x0002<br>(native PC 0xf19609d9) vreg=1</p>
+<p>在这种情况下，<code>vreg 1</code>（在 <code>com.google.gwt.corp.collections.JavaReadableJsArray.get</code>内）应该包含一个堆引用，但实际上却包含了地址 <code>0x2</code> 的一个无效指针。这显然是一个无效根。要调试此问题，下一步是在 oat 文件中使用 <code>oatdump</code>，并查看具有无效根的方法。在这种情况下，结果证明错误在于 x86 后端的编译器错误。修正该错误的更改列表如下：<a href="https://android-review.googlesource.com/#/c/133932/" target="_blank" rel="external">https://android-review.googlesource.com/#/c/133932/</a></p>
+<h3 id="损坏的对象示例"><a href="#损坏的对象示例" class="headerlink" title="损坏的对象示例"></a>损坏的对象示例</h3><p>如果对象不是根，则会输出类似于以下输出内容的消息：</p>
+<p>01-15 12:38:00.196  1217  1238 E art     : Attempting see if it’s a bad root<br>01-15 12:38:00.196  1217  1238 F art     :<br>art/runtime/gc/collector/mark_sweep.cc:381] Can’t mark invalid object</p>
+<p>当堆损坏不是无效根时，将很难进行调试。此错误消息表示堆中至少含有一个指向无效对象的对象。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;本文档介绍如何调试 Android 运行时 (ART) 垃圾回收 (GC) 的正确性和性能问题。本文档解释了如何使用 GC 验证选项、确定 GC 验证失败的解决方案，以及测量并解决 GC 性能问题。&lt;/p&gt;
+&lt;p&gt;有关处理 ART 的说明，请参阅 &lt;a href=&quot;http
+    
+    </summary>
+    
+      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
     
     
   </entry>
@@ -767,65 +842,6 @@
   </entry>
   
   <entry>
-    <title>优化Gradle 依赖使用方式</title>
-    <link href="http://fushenghua.github.io/archives/c66eed35.html"/>
-    <id>http://fushenghua.github.io/archives/c66eed35.html</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.653Z</updated>
-    
-    <content type="html"><![CDATA[<p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p>
-<blockquote>
-<p><a href="http://stash.lab.tclclouds.com/projects/CLEAN/repos/cleaner_module/commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318" target="_blank" rel="external">commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318</a></p>
-</blockquote>
-<p>现在仍有些问题,比如 <strong>SpaceBase</strong> 依赖了 <strong>VirusEngine</strong> 等问题。</p>
-<h3 id="全新的依赖方式"><a href="#全新的依赖方式" class="headerlink" title="全新的依赖方式"></a>全新的依赖方式</h3><h4 id="需要那个开那个"><a href="#需要那个开那个" class="headerlink" title="需要那个开那个"></a>需要那个开那个</h4><p>修改项目中 <code>module.properties</code> 的配置, <code>true</code> 代表以<code>Project</code> 方式引入,反之则是<code>aar</code>方式,<strong>该配置已被忽略,只对当前工程配置有效。</strong></p>
-<p>如果你确实想提交修改,请使用 <code>git add -f module.properties</code> 命令强制添加。</p>
-<figure class="highlight lasso"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="params">...</span></div><div class="line">isBoostengineDebug=<span class="literal">false</span></div><div class="line">isAppmgrDebug=<span class="literal">false</span></div><div class="line">isCpuDebug=<span class="literal">false</span></div><div class="line">isNotifyboxDebug=<span class="literal">false</span></div><div class="line">isHardwareDebug=<span class="literal">false</span></div><div class="line">isAntivirusDebug=<span class="literal">false</span></div><div class="line">isJunkDebug=<span class="literal">false</span></div><div class="line">isAllDebug=<span class="literal">false</span><span class="comment">// 全部 Debug，即编译Project模式</span></div></pre></td></tr></table></figure>
-<h4 id="添加新的模块依赖"><a href="#添加新的模块依赖" class="headerlink" title="添加新的模块依赖"></a>添加新的模块依赖</h4><p>如果你需要添加新的模块依赖,请按照以下方法,在 <code>module.gradle</code> 脚本中新增 <code>compile_*</code> 方法,如下:</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">def</span> compile_junk(<span class="keyword">Project</span> projectModule)&#123;</div><div class="line">    projectModule.<span class="keyword">dependencies</span>&#123;</div><div class="line">        <span class="keyword">if</span> (isAllDebug.toBoolean() || isJunkDebug.toBoolean()) &#123;</div><div class="line">            <span class="keyword">compile</span> <span class="keyword">project</span>(<span class="string">':junk'</span>)</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">compile</span>(name: <span class="string">'junk'</span>, ext: <span class="string">'aar'</span>)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>然后通过闭包形式传递出去,在 <code>module.gradle</code> 脚本中有<code>ext</code> 扩展属性 ，添加如下：</p>
-<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class">ext </span>&#123;</div><div class="line">  compile_junk = this.<span class="variable">&amp;compile_junk</span>  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>最终通过以下方式使用</p>
-<figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compile_junk(<span class="name">getProject</span>())</div></pre></td></tr></table></figure>
-<h3 id="模块公用的Libs库"><a href="#模块公用的Libs库" class="headerlink" title="模块公用的Libs库"></a>模块公用的Libs库</h3><p>在工程目录的顶级 <code>libs</code> 文件夹中存放着各个模块的 <code>aar</code> ,如果需要更新,可以通过脚本进行<br>全量更新,或者各模块部分更新。</p>
-<h3 id="更新AAR"><a href="#更新AAR" class="headerlink" title="更新AAR"></a>更新AAR</h3><p>在<code>cleaner</code> 工程目录下，在你每次<strong>运行</strong>程序时 <code>update-aar.gradle</code>会自动更新<strong>已开启</strong>模块(如<code>isJunkDebug=true</code>)的<code>aar</code> 到 公用<code>libs</code>库中，你所需要做的就是 <code>commit</code>，这样能保证各位小伙伴使用的都是较新的<code>aar</code>。</p>
-<p>同样的你也可以手动触发<code>Task</code>来更新<code>aar</code>，相应<code>Task</code> 如下：</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">task</span> updateAAR &lt;&lt; &#123;</div><div class="line">    eachLibsAAR()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="版本发布"><a href="#版本发布" class="headerlink" title="版本发布"></a>版本发布</h3><p>如果需要全部通过 <code>Project</code> 形式构建<strong>版本发布</strong>,只需添加动态参数 <code>isAllDebug=true</code> ，比如：</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAllDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
-<p>同样的可以添加更多的模块参数,来表示某些模块通过 <code>Project</code> 形式构建，比如：</p>
-<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAppmgrDebug=<span class="literal">true</span> -PisJunkDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
-<blockquote>
-<p>注意: 默认都是以引入<code>aar</code> 形式构建(除<strong>SpaceBase</strong>),所以如果不添加参数,需要及时更新<code>aar</code></p>
-</blockquote>
-<h3 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h3><h4 id="2017-4-21-优化Gradle编译速度，最快3s。"><a href="#2017-4-21-优化Gradle编译速度，最快3s。" class="headerlink" title="2017/4/21 优化Gradle编译速度，最快3s。"></a>2017/4/21 优化Gradle编译速度，最快3s。</h4><blockquote>
-<p>1、修改<strong><code>isAllDebug</code></strong> 作用域，由原存放在<code>module.properties</code> 修改存放在<code>gradle.properties</code>中。<br>2、可选模块<strong>include</strong>，只有在<code>module.properties</code>配置文件中开关为<strong>true</strong> 的模块，才会被Android Studio 所<strong>include</strong>。<br>3、新增<code>task</code> 耗时监听，方便查看耗时<code>task</code>，在<em>Gradle Console</em> 中输出。<br>4、区分测试开发输出，新增<strong><code>dev</code></strong> <code>productFlavors</code>,同时关闭一些不用的<code>productFlavors</code>，其中<strong><code>dev</code></strong> 用于测试Jenkins 输出apk <code>flavors</code>，<strong><code>buildVersion</code></strong> 用于研发本地输出apk，<strong>minSdkVersion=21</strong>，关闭<strong>fabric</strong> 在<strong><code>buildVersion</code></strong> 中上报初始化，同时也优化了其他模块的依赖。<br>5、本地默认只有<strong><code>buildVersion</code></strong><code>flavors</code>，只有在<code>isAllDebug=true</code>的情况，才会开启其他的<code>flavors</code>。以便获得更好的编译体验。<strong>还有修改完gradle配置文件后记得点build sync<img src="/images/toolbar-sync-gradle.png" alt="Alt text">进行同步一下。</strong></p>
-</blockquote>
-<h4 id="2017-5-27-添加自动合并多语言task"><a href="#2017-5-27-添加自动合并多语言task" class="headerlink" title="2017/5/27  添加自动合并多语言task"></a>2017/5/27  添加自动合并多语言task</h4><blockquote>
-<p>1 、使用<code>Python</code>脚本自动化合入多语言的<code>task</code>，所以在使用前需要有<code>Python</code>环境，相应代码块如下：</p>
-</blockquote>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">task mergeLanguage(<span class="built_in">type</span>: Exec) &#123;</div><div class="line">    workingDir <span class="string">'./'</span></div><div class="line">    <span class="built_in">command</span>Line <span class="string">"python"</span>, <span class="string">"merge_strs.py"</span>,</div><div class="line"><span class="string">"/home/silver/ssd/AndroidStudioProjects/cleaner_module/spaceplus_android/junk/src/main/res/"</span>,</div><div class="line">            <span class="string">"/home/silver/桌面/清理缓存0502-多语言/"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>其中第一个参数是需要添入多语言模块文件目录，第二个参数是存放多语言文件目录。修改参数 执行<strong><code>mergeLanguage</code></strong> <code>task</code>即可合并多语言。<br><img src="/images/2017-05-27 19:26:37屏幕截图.png" alt="Alt text"></p>
-<h4 id="2017-5-31-Auto-Update-Librarys-AAR"><a href="#2017-5-31-Auto-Update-Librarys-AAR" class="headerlink" title="2017/5/31  Auto Update Librarys AAR"></a>2017/5/31  Auto Update Librarys AAR</h4><blockquote>
-<p>1 、<strong><code>quartz-robot</code></strong>会在<strong>每周一至周五(8,12,16,20h)</strong>准时自动更新<code>aar</code>到git repos。</p>
-</blockquote>
-<h4 id="2017-5-1-更新说明"><a href="#2017-5-1-更新说明" class="headerlink" title="2017/5/1  更新说明"></a>2017/5/1  更新说明</h4><p>以上是模块化后解决过渡时期编译速度慢,方便开发调试等各种便利的方案,各位研发大拿体验<br>下,感受如丝般顺滑,如有问题及时沟通。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 &lt;strong&gt;commit&lt;/strong&gt;：&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;&lt;a href=&quot;http://stash.lab.
-    
-    </summary>
-    
-      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
-    
-    
-  </entry>
-  
-  <entry>
     <title>ViewStub原理分析</title>
     <link href="http://fushenghua.github.io/archives/235d5e38.html"/>
     <id>http://fushenghua.github.io/archives/235d5e38.html</id>
@@ -1102,6 +1118,65 @@
   </entry>
   
   <entry>
+    <title>优化Gradle 依赖使用方式</title>
+    <link href="http://fushenghua.github.io/archives/c66eed35.html"/>
+    <id>http://fushenghua.github.io/archives/c66eed35.html</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-20T05:25:03.653Z</updated>
+    
+    <content type="html"><![CDATA[<p>经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 <strong>commit</strong>：</p>
+<blockquote>
+<p><a href="http://stash.lab.tclclouds.com/projects/CLEAN/repos/cleaner_module/commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318" target="_blank" rel="external">commits/d374e1c36d5e7a44c3b1d817216f3b6a04a9f318</a></p>
+</blockquote>
+<p>现在仍有些问题,比如 <strong>SpaceBase</strong> 依赖了 <strong>VirusEngine</strong> 等问题。</p>
+<h3 id="全新的依赖方式"><a href="#全新的依赖方式" class="headerlink" title="全新的依赖方式"></a>全新的依赖方式</h3><h4 id="需要那个开那个"><a href="#需要那个开那个" class="headerlink" title="需要那个开那个"></a>需要那个开那个</h4><p>修改项目中 <code>module.properties</code> 的配置, <code>true</code> 代表以<code>Project</code> 方式引入,反之则是<code>aar</code>方式,<strong>该配置已被忽略,只对当前工程配置有效。</strong></p>
+<p>如果你确实想提交修改,请使用 <code>git add -f module.properties</code> 命令强制添加。</p>
+<figure class="highlight lasso"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="params">...</span></div><div class="line">isBoostengineDebug=<span class="literal">false</span></div><div class="line">isAppmgrDebug=<span class="literal">false</span></div><div class="line">isCpuDebug=<span class="literal">false</span></div><div class="line">isNotifyboxDebug=<span class="literal">false</span></div><div class="line">isHardwareDebug=<span class="literal">false</span></div><div class="line">isAntivirusDebug=<span class="literal">false</span></div><div class="line">isJunkDebug=<span class="literal">false</span></div><div class="line">isAllDebug=<span class="literal">false</span><span class="comment">// 全部 Debug，即编译Project模式</span></div></pre></td></tr></table></figure>
+<h4 id="添加新的模块依赖"><a href="#添加新的模块依赖" class="headerlink" title="添加新的模块依赖"></a>添加新的模块依赖</h4><p>如果你需要添加新的模块依赖,请按照以下方法,在 <code>module.gradle</code> 脚本中新增 <code>compile_*</code> 方法,如下:</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">def</span> compile_junk(<span class="keyword">Project</span> projectModule)&#123;</div><div class="line">    projectModule.<span class="keyword">dependencies</span>&#123;</div><div class="line">        <span class="keyword">if</span> (isAllDebug.toBoolean() || isJunkDebug.toBoolean()) &#123;</div><div class="line">            <span class="keyword">compile</span> <span class="keyword">project</span>(<span class="string">':junk'</span>)</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">compile</span>(name: <span class="string">'junk'</span>, ext: <span class="string">'aar'</span>)</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>然后通过闭包形式传递出去,在 <code>module.gradle</code> 脚本中有<code>ext</code> 扩展属性 ，添加如下：</p>
+<figure class="highlight dts"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class">ext </span>&#123;</div><div class="line">  compile_junk = this.<span class="variable">&amp;compile_junk</span>  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>最终通过以下方式使用</p>
+<figure class="highlight lisp"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">compile_junk(<span class="name">getProject</span>())</div></pre></td></tr></table></figure>
+<h3 id="模块公用的Libs库"><a href="#模块公用的Libs库" class="headerlink" title="模块公用的Libs库"></a>模块公用的Libs库</h3><p>在工程目录的顶级 <code>libs</code> 文件夹中存放着各个模块的 <code>aar</code> ,如果需要更新,可以通过脚本进行<br>全量更新,或者各模块部分更新。</p>
+<h3 id="更新AAR"><a href="#更新AAR" class="headerlink" title="更新AAR"></a>更新AAR</h3><p>在<code>cleaner</code> 工程目录下，在你每次<strong>运行</strong>程序时 <code>update-aar.gradle</code>会自动更新<strong>已开启</strong>模块(如<code>isJunkDebug=true</code>)的<code>aar</code> 到 公用<code>libs</code>库中，你所需要做的就是 <code>commit</code>，这样能保证各位小伙伴使用的都是较新的<code>aar</code>。</p>
+<p>同样的你也可以手动触发<code>Task</code>来更新<code>aar</code>，相应<code>Task</code> 如下：</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">task</span> updateAAR &lt;&lt; &#123;</div><div class="line">    eachLibsAAR()</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="版本发布"><a href="#版本发布" class="headerlink" title="版本发布"></a>版本发布</h3><p>如果需要全部通过 <code>Project</code> 形式构建<strong>版本发布</strong>,只需添加动态参数 <code>isAllDebug=true</code> ，比如：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAllDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
+<p>同样的可以添加更多的模块参数,来表示某些模块通过 <code>Project</code> 形式构建，比如：</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./gradlew -PisAppmgrDebug=<span class="literal">true</span> -PisJunkDebug=<span class="literal">true</span> hello</div></pre></td></tr></table></figure>
+<blockquote>
+<p>注意: 默认都是以引入<code>aar</code> 形式构建(除<strong>SpaceBase</strong>),所以如果不添加参数,需要及时更新<code>aar</code></p>
+</blockquote>
+<h3 id="更新日志"><a href="#更新日志" class="headerlink" title="更新日志"></a>更新日志</h3><h4 id="2017-4-21-优化Gradle编译速度，最快3s。"><a href="#2017-4-21-优化Gradle编译速度，最快3s。" class="headerlink" title="2017/4/21 优化Gradle编译速度，最快3s。"></a>2017/4/21 优化Gradle编译速度，最快3s。</h4><blockquote>
+<p>1、修改<strong><code>isAllDebug</code></strong> 作用域，由原存放在<code>module.properties</code> 修改存放在<code>gradle.properties</code>中。<br>2、可选模块<strong>include</strong>，只有在<code>module.properties</code>配置文件中开关为<strong>true</strong> 的模块，才会被Android Studio 所<strong>include</strong>。<br>3、新增<code>task</code> 耗时监听，方便查看耗时<code>task</code>，在<em>Gradle Console</em> 中输出。<br>4、区分测试开发输出，新增<strong><code>dev</code></strong> <code>productFlavors</code>,同时关闭一些不用的<code>productFlavors</code>，其中<strong><code>dev</code></strong> 用于测试Jenkins 输出apk <code>flavors</code>，<strong><code>buildVersion</code></strong> 用于研发本地输出apk，<strong>minSdkVersion=21</strong>，关闭<strong>fabric</strong> 在<strong><code>buildVersion</code></strong> 中上报初始化，同时也优化了其他模块的依赖。<br>5、本地默认只有<strong><code>buildVersion</code></strong><code>flavors</code>，只有在<code>isAllDebug=true</code>的情况，才会开启其他的<code>flavors</code>。以便获得更好的编译体验。<strong>还有修改完gradle配置文件后记得点build sync<img src="/images/toolbar-sync-gradle.png" alt="Alt text">进行同步一下。</strong></p>
+</blockquote>
+<h4 id="2017-5-27-添加自动合并多语言task"><a href="#2017-5-27-添加自动合并多语言task" class="headerlink" title="2017/5/27  添加自动合并多语言task"></a>2017/5/27  添加自动合并多语言task</h4><blockquote>
+<p>1 、使用<code>Python</code>脚本自动化合入多语言的<code>task</code>，所以在使用前需要有<code>Python</code>环境，相应代码块如下：</p>
+</blockquote>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">task mergeLanguage(<span class="built_in">type</span>: Exec) &#123;</div><div class="line">    workingDir <span class="string">'./'</span></div><div class="line">    <span class="built_in">command</span>Line <span class="string">"python"</span>, <span class="string">"merge_strs.py"</span>,</div><div class="line"><span class="string">"/home/silver/ssd/AndroidStudioProjects/cleaner_module/spaceplus_android/junk/src/main/res/"</span>,</div><div class="line">            <span class="string">"/home/silver/桌面/清理缓存0502-多语言/"</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其中第一个参数是需要添入多语言模块文件目录，第二个参数是存放多语言文件目录。修改参数 执行<strong><code>mergeLanguage</code></strong> <code>task</code>即可合并多语言。<br><img src="/images/2017-05-27 19:26:37屏幕截图.png" alt="Alt text"></p>
+<h4 id="2017-5-31-Auto-Update-Librarys-AAR"><a href="#2017-5-31-Auto-Update-Librarys-AAR" class="headerlink" title="2017/5/31  Auto Update Librarys AAR"></a>2017/5/31  Auto Update Librarys AAR</h4><blockquote>
+<p>1 、<strong><code>quartz-robot</code></strong>会在<strong>每周一至周五(8,12,16,20h)</strong>准时自动更新<code>aar</code>到git repos。</p>
+</blockquote>
+<h4 id="2017-5-1-更新说明"><a href="#2017-5-1-更新说明" class="headerlink" title="2017/5/1  更新说明"></a>2017/5/1  更新说明</h4><p>以上是模块化后解决过渡时期编译速度慢,方便开发调试等各种便利的方案,各位研发大拿体验<br>下,感受如丝般顺滑,如有问题及时沟通。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;经历过模块化后,项目依赖变的错综复杂,以至于编译速度过慢,部分模块依赖不合理导致包增大等。所以清理了一些不必要的依赖及重复依赖详见 &lt;strong&gt;commit&lt;/strong&gt;：&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;&lt;a href=&quot;http://stash.lab.
+    
+    </summary>
+    
+      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
+    
+    
+  </entry>
+  
+  <entry>
     <title>app安全之Apk完整性校验</title>
     <link href="http://fushenghua.github.io/archives/a72a1e10.html"/>
     <id>http://fushenghua.github.io/archives/a72a1e10.html</id>
@@ -1149,64 +1224,6 @@
     </summary>
     
       <category term="安全" scheme="http://fushenghua.github.io/categories/%E5%AE%89%E5%85%A8/"/>
-    
-    
-  </entry>
-  
-  <entry>
-    <title>版本管理发布流程</title>
-    <link href="http://fushenghua.github.io/archives/375726b.html"/>
-    <id>http://fushenghua.github.io/archives/375726b.html</id>
-    <published>2016-06-07T00:55:29.000Z</published>
-    <updated>2018-04-20T05:25:03.655Z</updated>
-    
-    <content type="html"><![CDATA[<p>为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。</p>
-<h3 id="版本命名规范"><a href="#版本命名规范" class="headerlink" title="版本命名规范"></a>版本命名规范</h3><p>软件版本号由四部分组成，第一个1为主版本号，第二个1为子版本号，第三个1为阶段版本号，第四部分为日期版本号加希腊字母版本号，希腊字母版本号共有5种，分别为：base、alpha、beta、RC、release。例如：1.1.1.051021_beta。</p>
-<h4 id="版本号修改规则"><a href="#版本号修改规则" class="headerlink" title="版本号修改规则"></a>版本号修改规则</h4><p>⑴ 主版本号(1)<br>当功能模块有较大的变动，比如增加多个模块或者整体架构发生变化。此版本号由项目决定是否修改。<br>⑵ 子版本号(1)<br>相对于主版本号而言，子版本号升级对应的是软件功能有一定的增加或变化，比如增加了对权限控制、增加自定义视图等功能。此版本号由项目决定是否修改。<br>⑶ 阶段版本号(1)<br>一般是 Bug 修复或是一些小的变动，要经常发布修订版，时间间隔不限，修复一个严重的bug即可发布一个修订版。此版本号由项目经理决定是否修改。<br>⑷ 日期版本号(051021)<br>用于记录修改项目的当前日期，每天对项目的修改都需要更改日期版本号。此版本号由开发人员决定是否修改。<br>⑸ 希腊字母版本号(beta)<br>此版本号用于标注当前版本的软件处于哪个开发阶段，当软件进入到另一个阶段时需要修改此版本号。此版本号由项目决定是否修改。</p>
-<h4 id="软件版本阶段说明"><a href="#软件版本阶段说明" class="headerlink" title="软件版本阶段说明"></a>软件版本阶段说明</h4><p>⑴ Base：<br>此版本表示该软件仅仅是一个假页面链接，通常包括所有的功能和页面布局，但是页面中的功能都没有做完整的实现，只是做为整体网站的一个基础架构。<br>⑵ α（Alpha）版：内测版。<br>软件的初级版本，表示该软件在此阶段以实现软件功能为主，通常只在软件开发者 内部交流，或者专业测试人员测试用，一般而言，该版本软件的Bug较多，需要继续修改，是测试版本。测试人员提交Bug经开发人员修改确认之后，发布到测试网址让测试人员测试，此时可将软件版本标注为alpha版。<br>⑶ β（Beta）版：公测版。<br>该版本相对于α版已有了很大的改进，消除了严重的错误，但还是存在着一些缺陷，需要经过多次测试来进一步消除，此版本主要的修改对像是软件的UI，供专业爱好者大规模测试用。<br>⑷ RC 版：<br>是 Release Candidate 的缩写，意思是发布倒计时，候选版本，该版本已经相当成熟了，完成全部功能并清除大部分的BUG，基本上不存在导致错误的BUG，与即将发行的正式版相差无几。<br>⑷ Release 版：<br>该版本意味“最终版本”，在前面版本的一系列测试版之后，终归会有一个正式版本，是最终交付用户使用的一个版本。该版本有时也称为标准版。一般情况下，Release不会以单词形式出现在软件封面上，取而代之的是符号(R)。</p>
-<h4 id="版本号修改举例说明"><a href="#版本号修改举例说明" class="headerlink" title="版本号修改举例说明"></a>版本号修改举例说明</h4><p>比如版本号为：1.0.0.0321_alpha ，此时为内部测试阶段<br>⑴ 开发人员修复了测试人员提交的bug并经测试人员测试验证关闭bug之后，发布到外网时，此时就进入了软件的下一个阶段，版本号可改为：1.0.0.0321_beta ，如当前日期跟上一个版本号的日期不一样，版本号可改为：1.0.0.0322_beta。<br>⑵ 如果修复了一些重大Bug 并按照流程发布到外网时就可发布一个修订版，如1.0.1.0322_beta，日期为发布的当前日期。<br>⑶ 如果对软件进行了一些功能上的改进或增强，进行了一些局部变动的时候要修改次版本号，如：1.1.0.0322_beta（上一级有变动时，下级要归零）。<br>⑷ 当功能模块有较大变动，增加模块或整体架构发生变化时要修改主版本号，如新增加了退款功能，则版本号要改为：2.0.0.0322_beta 。<br>⑸ 紧急情况：如果bug比较紧急可跳过一般流程，由开发人员尽快修复bug，测试确认之后直接发布该版本的beta版。</p>
-<h4 id="APK-文件命名"><a href="#APK-文件命名" class="headerlink" title="APK 文件命名"></a>APK 文件命名</h4><p>appName_版本号，即中间用“下划线”分割。</p>
-<h2 id="持续集成流程"><a href="#持续集成流程" class="headerlink" title="持续集成流程"></a>持续集成流程</h2><p>引用自百科的话来说，持续集成是一种软件开发实践，即团队开发成员经常集成它们的工作，通过每个成员每天至少集成一次，也就意味着每天可能会发生多次集成。每次集成都通过自动化的构建（包括编译，发布，自动化测试）来验证，从而尽早地发现集成错误。</p>
-<h2 id="项目自动化流程"><a href="#项目自动化流程" class="headerlink" title="项目自动化流程"></a>项目自动化流程</h2><p>在没有自动化的开发过程中，很多事就需要我们人为去做，那就增长我们的时间成本，而且难免会有疏忽的一些问题，比如某个配置文件忘改了，哪个版本出问题，代码的集成，重复构建等一些耗时且易于犯错的问题。</p>
-<p>于是我们引入一些自动化的Java构建工具：</p>
-<h3 id="Apache-Ant"><a href="#Apache-Ant" class="headerlink" title="Apache Ant"></a>Apache Ant</h3><p>Apache Ant，是一个将软件编译、测试、部署等步骤联系在一起加以自动化的一个工具，大多用于Java环境中的软件开发。由Apache软件基金会所提供。默认情况下，它的buildfile(XML文件)名为build.xml。每一个buildfile含有一个<project>和至少一个预设的<target>，这些targets包含许多task elements。每一个task element有一个用来被参考的id，此id必须是唯一的</target></project></p>
-<p>build.xml 示例：<br><figure class="highlight plain"><figcaption><span>version="1.0" ?> </span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;project name=&quot;Hello World&quot; default=&quot;execute&quot;&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;init&quot;&gt;</div><div class="line">		&lt;mkdir dir=&quot;build/classes&quot;/&gt;</div><div class="line">		&lt;mkdir dir=&quot;dist&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	&lt;target name=&quot;compile&quot; depends=&quot;init&quot;&gt;</div><div class="line">		&lt;javac srcdir=&quot;src&quot; destdir=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	</div><div class="line">	&lt;target name=&quot;compress&quot; depends=&quot;compile&quot;&gt;</div><div class="line">	        &lt;jar destfile=&quot;dist/HelloWorld.jar&quot; basedir=&quot;build/classes&quot;  /&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;execute&quot; depends=&quot;compile&quot;&gt;</div><div class="line">		&lt;java classname=&quot;HelloWorld&quot; classpath=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure></p>
-<h3 id="Apache-Maven"><a href="#Apache-Maven" class="headerlink" title="Apache Maven"></a>Apache Maven</h3><p>Apache Maven，是一个软件（特别是Java软件）项目管理及自动构建工具，由Apache软件基金会所提供。基于项目对象模型（缩写：POM）概念，Maven利用一个中央信息片断能管理一个项目的构建、报告和文档等步骤。<br>Maven也可被用于构建和管理各种项目，例如C#，Ruby，Scala和其他语言编写的项目。Maven曾是Jakarta项目的子项目，现为由Apache软件基金会主持的独立Apache项目</p>
-<p>Maven项目使用项目对象模型（Project Object Model，POM）来配置。<br>项目对象模型存储在名为 pom.xml 的文件中。<br>以下是一个简单的示例：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">  &lt;!-- model version is always 4.0.0 for Maven 2.x POMs --&gt;</div><div class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</div><div class="line">  </div><div class="line">  &lt;!-- project coordinates, i.e. a group of values which</div><div class="line">       uniquely identify this project --&gt;</div><div class="line">  </div><div class="line">  &lt;groupId&gt;com.mycompany.app&lt;/groupId&gt;</div><div class="line">  &lt;artifactId&gt;my-app&lt;/artifactId&gt;</div><div class="line">  &lt;version&gt;1.0&lt;/version&gt;</div><div class="line"></div><div class="line">  &lt;!-- library dependencies --&gt;</div><div class="line">  </div><div class="line">  &lt;dependencies&gt;</div><div class="line">    &lt;dependency&gt;</div><div class="line">    </div><div class="line">      &lt;!-- coordinates of the required library --&gt;</div><div class="line">      </div><div class="line">      &lt;groupId&gt;junit&lt;/groupId&gt;</div><div class="line">      &lt;artifactId&gt;junit&lt;/artifactId&gt;</div><div class="line">      &lt;version&gt;3.8.1&lt;/version&gt;</div><div class="line">      </div><div class="line">      &lt;!-- this dependency is only used for running and compiling tests --&gt;</div><div class="line">      </div><div class="line">      &lt;scope&gt;test&lt;/scope&gt;</div><div class="line">      </div><div class="line">    &lt;/dependency&gt;</div><div class="line">  &lt;/dependencies&gt;</div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure>
-<p>引自<a href="https://zh.wikipedia.org/wiki/Apache_Maven介绍" target="_blank" rel="external">https://zh.wikipedia.org/wiki/Apache_Maven介绍</a></p>
-<p>目前JavaEE使用Apache_Maven的比较多，而我们选择了Android Studio 内置的封装布署工具，拥有以上工具中优秀特性并且更棒的工具Gradle。</p>
-<h3 id="Gradle"><a href="#Gradle" class="headerlink" title="Gradle"></a>Gradle</h3><p>Gradle是一个基于Apache Ant和Apache Maven概念的项目自动化建构工具。它使用一种基于Groovy的特定领域语言来声明项目设置，而不是传统的XML。[2]<br>当前其支持的语言限于Java、Groovy和Scala[3]，计划未来将支持更多的语言。</p>
-<h4 id="使用-Gradle-的优势"><a href="#使用-Gradle-的优势" class="headerlink" title="使用 Gradle 的优势"></a>使用 Gradle 的优势</h4><pre><code>•    自动处理包相依关系 - 取自 Maven Repos 的概念
-•    自动处理布署问题 - 取自 Ant 的概念
-•    条件判断写法直觉 - 使用 Groovy 语言
-</code></pre><p>过去 Java 开发者常用 Maven 和 Ant 等工具进行封装布署的自动化，或是两者兼用，不过这两个包彼此有优缺点，如果频繁改变相依包版本，使用 Ant 相当麻烦，如果琐碎工作很多，Maven 功能不足，而且两者都使用 XML 描述，相当不利于设计 if、switch 等判段式，即使写了可读性也不佳，而 Gradle 改良了过去 Maven、Ant 带给开发者的问题，至今也成为 Android Studio 内置的封装布署工具。</p>
-<h2 id="代码检测流程"><a href="#代码检测流程" class="headerlink" title="代码检测流程"></a>代码检测流程</h2><p>在我们日常开发过程中，使用静态代码检查工具自动进行代码检查，对软件开发者来讲是有利的事情，因为这些工具相比人工方式，能更快捷的查找软件存在的缺陷。但是，在很多情况下，这些工具并没用被开发者所广泛采用。</p>
-<p>尽管在我们开发中编译和测试的结果给出了一些产品健康状态的基本报告，但没有提供代码质量的基本报告，也没有任何地方可以查看到我们开发代码质量，产品质量的趋势，来帮助我们发现问题提升产品质量，我们公司内部构建平台会对代码质量，产品质量做一些分析，来推进产品的前进。</p>
-<h3 id="代码覆盖率"><a href="#代码覆盖率" class="headerlink" title="代码覆盖率"></a>代码覆盖率</h3><p>在Java中有很多免费和商业的代码覆盖率工具，大多数这些工具都可以集成在我们的构建平台上。这里我们列举几个Gradle比较流行的代码覆盖率工具。</p>
-<h4 id="Cobertura"><a href="#Cobertura" class="headerlink" title="Cobertura"></a>Cobertura</h4><p><a href="http://cobertura.sourceforge.net/" target="_blank" rel="external">Cobertura</a> 是一种开源工具，它通过检测基本的代码，并观察在测试包运行时执行了哪些代码和没有执行哪些代码，来测量测试覆盖率。除了找出未测试到的代码并发现 bug 外，Cobertura 还可以通过标记无用的、执行不到的代码来优化代码。</p>
-<h4 id="Emma"><a href="#Emma" class="headerlink" title="Emma"></a>Emma</h4><p><a href="http://emma.sourceforge.net/" target="_blank" rel="external">EMMA</a> 是一个开源、面向 Java 程序测试覆盖率收集和报告工具。它通过对编译后的 Java 字节码文件进行插装，在测试执行过程中收集覆盖率信息，并通过支持多种报表格式对覆盖率结果进行展示。 EMMA 所使用的字节码插装不仅保证 EMMA 不会给源代码带来“脏代码”，还确保 EMMA 摆脱了源代码的束缚，这一特点使 EMMA 应用于功能测试成为了可能。</p>
-<h4 id="Clover"><a href="#Clover" class="headerlink" title="Clover"></a>Clover</h4><p><a href="https://www.atlassian.com/software/clover" target="_blank" rel="external">Clover</a>是一款量度单元测试代码覆盖率（Code Coverage）的软件，用于检测Java单元测试是否完整覆盖代码中所有可能的路径，能够快速、准确地检测测试是否覆盖代码中的所有路径。</p>
-<p>团队成员通过Code review来发现架构、逻辑设计方面、安全缺漏和一些潜在的bug，但随着项目业务的增长，Code review的过程难免也会疏忽很多潜在的bug等问题。</p>
-<p>在我们工作中还有一些静态代码检查工具如<a href="http://checkstyle.sourceforge.net/" target="_blank" rel="external">Checkstyle</a>、<a href="http://findbugs.sourceforge.net/" target="_blank" rel="external">Findbugs</a>、<a href="http://pmd.sourceforge.net/" target="_blank" rel="external">PMD</a>等，将他们集成在我们的构建平台上，并成为我们构建流程中的一步骤。</p>
-<h2 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h2><p>对于开发流程，在不同的项目团队中，开发流程不太一样，但大致可为：<br>每天下班前RD必须把今天工作代码全部提交到Git上。</p>
-<p>####</p>
-<ul>
-<li>使用Jenkins CI ，每天定期会从Git上拉去最新代码，自定编译构建生成APK发出邮件，二维码等到产品维护人员的邮箱，并且将应用更新至公司内测分发平台。</li>
-<li>编译构建成功，进行自动化测试、单元测试覆盖率（Cobertura、Emma或Clover等生成）、功能测试结果（如Selenium）、静态代码检查结果（Checkstyle、Findbugs、PMD等）</li>
-<li>测试人员对产品进行test，测试中若有紧急问题也可以让开发人员可以随时修改提交代码。并且立即重新构建测试安装包。</li>
-</ul>
-<h2 id="打包和发布流程"><a href="#打包和发布流程" class="headerlink" title="打包和发布流程"></a>打包和发布流程</h2><p>以上版本管理发布流程只是参考指南，而不是具体规则。你可以根据自己实际情况来选择适合自己的版本管理发布流程或微调来满足自己的需要。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。&lt;/p&gt;
-&lt;h3 id=&quot;版本命名规范&quot;&gt;&lt;a href=&quot;#版本命名
-    
-    </summary>
-    
-      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
     
     
   </entry>
@@ -1357,6 +1374,64 @@
     </summary>
     
       <category term="源码" scheme="http://fushenghua.github.io/categories/%E6%BA%90%E7%A0%81/"/>
+    
+    
+  </entry>
+  
+  <entry>
+    <title>版本管理发布流程</title>
+    <link href="http://fushenghua.github.io/archives/375726b.html"/>
+    <id>http://fushenghua.github.io/archives/375726b.html</id>
+    <published>2016-06-07T00:55:29.000Z</published>
+    <updated>2018-04-20T05:25:03.655Z</updated>
+    
+    <content type="html"><![CDATA[<p>为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。</p>
+<h3 id="版本命名规范"><a href="#版本命名规范" class="headerlink" title="版本命名规范"></a>版本命名规范</h3><p>软件版本号由四部分组成，第一个1为主版本号，第二个1为子版本号，第三个1为阶段版本号，第四部分为日期版本号加希腊字母版本号，希腊字母版本号共有5种，分别为：base、alpha、beta、RC、release。例如：1.1.1.051021_beta。</p>
+<h4 id="版本号修改规则"><a href="#版本号修改规则" class="headerlink" title="版本号修改规则"></a>版本号修改规则</h4><p>⑴ 主版本号(1)<br>当功能模块有较大的变动，比如增加多个模块或者整体架构发生变化。此版本号由项目决定是否修改。<br>⑵ 子版本号(1)<br>相对于主版本号而言，子版本号升级对应的是软件功能有一定的增加或变化，比如增加了对权限控制、增加自定义视图等功能。此版本号由项目决定是否修改。<br>⑶ 阶段版本号(1)<br>一般是 Bug 修复或是一些小的变动，要经常发布修订版，时间间隔不限，修复一个严重的bug即可发布一个修订版。此版本号由项目经理决定是否修改。<br>⑷ 日期版本号(051021)<br>用于记录修改项目的当前日期，每天对项目的修改都需要更改日期版本号。此版本号由开发人员决定是否修改。<br>⑸ 希腊字母版本号(beta)<br>此版本号用于标注当前版本的软件处于哪个开发阶段，当软件进入到另一个阶段时需要修改此版本号。此版本号由项目决定是否修改。</p>
+<h4 id="软件版本阶段说明"><a href="#软件版本阶段说明" class="headerlink" title="软件版本阶段说明"></a>软件版本阶段说明</h4><p>⑴ Base：<br>此版本表示该软件仅仅是一个假页面链接，通常包括所有的功能和页面布局，但是页面中的功能都没有做完整的实现，只是做为整体网站的一个基础架构。<br>⑵ α（Alpha）版：内测版。<br>软件的初级版本，表示该软件在此阶段以实现软件功能为主，通常只在软件开发者 内部交流，或者专业测试人员测试用，一般而言，该版本软件的Bug较多，需要继续修改，是测试版本。测试人员提交Bug经开发人员修改确认之后，发布到测试网址让测试人员测试，此时可将软件版本标注为alpha版。<br>⑶ β（Beta）版：公测版。<br>该版本相对于α版已有了很大的改进，消除了严重的错误，但还是存在着一些缺陷，需要经过多次测试来进一步消除，此版本主要的修改对像是软件的UI，供专业爱好者大规模测试用。<br>⑷ RC 版：<br>是 Release Candidate 的缩写，意思是发布倒计时，候选版本，该版本已经相当成熟了，完成全部功能并清除大部分的BUG，基本上不存在导致错误的BUG，与即将发行的正式版相差无几。<br>⑷ Release 版：<br>该版本意味“最终版本”，在前面版本的一系列测试版之后，终归会有一个正式版本，是最终交付用户使用的一个版本。该版本有时也称为标准版。一般情况下，Release不会以单词形式出现在软件封面上，取而代之的是符号(R)。</p>
+<h4 id="版本号修改举例说明"><a href="#版本号修改举例说明" class="headerlink" title="版本号修改举例说明"></a>版本号修改举例说明</h4><p>比如版本号为：1.0.0.0321_alpha ，此时为内部测试阶段<br>⑴ 开发人员修复了测试人员提交的bug并经测试人员测试验证关闭bug之后，发布到外网时，此时就进入了软件的下一个阶段，版本号可改为：1.0.0.0321_beta ，如当前日期跟上一个版本号的日期不一样，版本号可改为：1.0.0.0322_beta。<br>⑵ 如果修复了一些重大Bug 并按照流程发布到外网时就可发布一个修订版，如1.0.1.0322_beta，日期为发布的当前日期。<br>⑶ 如果对软件进行了一些功能上的改进或增强，进行了一些局部变动的时候要修改次版本号，如：1.1.0.0322_beta（上一级有变动时，下级要归零）。<br>⑷ 当功能模块有较大变动，增加模块或整体架构发生变化时要修改主版本号，如新增加了退款功能，则版本号要改为：2.0.0.0322_beta 。<br>⑸ 紧急情况：如果bug比较紧急可跳过一般流程，由开发人员尽快修复bug，测试确认之后直接发布该版本的beta版。</p>
+<h4 id="APK-文件命名"><a href="#APK-文件命名" class="headerlink" title="APK 文件命名"></a>APK 文件命名</h4><p>appName_版本号，即中间用“下划线”分割。</p>
+<h2 id="持续集成流程"><a href="#持续集成流程" class="headerlink" title="持续集成流程"></a>持续集成流程</h2><p>引用自百科的话来说，持续集成是一种软件开发实践，即团队开发成员经常集成它们的工作，通过每个成员每天至少集成一次，也就意味着每天可能会发生多次集成。每次集成都通过自动化的构建（包括编译，发布，自动化测试）来验证，从而尽早地发现集成错误。</p>
+<h2 id="项目自动化流程"><a href="#项目自动化流程" class="headerlink" title="项目自动化流程"></a>项目自动化流程</h2><p>在没有自动化的开发过程中，很多事就需要我们人为去做，那就增长我们的时间成本，而且难免会有疏忽的一些问题，比如某个配置文件忘改了，哪个版本出问题，代码的集成，重复构建等一些耗时且易于犯错的问题。</p>
+<p>于是我们引入一些自动化的Java构建工具：</p>
+<h3 id="Apache-Ant"><a href="#Apache-Ant" class="headerlink" title="Apache Ant"></a>Apache Ant</h3><p>Apache Ant，是一个将软件编译、测试、部署等步骤联系在一起加以自动化的一个工具，大多用于Java环境中的软件开发。由Apache软件基金会所提供。默认情况下，它的buildfile(XML文件)名为build.xml。每一个buildfile含有一个<project>和至少一个预设的<target>，这些targets包含许多task elements。每一个task element有一个用来被参考的id，此id必须是唯一的</target></project></p>
+<p>build.xml 示例：<br><figure class="highlight plain"><figcaption><span>version="1.0" ?> </span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;project name=&quot;Hello World&quot; default=&quot;execute&quot;&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;init&quot;&gt;</div><div class="line">		&lt;mkdir dir=&quot;build/classes&quot;/&gt;</div><div class="line">		&lt;mkdir dir=&quot;dist&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	&lt;target name=&quot;compile&quot; depends=&quot;init&quot;&gt;</div><div class="line">		&lt;javac srcdir=&quot;src&quot; destdir=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line">	</div><div class="line">	&lt;target name=&quot;compress&quot; depends=&quot;compile&quot;&gt;</div><div class="line">	        &lt;jar destfile=&quot;dist/HelloWorld.jar&quot; basedir=&quot;build/classes&quot;  /&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">	&lt;target name=&quot;execute&quot; depends=&quot;compile&quot;&gt;</div><div class="line">		&lt;java classname=&quot;HelloWorld&quot; classpath=&quot;build/classes&quot;/&gt;</div><div class="line">	&lt;/target&gt;</div><div class="line"></div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure></p>
+<h3 id="Apache-Maven"><a href="#Apache-Maven" class="headerlink" title="Apache Maven"></a>Apache Maven</h3><p>Apache Maven，是一个软件（特别是Java软件）项目管理及自动构建工具，由Apache软件基金会所提供。基于项目对象模型（缩写：POM）概念，Maven利用一个中央信息片断能管理一个项目的构建、报告和文档等步骤。<br>Maven也可被用于构建和管理各种项目，例如C#，Ruby，Scala和其他语言编写的项目。Maven曾是Jakarta项目的子项目，现为由Apache软件基金会主持的独立Apache项目</p>
+<p>Maven项目使用项目对象模型（Project Object Model，POM）来配置。<br>项目对象模型存储在名为 pom.xml 的文件中。<br>以下是一个简单的示例：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">  &lt;!-- model version is always 4.0.0 for Maven 2.x POMs --&gt;</div><div class="line">  &lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;</div><div class="line">  </div><div class="line">  &lt;!-- project coordinates, i.e. a group of values which</div><div class="line">       uniquely identify this project --&gt;</div><div class="line">  </div><div class="line">  &lt;groupId&gt;com.mycompany.app&lt;/groupId&gt;</div><div class="line">  &lt;artifactId&gt;my-app&lt;/artifactId&gt;</div><div class="line">  &lt;version&gt;1.0&lt;/version&gt;</div><div class="line"></div><div class="line">  &lt;!-- library dependencies --&gt;</div><div class="line">  </div><div class="line">  &lt;dependencies&gt;</div><div class="line">    &lt;dependency&gt;</div><div class="line">    </div><div class="line">      &lt;!-- coordinates of the required library --&gt;</div><div class="line">      </div><div class="line">      &lt;groupId&gt;junit&lt;/groupId&gt;</div><div class="line">      &lt;artifactId&gt;junit&lt;/artifactId&gt;</div><div class="line">      &lt;version&gt;3.8.1&lt;/version&gt;</div><div class="line">      </div><div class="line">      &lt;!-- this dependency is only used for running and compiling tests --&gt;</div><div class="line">      </div><div class="line">      &lt;scope&gt;test&lt;/scope&gt;</div><div class="line">      </div><div class="line">    &lt;/dependency&gt;</div><div class="line">  &lt;/dependencies&gt;</div><div class="line">&lt;/project&gt;</div></pre></td></tr></table></figure>
+<p>引自<a href="https://zh.wikipedia.org/wiki/Apache_Maven介绍" target="_blank" rel="external">https://zh.wikipedia.org/wiki/Apache_Maven介绍</a></p>
+<p>目前JavaEE使用Apache_Maven的比较多，而我们选择了Android Studio 内置的封装布署工具，拥有以上工具中优秀特性并且更棒的工具Gradle。</p>
+<h3 id="Gradle"><a href="#Gradle" class="headerlink" title="Gradle"></a>Gradle</h3><p>Gradle是一个基于Apache Ant和Apache Maven概念的项目自动化建构工具。它使用一种基于Groovy的特定领域语言来声明项目设置，而不是传统的XML。[2]<br>当前其支持的语言限于Java、Groovy和Scala[3]，计划未来将支持更多的语言。</p>
+<h4 id="使用-Gradle-的优势"><a href="#使用-Gradle-的优势" class="headerlink" title="使用 Gradle 的优势"></a>使用 Gradle 的优势</h4><pre><code>•    自动处理包相依关系 - 取自 Maven Repos 的概念
+•    自动处理布署问题 - 取自 Ant 的概念
+•    条件判断写法直觉 - 使用 Groovy 语言
+</code></pre><p>过去 Java 开发者常用 Maven 和 Ant 等工具进行封装布署的自动化，或是两者兼用，不过这两个包彼此有优缺点，如果频繁改变相依包版本，使用 Ant 相当麻烦，如果琐碎工作很多，Maven 功能不足，而且两者都使用 XML 描述，相当不利于设计 if、switch 等判段式，即使写了可读性也不佳，而 Gradle 改良了过去 Maven、Ant 带给开发者的问题，至今也成为 Android Studio 内置的封装布署工具。</p>
+<h2 id="代码检测流程"><a href="#代码检测流程" class="headerlink" title="代码检测流程"></a>代码检测流程</h2><p>在我们日常开发过程中，使用静态代码检查工具自动进行代码检查，对软件开发者来讲是有利的事情，因为这些工具相比人工方式，能更快捷的查找软件存在的缺陷。但是，在很多情况下，这些工具并没用被开发者所广泛采用。</p>
+<p>尽管在我们开发中编译和测试的结果给出了一些产品健康状态的基本报告，但没有提供代码质量的基本报告，也没有任何地方可以查看到我们开发代码质量，产品质量的趋势，来帮助我们发现问题提升产品质量，我们公司内部构建平台会对代码质量，产品质量做一些分析，来推进产品的前进。</p>
+<h3 id="代码覆盖率"><a href="#代码覆盖率" class="headerlink" title="代码覆盖率"></a>代码覆盖率</h3><p>在Java中有很多免费和商业的代码覆盖率工具，大多数这些工具都可以集成在我们的构建平台上。这里我们列举几个Gradle比较流行的代码覆盖率工具。</p>
+<h4 id="Cobertura"><a href="#Cobertura" class="headerlink" title="Cobertura"></a>Cobertura</h4><p><a href="http://cobertura.sourceforge.net/" target="_blank" rel="external">Cobertura</a> 是一种开源工具，它通过检测基本的代码，并观察在测试包运行时执行了哪些代码和没有执行哪些代码，来测量测试覆盖率。除了找出未测试到的代码并发现 bug 外，Cobertura 还可以通过标记无用的、执行不到的代码来优化代码。</p>
+<h4 id="Emma"><a href="#Emma" class="headerlink" title="Emma"></a>Emma</h4><p><a href="http://emma.sourceforge.net/" target="_blank" rel="external">EMMA</a> 是一个开源、面向 Java 程序测试覆盖率收集和报告工具。它通过对编译后的 Java 字节码文件进行插装，在测试执行过程中收集覆盖率信息，并通过支持多种报表格式对覆盖率结果进行展示。 EMMA 所使用的字节码插装不仅保证 EMMA 不会给源代码带来“脏代码”，还确保 EMMA 摆脱了源代码的束缚，这一特点使 EMMA 应用于功能测试成为了可能。</p>
+<h4 id="Clover"><a href="#Clover" class="headerlink" title="Clover"></a>Clover</h4><p><a href="https://www.atlassian.com/software/clover" target="_blank" rel="external">Clover</a>是一款量度单元测试代码覆盖率（Code Coverage）的软件，用于检测Java单元测试是否完整覆盖代码中所有可能的路径，能够快速、准确地检测测试是否覆盖代码中的所有路径。</p>
+<p>团队成员通过Code review来发现架构、逻辑设计方面、安全缺漏和一些潜在的bug，但随着项目业务的增长，Code review的过程难免也会疏忽很多潜在的bug等问题。</p>
+<p>在我们工作中还有一些静态代码检查工具如<a href="http://checkstyle.sourceforge.net/" target="_blank" rel="external">Checkstyle</a>、<a href="http://findbugs.sourceforge.net/" target="_blank" rel="external">Findbugs</a>、<a href="http://pmd.sourceforge.net/" target="_blank" rel="external">PMD</a>等，将他们集成在我们的构建平台上，并成为我们构建流程中的一步骤。</p>
+<h2 id="开发流程"><a href="#开发流程" class="headerlink" title="开发流程"></a>开发流程</h2><p>对于开发流程，在不同的项目团队中，开发流程不太一样，但大致可为：<br>每天下班前RD必须把今天工作代码全部提交到Git上。</p>
+<p>####</p>
+<ul>
+<li>使用Jenkins CI ，每天定期会从Git上拉去最新代码，自定编译构建生成APK发出邮件，二维码等到产品维护人员的邮箱，并且将应用更新至公司内测分发平台。</li>
+<li>编译构建成功，进行自动化测试、单元测试覆盖率（Cobertura、Emma或Clover等生成）、功能测试结果（如Selenium）、静态代码检查结果（Checkstyle、Findbugs、PMD等）</li>
+<li>测试人员对产品进行test，测试中若有紧急问题也可以让开发人员可以随时修改提交代码。并且立即重新构建测试安装包。</li>
+</ul>
+<h2 id="打包和发布流程"><a href="#打包和发布流程" class="headerlink" title="打包和发布流程"></a>打包和发布流程</h2><p>以上版本管理发布流程只是参考指南，而不是具体规则。你可以根据自己实际情况来选择适合自己的版本管理发布流程或微调来满足自己的需要。</p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;为了在多个版本中并行开发，提高开发效率，保证各个版本和各个环境（开发、测试、主干）的独立，避免相互影响，减少最终发布时合并主干出现冲突的概率，降低冲突处理的难度，那么在团队开发过程中就需要一定的规范流程。&lt;/p&gt;
+&lt;h3 id=&quot;版本命名规范&quot;&gt;&lt;a href=&quot;#版本命名
+    
+    </summary>
+    
+      <category term="基础技能" scheme="http://fushenghua.github.io/categories/%E5%9F%BA%E7%A1%80%E6%8A%80%E8%83%BD/"/>
     
     
   </entry>
@@ -1699,49 +1774,6 @@ public MyView(Context context, AttributeSet attrs, int defStyleAttr, int defStyl
     
       <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
     
-    
-  </entry>
-  
-  <entry>
-    <title>深入理解Handler原理</title>
-    <link href="http://fushenghua.github.io/archives/158db06e.html"/>
-    <id>http://fushenghua.github.io/archives/158db06e.html</id>
-    <published>2015-07-13T04:23:32.000Z</published>
-    <updated>2018-04-20T05:25:03.612Z</updated>
-    
-    <content type="html"><![CDATA[<p>Handler在Android开发中非常重要，最常见的使用场景就是在子线程需要更新UI，用Handler来投递消息到主线程执行UI更新操作。因为 Android系统的View是非线程安全的，所以需要在主线程更新UI。总的来说Handler就是用来做线程间通信，在不同线程之间传递消息。</p>
-<p>注：这篇文章所讲到的Handler是在主线程创建的，主线程在开始的时候已经创建了默认的消息循环。后面的文章会讲如何创建自己的消息循环。<br>从图中可以看出，四种颜色分别代表了四个对象，并且大致描述了几个对象之间的关系，以及消息的流转过程，首先Handler通过sendMessage将消息投递给MessageQueue，Looper通过消息循环（loop）不断的从MessageQueue中取出消息，然后消息被Handler的dispatchMessage分发到handleMessage方法消费掉。<br>消息循环中涉及的重要对象</p>
-<p>Handler</p>
-<p>通过Handler的sendMessage等方法来投递消息到MessageQueue，通过handleMessage来消费Message。Handler必须要有一个已经prepare好的Looper对象，也就是说必须调用了prepare方法(也包括prepareMainLooper方法)，究其根本是初始化一个消息队列，这一过程将在下文中详细分析。</p>
-<p>Looper</p>
-<p>Looper负责从MessageQueue中取出消息，然后通过执行message.target.dispatchMessage()消费掉这个消息，这里的target就是Handler。</p>
-<p>MessageQueue</p>
-<p>消息队列，管理Handler投递过来的消息。</p>
-<p>Message</p>
-<p>用来承载数据的消息，最终被Handler消费掉。</p>
-<p>UML类图分析</p>
-<p>Handler class diagram</p>
-<p>通过上面的类图可以清晰的了解各个类之间的关系。然后再来分析一下源码。<br>Handler的创建</p>
-<figure class="highlight monkey"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"> <span class="keyword">public</span> Handler(Callback callback, boolean async) &#123;</div><div class="line">        <span class="keyword">if</span> (FIND_POTENTIAL_LEAKS) &#123;</div><div class="line">            <span class="keyword">final</span> <span class="class"><span class="keyword">Class</span>&lt;? <span class="keyword">extends</span> <span class="title">Handler</span>&gt; <span class="title">klass</span> = <span class="title">getClass</span>();</span></div><div class="line">            <span class="keyword">if</span> ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &amp;&amp;</div><div class="line">                    (klass.getModifiers() &amp; Modifier.STATIC) == <span class="number">0</span>) &#123;</div><div class="line">                <span class="built_in">Log</span>.w(TAG, <span class="string">"The following Handler class should be static or leaks might occur: "</span> +</div><div class="line">                    klass.getCanonicalName());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        mLooper = Looper.myLooper();</div><div class="line">        <span class="keyword">if</span> (mLooper == <span class="literal">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</div><div class="line">                <span class="string">"Can't create handler inside thread that has not called Looper.prepare()"</span>);</div><div class="line">        &#125;</div><div class="line">        mQueue = mLooper.mQueue;</div><div class="line">        mCallback = callback;</div><div class="line">        mAsynchronous = async;</div><div class="line">&#125;</div><div class="line"></div><div class="line"> <span class="keyword">public</span> Handler(Callback callback, boolean async) &#123;</div><div class="line">        <span class="keyword">if</span> (FIND_POTENTIAL_LEAKS) &#123;</div><div class="line">            <span class="keyword">final</span> <span class="class"><span class="keyword">Class</span>&lt;? <span class="keyword">extends</span> <span class="title">Handler</span>&gt; <span class="title">klass</span> = <span class="title">getClass</span>();</span></div><div class="line">            <span class="keyword">if</span> ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &amp;&amp;</div><div class="line">                    (klass.getModifiers() &amp; Modifier.STATIC) == <span class="number">0</span>) &#123;</div><div class="line">                <span class="built_in">Log</span>.w(TAG, <span class="string">"The following Handler class should be static or leaks might occur: "</span> +</div><div class="line">                    klass.getCanonicalName());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"> </div><div class="line">        mLooper = Looper.myLooper();</div><div class="line">        <span class="keyword">if</span> (mLooper == <span class="literal">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</div><div class="line">                <span class="string">"Can't create handler inside thread that has not called Looper.prepare()"</span>);</div><div class="line">        &#125;</div><div class="line">        mQueue = mLooper.mQueue;</div><div class="line">        mCallback = callback;</div><div class="line">        mAsynchronous = async;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>在上面这段代码中，首先是检查是否存在潜在的内存泄漏，如果该类是匿名内部类，或者是成员类且没有static修饰符时那么打印一个内存泄漏风险警告。这是由于这种类型的class持有外部类的this引用，可能导致外部类无法释放。<br>接下来就是对成员变量mLooper赋值，在文章开头就提到过，这篇文章中提到的handler对象时在主线程（UI线程）中创建，而Android主线已经有一个消息队列了,所以直接将mLooper.mQueue赋给Handler的mQueue。<br>那么主线程中的消息队列是怎么创建的呢？</p>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepare</span><span class="params">()</span> </span>&#123;</div><div class="line">        prepare(<span class="keyword">true</span>);</div><div class="line">&#125;</div><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepareMainLooper</span><span class="params">()</span> </span>&#123;</div><div class="line">        prepare(<span class="keyword">false</span>);</div><div class="line">        <span class="keyword">synchronized</span> (Looper.class) &#123;</div><div class="line">            <span class="keyword">if</span> (sMainLooper != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The main Looper has already been prepared."</span>);</div><div class="line">            &#125;</div><div class="line">            sMainLooper = myLooper();</div><div class="line">        &#125;</div><div class="line"> &#125;</div><div class="line"></div><div class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepare</span><span class="params">(<span class="keyword">boolean</span> quitAllowed)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (sThreadLocal.get() != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Only one Looper may be created per thread"</span>);</div><div class="line">        &#125;</div><div class="line">        将looper对象装入ThreadLocal中，Handler就是从它里面取出looper对象的</div><div class="line">        sThreadLocal.set(<span class="keyword">new</span> Looper(quitAllowed));</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="title">Looper</span><span class="params">(<span class="keyword">boolean</span> quitAllowed)</span> </span>&#123;</div><div class="line">        <span class="comment">//创建消息队列</span></div><div class="line">        mQueue = <span class="keyword">new</span> MessageQueue(quitAllowed);</div><div class="line">        mThread = Thread.currentThread();</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepare</span><span class="params">()</span> </span>&#123;</div><div class="line">        prepare(<span class="keyword">true</span>);</div><div class="line">&#125;</div><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepareMainLooper</span><span class="params">()</span> </span>&#123;</div><div class="line">        prepare(<span class="keyword">false</span>);</div><div class="line">        <span class="keyword">synchronized</span> (Looper.class) &#123;</div><div class="line">            <span class="keyword">if</span> (sMainLooper != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The main Looper has already been prepared."</span>);</div><div class="line">            &#125;</div><div class="line">            sMainLooper = myLooper();</div><div class="line">        &#125;</div><div class="line"> &#125;</div><div class="line"> </div><div class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepare</span><span class="params">(<span class="keyword">boolean</span> quitAllowed)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (sThreadLocal.get() != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Only one Looper may be created per thread"</span>);</div><div class="line">        &#125;</div><div class="line">        将looper对象装入ThreadLocal中，Handler就是从它里面取出looper对象的</div><div class="line">        sThreadLocal.set(<span class="keyword">new</span> Looper(quitAllowed));</div><div class="line">&#125;</div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">private</span> <span class="title">Looper</span><span class="params">(<span class="keyword">boolean</span> quitAllowed)</span> </span>&#123;</div><div class="line">        <span class="comment">//创建消息队列</span></div><div class="line">        mQueue = <span class="keyword">new</span> MessageQueue(quitAllowed);</div><div class="line">        mThread = Thread.currentThread();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>看上面的关键代码，UI线程在创建的时候，会调用prepareMainLooper()这个方法，创建一个不退出的消息队列。所以prepareMainLooper这个方法自己永远也不要调用，它是系统调用的，如果我们需要用自己的消息队列呢？那么就应该调用prepare()方法。</p>
-<p>消息怎么被消费的呢？</p>
-<p>整个消息循环系统中的几个重要部件的创建都已经明白了，那么消息时怎么循环起来的，又是如何消费的呢？来看看下面是loop源码的一部分关键代码。代码非常简单易懂，就是从消息队列中取出消息，然后通过msg.target.dispatchMessage(msg)将消息投递到Handler。</p>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div></pre></td><td class="code"><pre><div class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">loop</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">final</span> Looper me = myLooper();</div><div class="line">        <span class="keyword">if</span> (me == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"No Looper; Looper.prepare() wasn't called on this thread."</span>);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">final</span> MessageQueue queue = me.mQueue;</div><div class="line">        Binder.clearCallingIdentity();</div><div class="line">        <span class="keyword">final</span> <span class="keyword">long</span> ident = Binder.clearCallingIdentity();</div><div class="line">        <span class="keyword">for</span> (;;) &#123;</div><div class="line">            Message msg = queue.next(); <span class="comment">// might block</span></div><div class="line">            <span class="keyword">if</span> (msg == <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="comment">// No message indicates that the message queue is quitting.</span></div><div class="line">                <span class="keyword">return</span>;</div><div class="line">            &#125;</div><div class="line">            msg.<span class="keyword">target</span>.dispatchMessage(msg);</div><div class="line">            msg.recycleUnchecked();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"> <span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">loop</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">final</span> Looper me = myLooper();</div><div class="line">        <span class="keyword">if</span> (me == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"No Looper; Looper.prepare() wasn't called on this thread."</span>);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">final</span> MessageQueue queue = me.mQueue;</div><div class="line">        Binder.clearCallingIdentity();</div><div class="line">        <span class="keyword">final</span> <span class="keyword">long</span> ident = Binder.clearCallingIdentity();</div><div class="line">        <span class="keyword">for</span> (;;) &#123;</div><div class="line">            Message msg = queue.next(); <span class="comment">// might block</span></div><div class="line">            <span class="keyword">if</span> (msg == <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="comment">// No message indicates that the message queue is quitting.</span></div><div class="line">                <span class="keyword">return</span>;</div><div class="line">            &#125;</div><div class="line">            msg.<span class="keyword">target</span>.dispatchMessage(msg);</div><div class="line">            msg.recycleUnchecked();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">消息传递的终点</div><div class="line"></div><div class="line"></div><div class="line"> <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">dispatchMessage</span><span class="params">(Message msg)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (msg.callback != <span class="keyword">null</span>) &#123;</div><div class="line">            handleCallback(msg);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">if</span> (mCallback != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">if</span> (mCallback.handleMessage(msg)) &#123;</div><div class="line">                    <span class="keyword">return</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            handleMessage(msg);</div><div class="line">        &#125;</div><div class="line">&#125;</div><div class="line"> <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">dispatchMessage</span><span class="params">(Message msg)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (msg.callback != <span class="keyword">null</span>) &#123;</div><div class="line">            handleCallback(msg);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">if</span> (mCallback != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">if</span> (mCallback.handleMessage(msg)) &#123;</div><div class="line">                    <span class="keyword">return</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            handleMessage(msg);</div><div class="line">        &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>当消息循环中取出的消息被再次传递给Handler的时候，这个消息就走到了生命的尽头(并不代表对象销毁，有一个消息池来回收消息)，从dispatchMessage方法可以看出，消息最终的归宿有三个，一是消息自身的callback接口，二是handler的callback接口，最后是handleMessage接口。<br>原文地址：<a href="http://vjson.com/wordpress/handler-looper%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90.html" target="_blank" rel="external">http://vjson.com/wordpress/handler-looper%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90.html</a><br>后面我们将继续分析Handler源码。</p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;Handler在Android开发中非常重要，最常见的使用场景就是在子线程需要更新UI，用Handler来投递消息到主线程执行UI更新操作。因为 Android系统的View是非线程安全的，所以需要在主线程更新UI。总的来说Handler就是用来做线程间通信，在不同线程之间
-    
-    </summary>
-    
-      <category term="android" scheme="http://fushenghua.github.io/categories/android/"/>
-    
-    
-      <category term="android" scheme="http://fushenghua.github.io/tags/android/"/>
     
   </entry>
   

@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://fushenghua.github.io/"/>
-  <updated>2018-06-13T11:00:58.596Z</updated>
+  <updated>2018-06-14T01:39:52.450Z</updated>
   <id>http://fushenghua.github.io/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://fushenghua.github.io/archives/1dde1414.html"/>
     <id>http://fushenghua.github.io/archives/1dde1414.html</id>
     <published>2018-05-02T00:55:29.000Z</published>
-    <updated>2018-06-13T11:00:58.596Z</updated>
+    <updated>2018-06-14T01:39:52.450Z</updated>
     
     <content type="html"><![CDATA[<p>本文列举几个Android源码中的设计模式。</p>
 <p>设计模式分为创建型模式、结构型模式、行为型模式。</p>

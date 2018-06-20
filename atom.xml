@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://fushenghua.github.io/"/>
-  <updated>2018-06-19T11:07:14.736Z</updated>
+  <updated>2018-06-19T11:07:27.899Z</updated>
   <id>http://fushenghua.github.io/</id>
   
   <author>
@@ -20,7 +20,7 @@
     <link href="http://fushenghua.github.io/archives/8adf912e.html"/>
     <id>http://fushenghua.github.io/archives/8adf912e.html</id>
     <published>2018-05-02T00:55:29.000Z</published>
-    <updated>2018-06-19T11:07:14.736Z</updated>
+    <updated>2018-06-19T11:07:27.899Z</updated>
     
     <content type="html"><![CDATA[<p>先从Okhttp3的请求实现说起（包括同步请求和异步请求）</p>
 <h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><h2 id="同步请求："><a href="#同步请求：" class="headerlink" title="同步请求："></a>同步请求：</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">private static final String DESTINATION_ADDRESS = &quot;https://github.com/soulrelay&quot;;</div><div class="line">OkHttpClient client = new OkHttpClient.Builder().build();</div><div class="line">Request request = new Request.Builder()</div><div class="line">        .url(DESTINATION_ADDRESS)</div><div class="line">        .build();</div><div class="line">Response response = client.newCall(request).execute();</div></pre></td></tr></table></figure>

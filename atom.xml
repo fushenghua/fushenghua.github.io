@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://fushenghua.github.io/"/>
-  <updated>2018-06-19T11:07:27.899Z</updated>
+  <updated>2018-06-21T02:21:56.291Z</updated>
   <id>http://fushenghua.github.io/</id>
   
   <author>
@@ -16,13 +16,13 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
-    <title>OkHttp 理解</title>
-    <link href="http://fushenghua.github.io/archives/8adf912e.html"/>
-    <id>http://fushenghua.github.io/archives/8adf912e.html</id>
+    <title>OkHttp 的理解</title>
+    <link href="http://fushenghua.github.io/archives/c9281ba6.html"/>
+    <id>http://fushenghua.github.io/archives/c9281ba6.html</id>
     <published>2018-05-02T00:55:29.000Z</published>
-    <updated>2018-06-19T11:07:27.899Z</updated>
+    <updated>2018-06-21T02:21:56.291Z</updated>
     
-    <content type="html"><![CDATA[<p>先从Okhttp3的请求实现说起（包括同步请求和异步请求）</p>
+    <content type="html"><![CDATA[<p>先从Okhttp3的请求实现说起（包括同步请求和异步请求）。</p>
 <h1 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h1><h2 id="同步请求："><a href="#同步请求：" class="headerlink" title="同步请求："></a>同步请求：</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">private static final String DESTINATION_ADDRESS = &quot;https://github.com/soulrelay&quot;;</div><div class="line">OkHttpClient client = new OkHttpClient.Builder().build();</div><div class="line">Request request = new Request.Builder()</div><div class="line">        .url(DESTINATION_ADDRESS)</div><div class="line">        .build();</div><div class="line">Response response = client.newCall(request).execute();</div></pre></td></tr></table></figure>
 <h2 id="异步请求："><a href="#异步请求：" class="headerlink" title="异步请求："></a>异步请求：</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">private static final String DESTINATION_ADDRESS = &quot;https://github.com/soulrelay&quot;;</div><div class="line">OkHttpClient client = new OkHttpClient.Builder().build();</div><div class="line">Request request = new Request.Builder()</div><div class="line">        .url(DESTINATION_ADDRESS)</div><div class="line">        .build();</div><div class="line">client.newCall(request).enqueue(new Callback() &#123;</div><div class="line">    @Override</div><div class="line">    public void onFailure(Call call, IOException e) &#123;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public void onResponse(Call call, Response response) throws IOException &#123;</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
 <h2 id="小结："><a href="#小结：" class="headerlink" title="小结："></a>小结：</h2><blockquote>
@@ -62,8 +62,8 @@
     
     <summary type="html">
     
-      &lt;p&gt;先从Okhttp3的请求实现说起（包括同步请求和异步请求）&lt;/p&gt;
-&lt;h1 id=&quot;基本使用&quot;&gt;&lt;a href=&quot;#基本使用&quot; class=&quot;headerlink&quot; title=&quot;基本使用&quot;&gt;&lt;/a&gt;基本使用&lt;/h1&gt;&lt;h2 id=&quot;同步请求：&quot;&gt;&lt;a href=&quot;#同步请
+      &lt;p&gt;先从Okhttp3的请求实现说起（包括同步请求和异步请求）。&lt;/p&gt;
+&lt;h1 id=&quot;基本使用&quot;&gt;&lt;a href=&quot;#基本使用&quot; class=&quot;headerlink&quot; title=&quot;基本使用&quot;&gt;&lt;/a&gt;基本使用&lt;/h1&gt;&lt;h2 id=&quot;同步请求：&quot;&gt;&lt;a href=&quot;#同步
     
     </summary>
     
